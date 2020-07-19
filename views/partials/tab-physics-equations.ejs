@@ -1,0 +1,357 @@
+<div id="physics_equations" class="col s12">
+
+  <div class="row">
+    <div class="col m12">
+      <ul class="collapsible">
+        <li class="mechanics-equations">
+          <div class="collapsible-header">
+            <i class="fas fa-balance-scale-left"></i>
+            <span>Mechanics</span>
+            <span class="new badge relevant-equations-badge" data-badge-caption="Relevant Equations">4</span>
+          </div>
+          <div class="collapsible-body">
+
+          <% for(var i=0; i < loe.mechanics.length; i+=3){%>
+            <div class="row my-row">
+
+            <% if(i < loe.mechanics.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.mechanics[i].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.mechanics[i].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.mechanics[i].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            <% if(i+1 < loe.mechanics.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.mechanics[i+1].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.mechanics[i+1].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.mechanics[i+1].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            <% if(i+2 < loe.mechanics.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.mechanics[i+2].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.mechanics[i+2].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.mechanics[i+2].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            </div>
+          <% }%>
+
+          </div>
+        </li>
+        <li class="thermal-equations">
+          <div class="collapsible-header">
+            <i class="fas fa-fire-alt"></i>
+            <span>Thermal Physics</span>
+            <span class="new badge relevant-equations-badge" data-badge-caption="Relevant Equations">4</span>
+          </div>
+          <div class="collapsible-body">
+
+          <% for(var i=0; i < loe.thermal.length; i+=3){%>
+            <div class="row my-row">
+
+            <% if(i < loe.thermal.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.thermal[i].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.thermal[i].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.thermal[i].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            <% if(i+1 < loe.thermal.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.thermal[i+1].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.thermal[i+1].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.thermal[i+1].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            <% if(i+2 < loe.thermal.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.thermal[i+2].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.thermal[i+2].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.thermal[i+2].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            </div>
+          <% }%>
+
+          </div>
+        </li>
+        <li class="waves-optics-equations">
+          <div class="collapsible-header"><i class="fas fa-wave-square"></i>
+            <span>Waves & Optics</span>
+            <span class="new badge relevant-equations-badge" data-badge-caption="Relevant Equations">4</span>
+          </div>
+          <div class="collapsible-body">
+
+          <% for(var i=0; i < loe.waveOptics.length; i+=3){%>
+            <div class="row my-row">
+
+            <% if(i < loe.waveOptics.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.waveOptics[i].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.waveOptics[i].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.waveOptics[i].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            <% if(i+1 < loe.waveOptics.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.waveOptics[i+1].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.waveOptics[i+1].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.waveOptics[i+1].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            <% if(i+2 < loe.waveOptics.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.waveOptics[i+2].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.waveOptics[i+2].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.waveOptics[i+2].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            </div>
+          <% }%>
+
+          </div>
+        </li>
+        <li class="electricity-magnetism-equations">
+          <div class="collapsible-header"><i class="fas fa-bolt"></i>
+            <span>Electricity & Magnetism</span>
+            <span class="new badge relevant-equations-badge" data-badge-caption="Relevant Equations">4</span>
+          </div>
+          <div class="collapsible-body">
+
+          <% for(var i=0; i < loe.em.length; i+=3){%>
+            <div class="row my-row">
+
+            <% if(i < loe.em.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.em[i].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.em[i].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.em[i].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            <% if(i+1 < loe.em.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.em[i+1].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.em[i+1].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.em[i+1].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            <% if(i+2 < loe.em.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.em[i+2].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.em[i+2].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.em[i+2].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            </div>
+          <% }%>
+
+          </div>
+        </li>
+        <li class="modern-physics-equations">
+          <div class="collapsible-header"><i class="fas fa-atom"></i>
+            <span>Modern Physics</span>
+            <span class="new badge relevant-equations-badge" data-badge-caption="Relevant Equations">4</span>
+          </div>
+          <div class="collapsible-body">
+
+          <% for(var i=0; i < loe.modern.length; i+=3){%>
+            <div class="row my-row">
+
+            <% if(i < loe.modern.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.modern[i].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.modern[i].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.modern[i].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            <% if(i+1 < loe.modern.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.modern[i+1].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.modern[i+1].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.modern[i+1].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            <% if(i+2 < loe.modern.length){%>
+              <div class="col m4">
+                <div class="row my-row">
+                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                    <span><%=loe.modern[i+2].name%></span>
+                  </div>
+                </div>
+                <% for(let eq in loe.modern[i+2].equations){ %>
+                  <div class="row my-row">
+                    <div class="col m12 center">
+                      <span class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.modern[i+2].equations[eq]%>"></span>
+                    </div>
+                  </div>
+                <% } %>
+
+              </div>
+            <% }%>
+
+            </div>
+          <% }%>
+
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,49 @@
+<%
+
+function RID(){
+  let c = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let rid = "";
+  for(var i = 0; i < 10; i++){
+    let r = Math.random() * c.length;
+    rid += c.substring(r, r+1);
+  }
+
+  return rid;
+}
+
+%>
+
+<div id="physics_constants" class="col s12">
+  <div style="padding: 10px;">
+    <table>
+        <thead>
+          <tr>
+              <th>Quantity</th>
+              <th>Symbol</th>
+              <th>Value</th>
+              <th>Unit</th>
+              <th>Use</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% for(var i = 0; i < lopc.length; i++){ %>
+          <tr>
+            <td><%= lopc[i].quantityDescription %></td>
+            <td><span id class="static-physics-equation" latex="<%= lopc[i].symbol%>"></span></td>
+            <td><span class="static-physics-equation" latex="<%= lopc[i].value %>"></span></td>
+            <td><span class="static-physics-equation" latex="<%= lopc[i].unit %>"></span></td>
+            <td>
+              <label>
+                <input type="checkbox" />
+                <span class="physics-constant-checkbox-span" rid="<%= RID() %>" symbol="<%= lopc[i].symbol%>"></span>
+              </label>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+    </table>
+  </div>
+
+
+</div>

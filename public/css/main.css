@@ -1,0 +1,601 @@
+#determinate-loader {
+  transition: width 2s;
+}
+#loading-screen {
+  width: 100%;
+  position: absolute;
+  height: 100%;
+  padding-top: 10%;
+  background-color: white;
+  z-index: 10;
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+[type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+  visibility: hidden !important;
+}
+
+body {
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+.static-physics-equation.tooltipped {
+  cursor: pointer;
+}
+
+.static-physics-equation.tooltipped:hover {
+  color: #0097a7;
+}
+
+
+.static-physics-equation .mq-empty {
+  background-color: transparent !important;
+}
+
+.static-physics-equation .mq-sqrt-prefix {
+  transform: scale(1, 2.7) !important;
+}
+
+.static-physics-equation-header {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.static-physics-equation-header i {
+  visibility: hidden;
+}
+
+.static-physics-equation-header:hover {
+  color: #0097a7;
+}
+
+.static-physics-equation-header:hover i {
+  visibility: visible;
+  color: inherit;
+  cursor: inherit;
+}
+
+.mq-sup {
+  margin-bottom: 0px !important;
+}
+
+.my-row, .my-col {
+  margin:0px !important;
+  padding: 0px !important;
+}
+
+.my_math_field {
+  display: inline-block !important;
+  border: none !important;
+  width: 100%;
+  box-shadow: none !important;
+}
+
+#modal_define_variable[type="new"] #static-math-define-variable {
+  display: none;
+}
+
+#modal_define_variable[type="new"] #dynamic-math-define-variable {
+  display: inline-block;
+}
+
+#modal_define_variable[type="existing"] #static-math-define-variable {
+  display: inline-block;
+}
+
+#modal_define_variable[type="existing"] #dynamic-math-define-variable, #modal_define_variable[type="existing"] #dynamic-math-define-variable-helper-text, #variable-type-helper-text {
+  display: none;
+}
+
+#define-variable-text {
+  font-size: 25px;
+  color: #424242;
+}
+
+#static-math-define-variable {
+  position: relative;
+  top: -5px;
+  font-size: 30px;
+}
+
+#dynamic-math-define-variable {
+  position: relative;
+  top: -5px;
+  width: 60%;
+  border: none;
+  border-bottom: 1px solid #424242;
+  box-shadow: none;
+  font-size: 30px;
+}
+
+#dynamic-math-define-variable.mq-focused {
+  border-bottom: 2px solid #009688;
+}
+
+
+#modal_define_variable {
+  height: 600px;
+  max-height: 90%;
+}
+
+#modal_define_variable .modal_header {
+  font-size: 20px;
+}
+
+#constant-variable-value-text {
+  color: #757575;
+  font-size: .8rem;
+}
+
+#input-exact-value-wrapper {
+  padding-left: 30px;
+  display: none;
+}
+
+#edit_variable_description {
+  padding: 10.5px 3px 8px 3px;
+  background-color: white;
+  position:relative;
+  left:-21px;
+  cursor: pointer;
+  border-top: 1px solid #eeeeee;
+  border-left: 1px solid #eeeeee;
+  border-bottom: 1px solid #eeeeee;
+  color: black;
+}
+
+#edit_variable_description i:hover{
+  color: #e0e0e0;
+}
+
+#variable-value-math-field {
+  width: 100%;
+  box-shadow: none;
+  border: none;
+  border-bottom: 1px solid #212121;
+}
+
+#variable-value-math-field.mq-focused {
+  border-bottom: 2px solid #009688 !important;
+}
+
+.my_math_field_col {
+  padding: 5px 0px 5px 5px !important;
+  width: calc(100% - 26px) !important;
+  border: 1px solid transparent;
+}
+
+.my_math_field_col.active {
+  -webkit-box-shadow: 0px 0px 8px 0px rgba(132,225,235,1);
+  -moz-box-shadow: 0px 0px 8px 0px rgba(132,225,235,1);
+  box-shadow: 0px 0px 8px 0px rgba(132,225,235,1);
+  border: 1px rgba(132,225,235,1) solid;
+}
+
+.editor_line {
+  margin-bottom: 0px !important;
+}
+
+.line_label {
+  padding: 6px 4px 0px 4px !important;
+  display: inline-block !important;
+  height: 23.64px;
+  width: 25px !important;
+  background-color: #eeeeee;
+}
+
+.line_label.active {
+  background-color: rgba(132,225,235,1);
+}
+.line_label span {
+  display: none;
+}
+
+.line_label span.active {
+  display: inline;
+}
+
+.line_label .fa-exclamation-triangle {
+  color: orange;
+}
+
+.line_label .fa-exclamation-circle {
+  color: red;
+}
+
+.line_label .fa-question-circle {
+  color: purple;
+}
+
+
+#equation-editor-errors.no-errors {
+  background-color: #80deea;
+}
+
+#equation-editor-errors {
+  background-color: #ec407a;
+}
+
+
+#equations_container .tabs .tab a:focus, #equations_container .tabs .tab a:focus.active {
+  background-color: rgba(48, 79, 254, 0.2);
+}
+
+#equations_container .tabs .tab a:hover, #equations_container .tabs .tab a.active {
+  color: rgba(48, 79, 254, 1.0);
+}
+
+#equations_container .tabs .indicator {
+  background-color: rgba(48, 79, 254, 1.0) !important;
+}
+
+#equations_container .tabs .tab a {
+  color: rgba(48, 79, 254, 0.7);
+}
+
+#equation-editor-errors {
+  margin-top: 20px;
+}
+
+#variable_description_menu {
+  top: 0px;
+  left: 0px;
+  position: absolute;
+  height: 30px;
+  display: none;
+  background-color: white;
+}
+
+#variable_description_menu table {
+  position:relative;
+  top:-32px;
+  background-color: white;
+}
+
+#variable_description_menu table td {
+  padding: 0px 3px !important;
+  border-right: 1px solid #eeeeee;
+  border-top: 1px solid #eeeeee;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#variable_description_menu table th {
+  padding: 0px 3px !important;
+  border-right: 1px solid #eeeeee;
+  border-top: 1px solid #eeeeee;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#variable_description_menu table .variable_state {
+  border-left: 1px solid #eeeeee;
+}
+
+#btn_define_new_variable {
+  margin-top: 10px;
+  background-color: #f5f5f5;
+  color: #616161;
+}
+
+.relevant-equations-badge {
+  background-color: #f0f4c3 !important;
+  color: #424242 !important;
+  display: none;
+}
+
+#my_variables .collection.no-variables-defined {
+  border: none !important;
+}
+
+#my_variables .collection-item{
+  padding-right: 5px !important;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+#my_variables .collection-item .delete-var {
+  margin-left: 5px;
+  visibility: hidden;
+}
+
+#my_variables .collection-item.active .delete-var {
+  visibility: visible;
+}
+
+#my_variables .collection-item.active .delete-var:hover {
+  cursor: pointer;
+  color: #ef5350;
+}
+
+#my_variables .collection-item.active {
+  background-color: #fafafa !important;
+  color: #212121;
+}
+
+#my_variables .collection .unknown {
+  background-color: #ffcdd2;
+  color: #424242;
+}
+
+#my_variables .collection .known {
+  background-color: #b2dfdb;
+  color: #424242;
+}
+
+#my_variables .collection .info {
+  background-color: #f5f5f5;
+  color: #424242;
+}
+
+#my_variables .collection .constant-info {
+  background-color: transparent;
+  color: #424242;
+}
+
+#my_variables .collection .physics-constant {
+  background-color: #e1bee7;
+  color: #424242;
+}
+
+#my_variables .collection {
+  margin: 10px;
+}
+
+#equations_container {
+  padding:0px;
+  border-left: 1px solid #eeeeee;
+}
+
+#physics_equations, #physics_constants {
+  overflow-y: scroll;
+}
+
+#physics_equations .collapsible {
+  box-shadow: none;
+  border: none !important;
+}
+
+#physics_equations .collapsible-header:hover{
+  background-color: #e1f5fe;
+  transition: background-color 0.5s;
+}
+
+#physics_equations li.active .collapsible-header{
+  background-color: #80deea;
+  transition: background-color 0.5s;
+}
+
+#physics_equations .collapsible .collapsible-header, #physics_equations .collapsible-body {
+  border: none !important;
+}
+
+#physics_equations .collapsible-body {
+  padding: 5px 0px;
+}
+
+#keyboard-container {
+  position: absolute;
+  top: calc(100% - 150px);
+  background-color: #f5f5f5;
+  height: 150px;
+  width: 100%;
+  z-index: 4;
+  transition: top 1s;
+  padding: 10px 20px 10px 0px;
+
+  -webkit-box-shadow: 0px 0px 19px -9px rgba(156,156,156,1);
+  -moz-box-shadow: 0px 0px 19px -9px rgba(156,156,156,1);
+  box-shadow: 0px 0px 19px -9px rgba(156,156,156,1);
+}
+
+#keyboard-container .simple-keyboard {
+  padding: 0px;
+  background-color: #f5f5f5 !important;
+}
+
+#keyboard-button{
+  position: absolute;
+  top: -36px;
+  left: 0px;
+  -webkit-box-shadow: 24px -17px 49px -32px rgba(156,156,156,1);
+  -moz-box-shadow: 24px -17px 49px -32px rgba(156,156,156,1);
+  box-shadow: 24px -17px 49px -32px rgba(156,156,156,1);
+}
+
+#keyboard-button .fa-keyboard {
+  font-size: 1.6rem !important;
+  margin-right: 8px;
+}
+
+#line-message-box {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: none;
+  background-color: #424242;
+  color: white;
+  border-radius: 2px;
+  padding: 5px 8px;
+  opacity: 1.0;
+}
+
+#line-message-box-question, #line-message-box-warning, #line-message-box-error {
+  display: none;
+}
+
+#line-message-box-question.active, #line-message-box-warning.active, #line-message-box-error.active {
+  display: block;
+}
+
+#dynamic-math-define-variable-helper-text {
+  display: block;
+  font-size: 12px;
+  margin-left: 175px;
+}
+
+#math_field_editor_container, #my_variables-collection-container {
+  overflow-y: scroll;
+}
+
+#similar-variables-info-container {
+  font-size: 14px;
+  color: #616161;
+  height: 0px;
+  overflow-y: hidden;
+  opacity: 0;
+}
+
+#more-info-on-similar-variables {
+  cursor: pointer;
+}
+
+#more-info-on-similar-variables:hover {
+  color: #0097a7;
+}
+
+.log-notification {
+  border-radius: 3px;
+  padding:3px 5px;
+  margin-left:3px;
+}
+
+.btn-log-notification  {
+  padding: 0px 10px;
+  font-size: 14px;
+  color: #424242;
+  margin-left: 5px;
+  margin-top: 15px;
+}
+
+.btn-log-notification svg {
+  position: relative;
+  top: 2px;
+}
+
+#editor-log-container {
+  position: absolute;
+  top: 0px;
+  right: -41.6%;
+  height: 100%;
+  width: 41.6%;
+  z-index: 3;
+  background-color: white;
+}
+
+#editor-log-container .collapsible {
+  margin: 0px;
+  box-shadow: none;
+}
+
+#editor-log-container .collapsible-header svg {
+  position: relative;
+  top: 3px;
+  margin-right: 5px;
+}
+
+#editor-log-container .collapsible-body.information-container {
+  padding: 39px 15px;
+}
+
+#close-editor-log {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  z-index: 3;
+  font-size: 26px;
+  cursor: pointer;
+  color: #616161;
+}
+
+#close-editor-log:hover {
+  color: #ef5350;
+}
+
+#editor-log-container .collapsible .collapsible-body {
+  overflow-y: scroll;
+}
+
+#keyboard-tab-container {
+  position: relative;
+  top: -5px;
+}
+
+#keyboard-tab-container .keyboard-tabs {
+  height: 32px;
+  border-radius: 3px;
+  width: 110px;
+  border-radius: 0px 3px 3px 0px;
+  background-color: #f5f5f5;
+  color: #424242;
+  margin-bottom: 3px;
+  text-transform: none;
+  cursor: pointer !important;
+}
+
+#keyboard-tab-container .keyboard-tabs span {
+  cursor: pointer !important;
+}
+
+#keyboard-tab-container .keyboard-tabs.active {
+  background-color: #80deea !important;
+}
+
+#keyboard-tab-container .keyboard-tabs:hover {
+  background-color: #e0f7fa;
+}
+
+#keyboard-tab-container .keyboard-tabs .keyboard-latex {
+  position: relative;
+  top: -3px;
+}
+
+#my-keyboard-container .keyboard-latex {
+  text-transform: none;
+}
+
+#my-keyboard-container .keyboard-latex .mq-sqrt-prefix {
+  transform: scale(1, 1.2) !important;
+}
+
+#my-keyboard-container .btn {
+  width: 100%;
+  background-color: #f5f5f5;
+  color: #424242;
+  cursor: pointer;
+}
+
+#my-keyboard-container .btn * {
+  cursor: pointer;
+}
+
+#my-keyboard-container .row {
+  margin-bottom: 5px !important;
+}
+
+#my-keyboard-container .col {
+  padding-right: 5px !important;
+  padding-left: 0px !important;
+}
+
+#my-keyboard-container #greek-letters-uppercase {
+  display: none;
+}
+
+#my-keyboard-container .mq-empty {
+  display: none;
+}
+
+#btn-greek-letter-uppercase, #btn-greek-letter-lowercase {
+  font-size: 12px;
+}
+
+#greek-letters-keyboard {
+  display: block;
+}
+
+#operators-keyboard, #functions-keyboard, #advanced-keyboard {
+  display: none;
+}

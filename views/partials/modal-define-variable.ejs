@@ -1,0 +1,86 @@
+<div id="modal_define_variable" class="modal modal-fixed-footer" type="new">
+  <div class="modal-content">
+    <div class="row">
+      <div class="col s12 m12 l12">
+        <p class="modal_header">
+          <span id="define-variable-text">Define Variable:</span>
+          <span id="static-math-define-variable">\vec{a}</span>
+          <span id="dynamic-math-define-variable" valid="false"></span>
+          <span id="dynamic-math-define-variable-helper-text" class="red-text">Invalid Input</span>
+        </p>
+      </div>
+    </div>
+    <div class="row">
+
+      <div class="input-field col s12">
+        <select id="select_variable_type" onchange="CheckModalForm()">
+          <option value="" disabled selected>Variable Type?</option>
+          <option value="scalar">Scalar</option>
+          <option value="vector">Vector</option>
+        </select>
+        <label><strong>Type:</strong>What type of variable is this?</label>
+        <span id="variable-type-helper-text" class="helper-text red-text darken-2">The unit you selected can not be a vector quantity</span>
+      </div>
+
+      <div class="input-field col s12">
+        <select id="select_known_or_unknown" onchange="CheckModalForm()">
+          <option value="" disabled selected>Known or Unknown?</option>
+          <option value="known">Known</option>
+          <option value="unknown">Unknown</option>
+        </select>
+        <label><strong>Value:</strong>Is this a known or unknown variable?</label>
+      </div>
+
+      <div id="input-exact-value-wrapper" class="input-field col s12">
+        <div class="row">
+          <div class="col m12">
+            <span id="constant-variable-value-text">Constant Variable Value</span>
+          </div>
+          <div class="col m12">
+            <div id="variable-value-math-field"></div>
+          </div>
+          <div class="col m12">
+            <span class="helper-text red-text">Invalid Input</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-field col s12">
+        <input type="text" id="input-units-autocomplete" class="autocomplete">
+        <label for="input-units-autocomplete"><strong>Variable Units</strong></label>
+        <span id="units-helper-text" class="helper-text red-text darken-2" valid="false" data-error="wrong" data-success="right">Unit not recognized</span>
+      </div>
+
+      <div class="col s12">
+        <p>
+          <label>
+            <input id="input-similar-defined-variables" type="checkbox" checked="checked"/>
+            <span style="color:#424242;">Similar variables with different subscripts should default to these units</span>
+          </label>
+          <span id="more-info-on-similar-variables" onclick="ToggleMoreInformationOnSimilarVariablesContainer()"><i class="fas fa-info-circle"></i></span>
+        </p>
+        <div id="similar-variables-info-container">
+          <div>When checked variables with the same base letter but different subscript will default to the variable type and units defined for this variable</div>
+          <div>For example if you define a variable <strong>m<sub>earth</sub></strong> to be a scalar with units of mass (kg) then if you type <strong>m<sub>moon</sub></strong> in the editor, the editor will assume <strong>m<sub>moon</sub></strong> also is a scalar with units of mass (kg) and generate a variable for you in the "My Variables" Tab.</div>
+        </div>
+      </div>
+
+    </div>
+
+
+  </div>
+  <div class="modal-footer">
+    <a id="btn_udpate_variable_definition" href="#!" class="modal-close waves-effect waves-green btn disabled">Update</a>
+    <a href="#!" class="modal-close waves-effect waves-green btn">Cancel</a>
+  </div>
+</div>
+
+<div id="modal-physics-equation-more-information" class="modal">
+  <div class="modal-content">
+    <h4>Modal Header</h4>
+    <p>A bunch of text</p>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
+  </div>
+</div>
