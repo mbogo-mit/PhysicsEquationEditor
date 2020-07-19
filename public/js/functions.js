@@ -1201,6 +1201,8 @@ function CheckForAndDisplayRelevantEquations(){
 
   let sections = ["mechanics-equations","thermal-equations","waves-optics-equations","electricity-magnetism-equations","modern-physics-equations"];
 
+  let totalNumberOfRelevantEquationsInSection = 0;
+
   sections.map(function(section,index){
 
     let numberOfRelevantEquationsInSection = 0;
@@ -1236,6 +1238,8 @@ function CheckForAndDisplayRelevantEquations(){
 
     });
 
+    totalNumberOfRelevantEquationsInSection += numberOfRelevantEquationsInSection;
+
     //updating the label that shows how many relevant equations are in a specific physics equation section
     $(`#physics_equations .${section} .relevant-equations-badge`).html(numberOfRelevantEquationsInSection);
     if(numberOfRelevantEquationsInSection > 0){//making the badge and count visibile if there are relevant equations in this section
@@ -1246,6 +1250,14 @@ function CheckForAndDisplayRelevantEquations(){
     }
 
   });
+
+  $("#relevant-physics-equations-total-count > span").html(totalNumberOfRelevantEquationsInSection);
+  if(totalNumberOfRelevantEquationsInSection > 0){
+    $("#relevant-physics-equations-total-count").addClass("active");
+  }
+  else{
+    $("#relevant-physics-equations-total-count").removeClass("active");
+  }
 
 }
 

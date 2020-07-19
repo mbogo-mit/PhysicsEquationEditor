@@ -235,6 +235,10 @@ body {
   color: rgba(48, 79, 254, 0.7);
 }
 
+#physics-equation-a-tag {
+  padding-left: 15px;
+}
+
 #equation-editor-errors {
   margin-top: 20px;
 }
@@ -606,4 +610,22 @@ body {
 
 #operators-keyboard, #functions-keyboard, #advanced-keyboard {
   display: none;
+}
+
+#relevant-physics-equations-total-count {
+  margin-bottom: -48px;
+  float: right;
+  margin-right: 5px;
+  visibility: hidden;
+}
+
+#relevant-physics-equations-total-count.active {
+  visibility: visible !important;
+}
+
+#relevant-physics-equations-total-count > span {
+  padding: 3px;
+  background-color: #f0f4c3;
+  border-radius: 5px;
+  color: #424242;
 }
