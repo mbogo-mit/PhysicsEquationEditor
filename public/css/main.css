@@ -283,7 +283,15 @@ body {
 .relevant-equations-badge {
   background-color: #f0f4c3 !important;
   color: #424242 !important;
-  display: none;
+  visibility: hidden;
+}
+
+.relevant-equations-badge.active {
+  visibility: visible;
+}
+
+.relevant-equation {
+  background-color: #f0f4c3 !important;
 }
 
 #my_variables .collection.no-variables-defined {

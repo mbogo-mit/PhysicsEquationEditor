@@ -146,7 +146,7 @@ let ListOfSIUnits = {
   "dynamic viscosity" : {name: "pascal second", symbol: "Pa*s", color: ListOfColors.quinary[9], unitsLatex: "Ps", unitsMathjs: "1 Pa s", canBeVector: false,  },
   "momentum" : {name: "kilogram meter per second", symbol: "kg*m/s", color: ListOfColors.quaternary[15], unitsLatex: "gms^{-1}", unitsMathjs: "1 kg m/s", canBeVector: true, },
   "torque/moment of force" : {name: "newton per meter", symbol: "N*m", color: ListOfColors.quinary[10], unitsLatex: "J", unitsMathjs: "1 N m", canBeVector: true, },
-  "moment of interia" : {name: "kilogram meter squared", symbol: "kg*m^2", color: ListOfColors.quinary[10], unitsLatex: "gm^2", unitsMathjs: "1 kg m^2", canBeVector: false, },
+  "moment of inertia" : {name: "kilogram meter squared", symbol: "kg*m^2", color: ListOfColors.quinary[10], unitsLatex: "gm^2", unitsMathjs: "1 kg m^2", canBeVector: false, },
   "surface tension" : {name: "newton per meter", symbol: "N/m", color: ListOfColors.quinary[11], unitsLatex: "Nm^{-1}", unitsMathjs: "1 N/m", canBeVector: false,   },
   "spring constant" : {name: "newton per meter", symbol: "N/m", color: ListOfColors.quinary[11], unitsLatex: "Nm^{-1}", unitsMathjs: "1 N/m", canBeVector: false,   },
   "angular velocity" : {name: "radian per second", symbol: "rad/s", color: ListOfColors.quinary[12], unitsLatex: "rs^{-1}", unitsMathjs: "1 rad/s", canBeVector: true, },
@@ -177,13 +177,14 @@ let ListOfSIUnits = {
 
 ListOfPhysicsConstants = [
   {
-    quantity: "speed of light in vacuum",
+    quantity: "velocity",
     quantityDescription: "speed of light in vacuum",
     symbol: "c",
     value: "299 792 458",
     unit: "\\frac{m}{s}",
     unitString: "m/s",
     unitsLatex: "ms^{-1}",
+    unitsMathjs: "1 m/s",
   },
   {
     quantity: "Planck constant",
@@ -193,6 +194,7 @@ ListOfPhysicsConstants = [
     unit: "J\\cdot s",
     unitString: "J*s",
     unitsLatex: "Js",
+    unitsMathjs: "1 J s",
   },
   {
     quantity: "Newtonian constant of gravitation",
@@ -202,6 +204,7 @@ ListOfPhysicsConstants = [
     unit: "\\frac{m^{3}}{kg\\cdot s^{2}}",
     unitString: "(m^3)/(kg*s^2)",
     unitsLatex: "Nm^{2}g^{-2}",
+    unitsMathjs: "1 m^3 / (kg s^2)",
   },
   {
     quantity: "Boltzmann constant",
@@ -211,15 +214,17 @@ ListOfPhysicsConstants = [
     unit: "\\frac{J}{K}",
     unitString: "J/K",
     unitsLatex: "JK^{-1}",
+    unitsMathjs: "1 J/K",
   },
   {
-    quantity: "molar gas constant",
+    quantity: "Molar gas constant",
     quantityDescription: "Molar gas constant",
     symbol: "R",
     value: "8.314510",
     unit: "\\frac{J}{mol}\\cdot K",
     unitString: "(J*K)/(mol)",
     unitsLatex: "JKo^{-1}",
+    unitsMathjs: "1 J K / mol",
   },
   {
     quantity: "Avogadro's number",
@@ -229,6 +234,7 @@ ListOfPhysicsConstants = [
     unit: "mol^{-1}",
     unitString: "1/mol",
     unitsLatex: "o^{-1}",
+    unitsMathjs: "1 / mol",
   },
   {
     quantity: "electric charge",
@@ -238,6 +244,7 @@ ListOfPhysicsConstants = [
     unit: "C",
     unitString: "C",
     unitsLatex: "As",
+    unitsMathjs: "1 C",
   },
   {
     quantity: "Permeability of vacuum",
@@ -247,6 +254,7 @@ ListOfPhysicsConstants = [
     unit: "\\frac{N}{A^{2}}",
     unitString: "N/(A^2)",
     unitsLatex: "NA^{-2}",
+    unitsMathjs: "1 N / A^2",
   },
   {
     quantity: "Permittivity of vacuum",
@@ -256,6 +264,7 @@ ListOfPhysicsConstants = [
     unit: "\\frac{F}{m}",
     unitString: "F/m",
     unitsLatex: "Fm^{-1}",
+    unitsMathjs: "1 F / m",
   },
   {
     quantity: "Coulomb constant",
@@ -265,6 +274,7 @@ ListOfPhysicsConstants = [
     unit: "N\\cdot\\frac{m^{2}}{C^{2}}",
     unitString: "N*(m^2)/(C^2)",
     unitsLatex: "Nm^{2}A^{-2}s^{-2}}",
+    unitsMathjs: "1 N m^2 / C^2",
   },
   {
     quantity: "Faraday constant",
@@ -274,6 +284,7 @@ ListOfPhysicsConstants = [
     unit: "\\frac{C}{mol}",
     unitString: "C/mol",
     unitsLatex: "Aso^{-1}",
+    unitsMathjs: "1 C / mol",
   },
   {
     quantity: "mass",
@@ -283,6 +294,7 @@ ListOfPhysicsConstants = [
     unit: "kg",
     unitString: "kg",
     unitsLatex: "g",
+    unitsMathjs: "1 kg",
   },
   {
     quantity: "mass",
@@ -292,6 +304,7 @@ ListOfPhysicsConstants = [
     unit: "kg",
     unitString: "kg",
     unitsLatex: "g",
+    unitsMathjs: "1 kg",
   },
   {
     quantity: "mass",
@@ -301,6 +314,7 @@ ListOfPhysicsConstants = [
     unit: "kg",
     unitString: "kg",
     unitsLatex: "g",
+    unitsMathjs: "1 kg",
   },
   {
     quantity: "mass",
@@ -310,6 +324,7 @@ ListOfPhysicsConstants = [
     unit: "kg",
     unitString: "kg",
     unitsLatex: "g",
+    unitsMathjs: "1 kg",
   },
   {
     quantity: "Stefan-Boltzmann constant",
@@ -319,6 +334,7 @@ ListOfPhysicsConstants = [
     unit: "\\frac{W}{m^{2}}\\cdot K^{4}",
     unitString: "W/(m^2)*K^4",
     unitsLatex: "WK^{4}m^{-2}",
+    unitsMathjs: "1 W K^4 / m^2",
   },
   {
     quantity: "Rydberg constant",
@@ -328,6 +344,7 @@ ListOfPhysicsConstants = [
     unit: "m^{-1}",
     unitString: "1/m",
     unitsLatex: "m^{-1}",
+    unitsMathjs: "1 / m",
   },
   {
     quantity: "Bohr magneton",
@@ -337,6 +354,7 @@ ListOfPhysicsConstants = [
     unit: "\\frac{J}{T}",
     unitString: "J/T",
     unitsLatex: "JT^{-1}",
+    unitsMathjs: "1 J / T",
   },
   {
     quantity: "magnetic flux",
@@ -346,6 +364,7 @@ ListOfPhysicsConstants = [
     unit: "Wb",
     unitString: "Wb",
     unitsLatex: "w",
+    unitsMathjs: "1 Wb",
   },
   {
     quantity: "Wien displacement constant",
@@ -355,5 +374,6 @@ ListOfPhysicsConstants = [
     unit: "m\\cdot K",
     unitString: "m*K",
     unitsLatex: "mK",
+    unitsMathjs: "1 m K",
   },
 ];

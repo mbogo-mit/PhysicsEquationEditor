@@ -840,13 +840,13 @@ function TogglePhysicsConstant(el, index){
     let obj = Object.assign({}, ListOfPhysicsConstants[index]);
     //console.log(obj);
     if(!el.prev().prop("checked")){
-      M.toast({html: `<span class='green-text text-lighten-4'>${obj.quantity}</span> &nbsp; added to 'My Variables' Tab`});
+      M.toast({html: `<span class='green-text text-lighten-4'>${obj.quantity}</span> &nbsp; added to 'My Variables' Tab`, displayLength: 3000});
       UpdateMyVariablesCollection({ls: obj.symbol, rid: el.attr("rid"), add: true, pc: obj, editable: false, indexChild: index});
     }
     else{
       //we need to check if variable is being used in the editor and if it is this can't be removed
       if(!isVariableBeingUsedInEditor({rid: el.attr("rid"), editable: false})){
-        M.toast({html: `<span class='red-text text-lighten-4'>${obj.quantity}</span> 	&nbsp; removed from 'My Variables' Tab`});
+        M.toast({html: `<span class='red-text text-lighten-4'>${obj.quantity}</span> 	&nbsp; removed from 'My Variables' Tab`, displayLength: 3000});
         UpdateMyVariablesCollection({ls: obj.symbol, rid: el.attr("rid"), remove: true, editable: false});
       }
       else{
@@ -1196,7 +1196,57 @@ function GetLineNumberFromMathFieldId(mfId){
 function CheckForAndDisplayRelevantEquations(){
   let usedQuantities = GetAllUsedQuantities();//an object that has the quanitity as the key and true if it is known or and false if it is unknown
   //this function goes through the dom of physics equations and checks the quanities they relate and sees if the equation is relevant for the defined quanities in the editor
-  //an equation is relevant when there are no quanitites that the user is not using  and when it has one quantity that the user is using and has set as known
+  //an equation is relevant when there are no quanitites that the user is not using  and when it has one quantity that the user is using and has set as known.
+  //additionally the user has to have the same number of each quantity or more for an equation to be relevant
+
+  let sections = ["mechanics-equations","thermal-equations","waves-optics-equations","electricity-magnetism-equations","modern-physics-equations"];
+
+  sections.map(function(section,index){
+
+    let numberOfRelevantEquationsInSection = 0;
+
+    $(`#physics_equations .${section} .static-physics-equation.mq-math-mode`).each(function(){
+      let quantities = JSON.parse($(this).attr("quantities"));
+      let isRelevantEquation = false;
+      for (const [key, value] of Object.entries(quantities)) {
+        if(usedQuantities[key] != undefined){//checking if user has defined the quantity that this equation uses
+          if(usedQuantities[key].number >= value){//the user has defined this variable at least the same number of times this equation needs or more
+            if(usedQuantities[key].state == "known"){
+              isRelevantEquation = true;
+            }
+          }
+          else{
+            isRelevantEquation = false;//the equation is not relevant because this equation needs a specific quantity a specific number of times and the user hasn't defined a quantity enough times
+            break;
+          }
+        }
+        else{
+          isRelevantEquation = false;//the equation is not relevant because there is a quantity that this equation needs that the user hasn't defined
+          break;
+        }
+      }
+
+      if(isRelevantEquation){
+        $(this).addClass("relevant-equation");
+        numberOfRelevantEquationsInSection += 1;
+      }
+      else{
+        $(this).removeClass("relevant-equation");
+      }
+
+    });
+
+    //updating the label that shows how many relevant equations are in a specific physics equation section
+    $(`#physics_equations .${section} .relevant-equations-badge`).html(numberOfRelevantEquationsInSection);
+    if(numberOfRelevantEquationsInSection > 0){//making the badge and count visibile if there are relevant equations in this section
+      $(`#physics_equations .${section} .relevant-equations-badge`).addClass('active');
+    }
+    else{
+      $(`#physics_equations .${section} .relevant-equations-badge`).removeClass('active');
+    }
+
+  });
+
 }
 
 function GetAllUsedQuantities(){
@@ -1205,10 +1255,10 @@ function GetAllUsedQuantities(){
   for (const [key, value] of Object.entries(PreDefinedVariables)) {
     if(value.quantity != undefined){
       if(usedQuantities[value.quantity] == undefined){
-        usedQuantities[value.quantity] = 1;
+        usedQuantities[value.quantity] = {number: 1, state: value.state};
       }
       else{
-        usedQuantities[value.quantity] += 1;
+        usedQuantities[value.quantity].number += 1;
       }
     }
   }
@@ -1216,10 +1266,10 @@ function GetAllUsedQuantities(){
   for (const [key, value] of Object.entries(DefinedVariables)) {
     if(value.quantity != undefined){
       if(usedQuantities[value.quantity] == undefined){
-        usedQuantities[value.quantity] = 1;
+        usedQuantities[value.quantity] = {number: 1, state: value.state};
       }
       else{
-        usedQuantities[value.quantity] += 1;
+        usedQuantities[value.quantity].number += 1;
       }
     }
   }
