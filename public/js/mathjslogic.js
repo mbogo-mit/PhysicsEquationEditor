@@ -21,7 +21,7 @@ math.import({
     v2 = v2.split(",");//making v2 into an array
 
     let expr = `(${v1[0]} * ${v2[0]} + ${v1[1]} * ${v2[1]} + ${v1[2]} * ${v2[2]}) / 1 vector^2`;
-    return math.evaluate(expr).toString();
+    return `(${math.evaluate(expr).toString()})`;
 
   },
   myCrossProduct: function (v1, v2) {
@@ -42,11 +42,13 @@ math.import({
 })
 
 function CheckForErrorsInExpression(ls, lineNumber){
+  console.log(ls);
+  ls = RemoveCommentsFromLatexString(ls);
   ls = PutBracketsAroundAllSubsSups(ls);
   ls = ReplaceVariablesWithMathjsUnits(ls);
   ls = CleanLatexString(ls, ["fractions","addition","parentheses","brackets", "white-space"]);
   ls = FindAndWrapVectorsThatAreBeingMultiplied(ls);
-  //console.log(ls);
+  console.log(ls);
   ls = CleanLatexString(ls,["multiplication"]);
   console.log(ls);
   //console.log(ls);
@@ -54,6 +56,7 @@ function CheckForErrorsInExpression(ls, lineNumber){
   let exprs = [];
   expressions.map(function(value, i){
     exprs.push(value.split("="));
+    console.log(value);
   });
   let results = [];
   console.log(exprs);
@@ -63,6 +66,7 @@ function CheckForErrorsInExpression(ls, lineNumber){
       //now that we have parsed the latex string into a mathjs readable string we evaluate it and grab any errors
       //that math js throws and interprets them for the user
       try {
+        console.log("exprs[i][j]", exprs[i][j]);
         let str = math.evaluate(exprs[i][j]).toString();
         results[i].push({success: str});
       }

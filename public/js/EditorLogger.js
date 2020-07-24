@@ -42,11 +42,23 @@ function EditorLogger(){
     this.clearLog();//clearing log befor adding to it
 
     for(var i = 0; i < ids.length; i++){
-      let ls = PutBracketsAroundAllSubsSups(MathFields[ids[i]].mf.latex());
+      //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
+      let ls = FormatNablaSquared(MathFields[ids[i]].mf.latex());
+      ls = PutBracketsAroundAllSubsSups(ls);
+      ls = RemoveDifferentialOperatorDFromLatexString(ls);
+      let lineNumber = GetLineNumberFromMathFieldId(ids[i]);
       if(ls.length > 0){//there is something to evaluate
-        if(GetUndefinedVariables(ls).length == 0){//no undefined variables
-          CheckIfUnitsMatchInMathField(ls);
-          CheckForErrorsInExpression(ls, GetLineNumberFromMathFieldId(ids[i]));
+        let undefinedVars = GetUndefinedVariables(ls);
+        if(undefinedVars.length == 0){//no undefined variables
+          //CheckIfUnitsMatchInMathField(ls);
+          CheckForErrorsInExpression(ls, lineNumber);
+        }
+        else{
+          this.addLog({warning: {
+            warning: "Undefined Variables",
+            variables: undefinedVars,
+            lineNumber: lineNumber,
+          }});
         }
       }
     }
@@ -55,10 +67,10 @@ function EditorLogger(){
   }
 
   this.addLog = function(log){
-    this.log.success = this.log.success.concat(log.success);
-    this.log.info = this.log.info.concat(log.info);
-    this.log.warning = this.log.warning.concat(log.warning);
-    this.log.error = this.log.error.concat(log.error);
+    this.log.success = this.log.success.concat((log.success) ? log.success : []);
+    this.log.info = this.log.info.concat((log.info) ? log.info : []);
+    this.log.warning = this.log.warning.concat((log.warning) ? log.warning : []);
+    this.log.error = this.log.error.concat((log.error) ? log.error : []);
   }
 
   this.clearLog = function(){
@@ -102,11 +114,17 @@ function EditorLogger(){
     $("#editor-log-container").html(html);
     //once the html is inject we need to add materialize event listeners to all the collapsibles
     $('#editor-log-container .collapsible').collapsible();
+    $("#editor-log-container .collapsible .collapsible-body.information-container").css("max-height",`${window.innerHeight - $("#editor-log-container .collapsible.log-container").height()}px`)
     //changing html of log indicators in header
     $("#btn-log-success-indicator .indicator-count").html(this.log.success.length);
     $("#btn-log-info-indicator .indicator-count").html(this.log.info.length);
     $("#btn-log-warning-indicator .indicator-count").html(this.log.warning.length);
     $("#btn-log-error-indicator .indicator-count").html(this.log.error.length);
+
+    //initialize static math fields that are used in the log
+    $(".log-static-latex").each(function(){
+      MQ.StaticMath($(this)[0]);
+    });
   }
 
 }

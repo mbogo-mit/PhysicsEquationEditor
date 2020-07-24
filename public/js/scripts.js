@@ -26,6 +26,17 @@ $(document).ready(function(){
   $('.tabs').tabs();
   $("#modal_define_variable, #modal-physics-equation-more-information").modal();
   $('.collapsible').collapsible();
+  $("#physics_equations .collapsible").collapsible({
+    onOpenEnd: function(){
+      //there are some equations that are too long to fit into the space alotted so I am finding them and making their font size a bit smaller so they don't overlap into other equations
+      $("#physics_equations .static-physics-equation").each(function(){
+        //console.log($(this)[0].getBoundingClientRect(), $(this).parent(".col")[0].getBoundingClientRect());
+        if($(this).width() > $(this).parent(".col").width()){
+          $(this).css("font-size","13px");
+        }
+      });
+    }
+  });
   $('.tooltipped').tooltip();
   $('#side-nav-editor-log').sidenav({
     edge: 'right',
@@ -100,7 +111,6 @@ $(document).ready(function(){
   $("#math_field_editor_container").css("height",`${window.innerHeight - $("#math_field_editor_container").offset().top}px`);
   $("#my_variables-collection-container").css("height",`${window.innerHeight - $("#my_variables-collection-container")[0].getBoundingClientRect().top}px`);
 
-  $("#editor-log-container .collapsible .collapsible-body").css("max-height",`${window.innerHeight - $("#editor-log-container .collapsible").height()}px`)
-
+  $("#editor-log-container .collapsible .collapsible-body.information-container").css("max-height",`${window.innerHeight - $("#editor-log-container .collapsible.log-container").height()}px`);
 
 });

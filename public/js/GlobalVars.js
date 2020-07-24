@@ -8,6 +8,14 @@ let DefaultDefinedVariable = {
 }
 
 let PreDefinedVariables = {
+  "\\nabla": {
+    state: "knonwn",
+    type: "vector",
+    units: "wave number (m^(-1))",
+    value: undefined,
+    unitsLatex: "m^{-1}",
+    unitsMathjs: "1/m",
+  },
   "\\pi": {
     state: "knonwn",
     type: "constant",
@@ -172,6 +180,7 @@ let ListOfSIUnits = {
   "catalytic concentration" : {name: "katal per cubic meter", symbol: "kat/m^3", color: ListOfColors.quinary[14], unitsLatex: "s^{-1}m^{-3}", unitsMathjs: "1 kat/m^3", canBeVector: false, },
   "unknown" : {name: "unknown units", symbol: "?", color: ListOfColors.unknown, unitsLatex: "u", unitsMathjs: "1", canBeVector: true,},
   "unitless" : {name: "unitless variable", symbol: "none", color: ListOfColors.unitless, unitsLatex: "1", unitsMathjs: "1", canBeVector: true,},
+  "coefficient of friction" : {name: "unitless variable", symbol: "none", color: ListOfColors.unitless, unitsLatex: "1", unitsMathjs: "1", canBeVector: false,},
 
 };
 

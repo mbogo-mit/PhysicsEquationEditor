@@ -67,9 +67,17 @@ function ToggleGreekKeyboard(lowercase){
 
 function KeyboardClicked(write, typedText = ""){
   MathFields[FocusedMathFieldId].mf.write(write);
-  MathFields[FocusedMathFieldId].mf.write(typedText);
+  MathFields[FocusedMathFieldId].mf.typedText(typedText);
   MathFields[FocusedMathFieldId].mf.focus();
   MathFields[FocusedMathFieldId].mf.focus();
+}
+
+function InsertComment(){
+  //check if the user is already in a comment section, and if they are not then do something otherwise don't do anything
+  console.log($(`#${FocusedMathFieldId} .mq-text-mode.mq-hasCursor`));
+  if($(`#${FocusedMathFieldId} .mq-text-mode.mq-hasCursor`).length == 0){
+    KeyboardClicked('','\\text ');
+  }
 }
 
 function SetKeyboardKeys(key){

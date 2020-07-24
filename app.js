@@ -90,8 +90,8 @@ ListOfEquations = {
         "f_{k}\\leq \\mu_{k}N"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"force": 1},
-        {"force": 1},
+        {"force": 2, "coefficient of friction": 1},
+        {"force": 2, "coefficient of friction": 1},
       ],
     },
     {
@@ -605,7 +605,7 @@ ListOfEquations = {
         "v=\\frac{\\eta}{\\rho}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1, "mass density": 1},
+        {"velocity": 1, "mass density": 1, "dynamic viscosity": 1},
       ],
     },
     {
@@ -1118,7 +1118,7 @@ ListOfEquations = {
       name: "Field & Potential",
       info: {},
       equations: [
-        "\\bar{E}=\\frac{\\Delta}{d}",
+        "\\bar{E}=\\frac{\\Delta V}{d}",
         "\\vec{E}=-\\nabla V",
         "-\\int E\\cdot d\\vec{r}=\\Delta V"
       ],

@@ -55,8 +55,17 @@ let Templates = {
             <ul class="collapsible popout">
               <% for(let i = 0; i < log.warning.length; i++){%>
               <li>
-                <div class="collapsible-header"><%= log.warning[i].error.type %><span class="badge">Line: <%= log.warning[i].lineNumber %></span></div>
-                <div class="collapsible-body"><span><%= log.warning[i].error.description %></span></div>
+                <div class="collapsible-header"><%= log.warning[i].warning %><span class="badge">Line: <%= log.warning[i].lineNumber %></span></div>
+                <div class="collapsible-body">
+                  <div class="row">
+                    <div class="col m12">
+                      <span>Click to variables to define them: </span>
+                      <% for(let c =0; c < log.warning[i].variables.length; c++){%>
+                          <span class="undefined-variable-badge log-static-latex" onclick="DefineUndefinedVariable($(this))" latex="<%= log.warning[i].variables[c] %>"><%= log.warning[i].variables[c] %></span>
+                      <% }%>
+                    </div>
+                  </div>
+                </div>
               </li>
               <% } %>
             </ul>
@@ -85,5 +94,5 @@ let Templates = {
     </div>
   </div>
 
-  `
+  `,
 };

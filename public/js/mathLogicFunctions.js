@@ -158,9 +158,11 @@ function TakeOutFractionLatexFormatting(ls){
   let index = 0;
   while(ls.indexOf("\\frac") != -1){
     index = ls.indexOf("\\frac");
-    let i = FindIndexOfClosingBracket(ls.substring(index + 6));
-    ls = ls.substring(0, (index + 6) + i + 1) + "/" + ls.substring( (index + 6) + i + 1);//this adds a / between {}{} -> {}/{}
-    ls = ls.substring(0, index) + ls.substring(index + 5);//this removes the "\frac" latex keyword
+    let i = FindIndexOfClosingBracket(ls.substring(index + 6)) + (index + 6);//this string finds the first closing bracket of the fraction latext string  {"}"{}
+    let i2 = FindIndexOfClosingBracket(ls.substring(i + 2)) + (i + 2);//this string finds the second closing bracket for the fraction latex string        {}{"}"
+    //this substring removes \\frac and replaces it with a "(" then puts a "/" in between {}{} -> {}/{} then wraps the end with ")"
+    ls = ls.substring(0, index) + "(" + ls.substring(index + 5, i + 1) + "/" + ls.substring(i + 1, i2 + 1) + ")" + ls.substring(i2 + 1);
+    //after the line above the latex string goes from "....\\frac{a}{b}...." -> "({a}/{b})"
   }
 
   return ls;

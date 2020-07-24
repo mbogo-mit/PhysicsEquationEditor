@@ -3,6 +3,15 @@
   <div id="keyboard-button" onclick="ToggleKeyboard()">
     <a class="waves-effect waves-light btn-flat grey lighten-4"><i class="far fa-keyboard"></i><i id="toggle-dir" class="fas fa-caret-down"></i></a>
   </div>
+  <div id="insert-comment-button" onclick="InsertComment()">
+    <a class="waves-effect waves-light btn-flat light-blue lighten-4">
+      Insert Comment
+      <svg style="position:relative;top:2px;" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-card-text" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" d="M14.5 3h-13a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+        <path fill-rule="evenodd" d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8zm0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/>
+      </svg>
+    </a>
+  </div>
   <div class="row my-row">
     <div id="keyboard-tab-container" class="col m1 my-col">
       <a id="greek-letters-tab" class="keyboard-tabs active waves-effect waves-light btn" onclick="SetKeyboardKeys('greek')">
@@ -126,7 +135,7 @@
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="plus minus" onclick="KeyboardClicked('\\tan')"><span class="keyboard-latex">\tan(x)</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="less than" onclick="KeyboardClicked('\\sec')"><span class="keyboard-latex">\sec(x)</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="greater than" onclick="KeyboardClicked('\\ln')"><span class="keyboard-latex">\ln(x)</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="zeta" onclick="KeyboardClicked('\\vec')"><span class="keyboard-latex">\vec{a}</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="zeta" onclick="KeyboardClicked('\\vec{}')"><span class="keyboard-latex">\vec{a}</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="eta" onclick="KeyboardClicked('')"><span class="keyboard-latex">{a}'</span></a></div>
           </div>
           <div class="row">

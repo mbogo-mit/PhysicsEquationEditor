@@ -16,7 +16,7 @@ let ListOfOperators = [
 ];
 
 let LatexGreekLetters = [
-  "\\alpha","\\beta", "\\gamma", "\\delta", "\\epsilon", "\\varepsilon", "\\zeta", "\\eta", "\\theta", "\\vartheta", "\\iota", "\\kappa", "\\lambda", "\\mu", "\\nu", "\\xi", "\\pi", "\\varpi", "\\rho", "\\varrho", "\\sigma", "\\varsigma", "\\tau", "\\upsilon", "\\phi", "\\varphi", "\\chi", "\\psi", "\\omega", "\\Gamma", "\\Delta", "\\Lambda", "\\Theta", "\\Xi", "\\Pi", "\\Upsilon", "\\Sigma", "\\Phi", "\\Psi", "\\Omega",
+  "\\nabla","\\alpha","\\beta", "\\gamma", "\\delta", "\\epsilon", "\\varepsilon", "\\zeta", "\\eta", "\\theta", "\\vartheta", "\\iota", "\\kappa", "\\lambda", "\\mu", "\\nu", "\\xi", "\\pi", "\\varpi", "\\rho", "\\varrho", "\\sigma", "\\varsigma", "\\tau", "\\upsilon", "\\phi", "\\varphi", "\\chi", "\\psi", "\\omega", "\\Gamma", "\\Delta", "\\Lambda", "\\Theta", "\\Xi", "\\Pi", "\\Upsilon", "\\Sigma", "\\Phi", "\\Psi", "\\Omega",
 ];
 
 let listOfDynamicTags = [
@@ -469,12 +469,13 @@ function ThisIsTheBeginningOfAVariable(state){
     //we need to see if the current character could be the start of a variable
     if(subLs[0] == "\\"){
       //it could equal a blackslash because it is the start of a vector variable '\vec{}'
-      if(subLs.indexOf("\\vec{") == 0 || subLs.indexOf("\\bar{") == 0){
+      if(subLs.indexOf("\\vec{") == 0 || subLs.indexOf("\\bar{") == 0 || subLs.indexOf("\\overline{") == 0){
+        let size = (subLs.indexOf("\\vec{") == 0 || subLs.indexOf("\\bar{") == 0) ? "\\bar{".length : "\\overline{".length;
         answer.yes = true;
-        answer.substring = subLs.substring(0,5);
+        answer.substring = subLs.substring(0,size);
         answer.newState.currentlyParsingVariable = true;
         answer.newState.numberOfRightBracketsNeeded = 1;//because the vec has a left bracket
-        answer.newState.index += 5;
+        answer.newState.index += size;
       }
       else{
         //this checks if the variable is like a greek letter which be formatted in a latex keyword
