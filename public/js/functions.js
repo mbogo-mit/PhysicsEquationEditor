@@ -188,8 +188,6 @@ function UpdateDefinedVariables(opts){
   }
 
   if(opts.updateErrorMessages != false){
-    //after defining the variable we need to generate new error messages for all the MathFields becuase this new definition could change a lot of the error messages
-    //GenerateErrorMessagesForAllMathFields();
     //after editing we need to check if there are any new Editor errors
     EL.GenerateEditorErrorMessages();
   }
@@ -665,38 +663,6 @@ function ToggleKeyboard(){
   }
 }
 
-function GenerateErrorMessages(id){
-  if(MathFields[id] != undefined){
-    console.log("GenerateErrorMessages");
-    MathFields[id].message = {
-      question: null,//is this variable a physics constant
-      warning: null,//variable undefined,
-      error: null, //units don't match, variable d can't be used
-    }
-    //Three types of messages: questions, warnings, errors in that order
-    //first we need to grab all the variables in the latex equation. Then we will consider all the undefined variables.
-    //And see if any of them could be a physics constant and suggest the constant to the user. If there are no variables
-    //like that but there are undefined variables a warning will show up. Then lastly once there are no undefined variables
-    //in a MathField we will run dimensional analysis if possible and through an error if it comes back negative
-
-    //get all undefined variables from latex string
-    //console.log('..................');
-    //console.log(PutBracketsAroundAllSubsSups(MathFields[id].mf.latex()));
-    let ls = RemoveDifferentialOperatorDFromLatexString(MathFields[id].mf.latex());
-    let uv = GetUndefinedVariables(ls);
-    //console.log(uv);
-    if(uv.length > 0){
-        MathFields[id].message.warning = {
-          type: 1,
-          vars: uv,
-        }
-    }
-
-    RenderMessageUI(id);//takes the messages for a specific math field and renders it
-  }
-
-}
-
 function RenderMessageUI(id){
 
   let elmnt = $(`#${id}`).parents(".editor_line");
@@ -879,14 +845,6 @@ function TogglePhysicsConstant(el, index){
       }
     }
 
-}
-
-function GenerateErrorMessagesForAllMathFields(){
-  let ids = Object.keys(MathFields);
-  for(var i = 0; i < ids.length; i++){
-    GenerateErrorMessages(ids[i]);
-
-  }
 }
 
 function UpdateMyVariablesCollection(opts = {ls: "", rid: "", update: true, add: false, pc: {}, remove: false, editable: true}){
