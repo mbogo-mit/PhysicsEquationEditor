@@ -50,7 +50,6 @@ function EditorLogger(){
       if(ls.length > 0){//there is something to evaluate
         let undefinedVars = GetUndefinedVariables(ls);
         if(undefinedVars.length == 0){//no undefined variables
-          //CheckIfUnitsMatchInMathField(ls);
           CheckForErrorsInExpression(ls, lineNumber, ids[i]);
         }
         else{

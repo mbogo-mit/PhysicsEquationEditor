@@ -143,7 +143,6 @@ function UpdateSimilarDefinedVariables(opts){
       state: opts.props.state,
       type: opts.props.type,
       units: opts.props.units,
-      unitsLatex: opts.props.unitsLatex,
       unitsMathjs: opts.props.unitsMathjs,
       quantity: opts.props.quantity,
     };
@@ -209,7 +208,6 @@ function UpdatedVariableDefinition(){
     units: TrimUnitInputValue($("#input-units-autocomplete").val()),
     fullUnitsString: $("#input-units-autocomplete").val(),
     value: (isExactValueInputFilledProperly() && VariableValueMathField.latex().length > 0) ? VariableValueMathField.latex() : undefined,
-    unitsLatex: UnitReference[$("#input-units-autocomplete").val()].unitsLatex,//returns latex string for that particular input
     unitsMathjs: UnitReference[$("#input-units-autocomplete").val()].unitsMathjs,//returns latex string for that particular input
     quantity: UnitReference[$("#input-units-autocomplete").val()].quantity,
   };
@@ -235,7 +233,6 @@ function UpdatedVariableDefinition(){
         state: "unknown",
         type: props.type,
         units: props.units,
-        unitsLatex: props.unitsLatex,
         unitsMathjs: props.unitsMathjs,
         quantity: props.quantity,
       },
@@ -974,7 +971,6 @@ function UpdateMyVariablesCollection(opts = {ls: "", rid: "", update: true, add:
         type: 'constant',
         units: opts.pc.unitString,
         size: "0",
-        unitsLatex: opts.pc.unitsLatex,
         unitsMathjs: opts.pc.unitsMathjs,
         quantity: opts.pc.quantity,
       },
