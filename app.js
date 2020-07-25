@@ -1707,7 +1707,6 @@ ListOfPhysicsConstants = [
     value: "299 792 458",
     unit: "\\frac{m}{s}",
     unitString: "m/s",
-    unitsLatex: "ms^{-1}",
     unitsMathjs: "1 m/s",
   },
   {
@@ -1717,7 +1716,6 @@ ListOfPhysicsConstants = [
     value: "6.626 070 040(81)\\times 10^{-34}",
     unit: "J\\cdot s",
     unitString: "J*s",
-    unitsLatex: "Js",
     unitsMathjs: "1 J s",
   },
   {
@@ -1727,7 +1725,6 @@ ListOfPhysicsConstants = [
     value: "6.674 08(31)\\times 10^{-11}",
     unit: "\\frac{m^{3}}{kg\\cdot s^{2}}",
     unitString: "(m^3)/(kg*s^2)",
-    unitsLatex: "Nm^{2}g^{-2}",
     unitsMathjs: "1 m^3 / (kg s^2)",
   },
   {
@@ -1737,7 +1734,6 @@ ListOfPhysicsConstants = [
     value: "9.8",
     unit: "\\frac{m}{s^2}",
     unitString: "m/s^2",
-    unitsLatex: "ms^{-2}",
     unitsMathjs: "1 m / s^2",
   },
   {
@@ -1747,7 +1743,6 @@ ListOfPhysicsConstants = [
     value: "1.380658\\times 10^{-23}",
     unit: "\\frac{J}{K}",
     unitString: "J/K",
-    unitsLatex: "JK^{-1}",
     unitsMathjs: "1 J/K",
   },
   {
@@ -1757,7 +1752,6 @@ ListOfPhysicsConstants = [
     value: "8.314510",
     unit: "\\frac{J}{mol}\\cdot K",
     unitString: "(J*K)/(mol)",
-    unitsLatex: "JKo^{-1}",
     unitsMathjs: "1 J K / mol",
   },
   {
@@ -1767,7 +1761,6 @@ ListOfPhysicsConstants = [
     value: "6.0221367\\times 10^{23}",
     unit: "mol^{-1}",
     unitString: "1/mol",
-    unitsLatex: "o^{-1}",
     unitsMathjs: "1 / mol",
   },
   {
@@ -1777,7 +1770,6 @@ ListOfPhysicsConstants = [
     value: "1.602 176 6208(98)\\times 10^{-19}",
     unit: "C",
     unitString: "C",
-    unitsLatex: "As",
     unitsMathjs: "1 C",
   },
   {
@@ -1787,7 +1779,6 @@ ListOfPhysicsConstants = [
     value: "4\\pi\\times 10^{-7}",
     unit: "\\frac{N}{A^{2}}",
     unitString: "N/(A^2)",
-    unitsLatex: "NA^{-2}",
     unitsMathjs: "1 N / A^2",
   },
   {
@@ -1797,7 +1788,6 @@ ListOfPhysicsConstants = [
     value: "8.854 187 817...\\times 10^{-12}",
     unit: "\\frac{F}{m}",
     unitString: "F/m",
-    unitsLatex: "Fm^{-1}",
     unitsMathjs: "1 F / m",
   },
   {
@@ -1807,7 +1797,6 @@ ListOfPhysicsConstants = [
     value: "8.987552\\times 10^{9}",
     unit: "N\\cdot\\frac{m^{2}}{C^{2}}",
     unitString: "N*(m^2)/(C^2)",
-    unitsLatex: "Nm^{2}A^{-2}s^{-2}}",
     unitsMathjs: "1 N m^2 / C^2",
   },
   {
@@ -1817,7 +1806,6 @@ ListOfPhysicsConstants = [
     value: "96485.309",
     unit: "\\frac{C}{mol}",
     unitString: "C/mol",
-    unitsLatex: "Aso^{-1}",
     unitsMathjs: "1 C / mol",
   },
   {
@@ -1827,7 +1815,6 @@ ListOfPhysicsConstants = [
     value: "9.109 383 56(11)\\times 10^{-31}",
     unit: "kg",
     unitString: "kg",
-    unitsLatex: "g",
     unitsMathjs: "1 kg",
   },
   {
@@ -1837,7 +1824,6 @@ ListOfPhysicsConstants = [
     value: "1.672 621 898(21)\\times 10^{-27}",
     unit: "kg",
     unitString: "kg",
-    unitsLatex: "g",
     unitsMathjs: "1 kg",
   },
   {
@@ -1847,7 +1833,6 @@ ListOfPhysicsConstants = [
     value: "1.6726231\\times 10^{-27}",
     unit: "kg",
     unitString: "kg",
-    unitsLatex: "g",
     unitsMathjs: "1 kg",
   },
   {
@@ -1857,7 +1842,6 @@ ListOfPhysicsConstants = [
     value: "1.6605402\\times 10^{-27}",
     unit: "kg",
     unitString: "kg",
-    unitsLatex: "g",
     unitsMathjs: "1 kg",
   },
   {
@@ -1867,7 +1851,6 @@ ListOfPhysicsConstants = [
     value: "5.67051\\times 10^{-8}",
     unit: "\\frac{W}{m^{2}}\\cdot K^{4}",
     unitString: "W/(m^2)*K^4",
-    unitsLatex: "WK^{4}m^{-2}",
     unitsMathjs: "1 W K^4 / m^2",
   },
   {
@@ -1877,7 +1860,6 @@ ListOfPhysicsConstants = [
     value: "10973731.534",
     unit: "m^{-1}",
     unitString: "1/m",
-    unitsLatex: "m^{-1}",
     unitsMathjs: "1 / m",
   },
   {
@@ -1887,7 +1869,6 @@ ListOfPhysicsConstants = [
     value: "9.2740154\\times 10^{-24}",
     unit: "\\frac{J}{T}",
     unitString: "J/T",
-    unitsLatex: "JT^{-1}",
     unitsMathjs: "1 J / T",
   },
   {
@@ -1897,7 +1878,6 @@ ListOfPhysicsConstants = [
     value: "2.067 833 831(13)\\times 10^{-15}",
     unit: "Wb",
     unitString: "Wb",
-    unitsLatex: "w",
     unitsMathjs: "1 Wb",
   },
   {
@@ -1907,7 +1887,6 @@ ListOfPhysicsConstants = [
     value: "2.897756\\times 10^{-3}",
     unit: "m\\cdot K",
     unitString: "m*K",
-    unitsLatex: "mK",
     unitsMathjs: "1 m K",
   },
 ];
