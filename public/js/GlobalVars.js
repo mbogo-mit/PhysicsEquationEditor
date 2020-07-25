@@ -1,5 +1,10 @@
 //Demensional Analysis, Getting Relevant and Unique Equations, Checks Simplifications
 
+
+let ImportedVariableDefinitions = {
+  //starts out empty because no variable definitions are imported yet
+};
+
 let DefaultDefinedVariable = {
   state: "Unknown",
   type: "undefined",
@@ -229,6 +234,7 @@ let ListOfSIUnits = {
   "unknown" : {name: "unknown units", symbol: "?", color: ListOfColors.unknown, unitsLatex: "u", unitsMathjs: "1", canBeVector: true,},
   "unitless" : {name: "unitless variable", symbol: "none", color: ListOfColors.unitless, unitsLatex: "1", unitsMathjs: "1", canBeVector: true,},
   "coefficient of friction" : {name: "unitless variable", symbol: "none", color: ListOfColors.unitless, unitsLatex: "1", unitsMathjs: "1", canBeVector: false,},
+  "energy efficiency" : {name: "unitless variable", symbol: "none", color: ListOfColors.unitless, unitsLatex: "1", unitsMathjs: "1", canBeVector: false,},
 
 };
 

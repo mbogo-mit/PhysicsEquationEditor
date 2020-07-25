@@ -24,7 +24,7 @@ $(document).ready(function(){
   MessageBoxMathFields.warning.m1 = MQ.StaticMath($("#warning-box-undefined-vars")[0]);
 
   $('.tabs').tabs();
-  $("#modal_define_variable, #modal-physics-equation-more-information").modal();
+  $("#modal_define_variable, #modal-physics-equation-more-information, #modal_import_mechanics_variable_definition").modal();
   $('.collapsible').collapsible();
   $("#physics_equations .collapsible").collapsible({
     onOpenEnd: function(){

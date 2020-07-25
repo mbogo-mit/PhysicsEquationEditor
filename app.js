@@ -15,7 +15,7 @@ app.set('view engine', 'ejs');
 app.listen(PORT, () => console.log(`listening at http://localhost:${PORT}`));
 
 app.get('/', (req, res, next)=>{
-  res.render('pages/index',{loe: ListOfEquations, lopc: ListOfPhysicsConstants});
+  res.render('pages/index',{loe: ListOfEquations, lopc: ListOfPhysicsConstants, ImportVariableDefinitions: ImportVariableDefinitions});
 });
 
 ListOfEquations = {
@@ -205,7 +205,7 @@ ListOfEquations = {
         "\\eta=\\frac{W_{out}}{E_{in}}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"energy/work": 2},
+        {"energy/work": 2, "energy efficiency": 1},
       ],
     },
     {
@@ -325,11 +325,11 @@ ListOfEquations = {
       ],
     },
     {
-      name: "Rotaitonal Power",
+      name: "Rotational Power",
       info: {},
       equations: [
         "P=\\tau\\omega\\cos\\theta",
-        "P=\\vec{\\tau}\\times\\vec{\\omega}"
+        "P=\\vec{\\tau}\\cdot\\vec{\\omega}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"power": 1, "torque/moment of force": 1,"angular velocity": 1, "plane angle": 1},
@@ -1731,6 +1731,16 @@ ListOfPhysicsConstants = [
     unitsMathjs: "1 m^3 / (kg s^2)",
   },
   {
+    quantity: "force",
+    quantityDescription: "Acceleration due to gravity",
+    symbol: "\\vec{g}",
+    value: "9.8",
+    unit: "\\frac{m}{s^2}",
+    unitString: "m/s^2",
+    unitsLatex: "ms^{-2}",
+    unitsMathjs: "1 m / s^2",
+  },
+  {
     quantity: "Boltzmann constant",
     quantityDescription: "Boltzmann constant",
     symbol: "k",
@@ -1901,3 +1911,50 @@ ListOfPhysicsConstants = [
     unitsMathjs: "1 m K",
   },
 ];
+
+
+
+let ImportVariableDefinitions = {
+  //the key is the variable, unit is the latex string the describes the units for that variable, and key is the quantity name and key for ListOfSIUnits for the specific variable
+  mechanics: {
+    "t": {unit: "s", quantity: "time", key: "time", vector: false,},
+    "T": {unit: "s", quantity: "period", key: "time", vector: false,},
+    "f": {unit: "Hz", quantity: "frequency", key: "frequency", vector: false,},
+    "m": {unit: "kg", quantity: "mass", key: "mass", vector: false,},
+    "l": {unit: "m", quantity: "length", key: "length", vector: false,},
+    "\\vec{x}": {unit: "m", quantity: "length", key: "length", vector: true,},
+    "\\vec{y}": {unit: "m", quantity: "length", key: "length", vector: true,},
+    "\\vec{z}": {unit: "m", quantity: "length", key: "length", vector: true,},
+    "\\vec{r}": {unit: "m", quantity: "radius", key: "length", vector: true,},
+    "h": {unit: "m", quantity: "height", key: "length", vector: false,},
+    "A": {unit: "m^2", quantity: "area", key: "area", vector: false,},
+    "V": {unit: "m^3", quantity: "volume", key: "volume", vector: false,},
+    "\\vec{v}": {unit: "\\frac{m}{s}", quantity: "velocity", key: "velocity", vector: true,},
+    "\\vec{a}": {unit: "\\frac{m}{s^2}", quantity: "velocity", key: "acceleration", vector: true,},
+    "\\vec{F}": {unit: "N", quantity: "force", key: "force", vector: true,},
+    "\\vec{N}": {unit: "N", quantity: "normal force", key: "force", vector: true,},
+    "\\mu": {unit: "unitless", quantity: "coefficient of friction", key: "coefficient of friction", vector: false,},
+    "\\vec{\\theta}": {unit: "rad", quantity: "plane angle", key: "plane angle", vector: true,},
+    "\\vec{\\omega}": {unit: "\\frac{rad}{s}", quantity: "angular velocity", key: "angular velocity", vector: true,},
+    "\\vec{\\alpha}": {unit: "\\frac{rad}{s^2}", quantity: "angular acceleration", key: "angular acceleration", vector: true,},
+    "\\vec{p}": {unit: "\\frac{kg\\cdot m}{s}", quantity: "momentum", key: "momentum", vector: true,},
+    "\\vec{J}": {unit: "\\frac{kg\\cdot m}{s}", quantity: "impulse", key: "impulse", vector: true,},
+    "W": {unit: "J", quantity: "work", key: "energy/work", vector: false,},
+    "E": {unit: "J", quantity: "energy", key: "energy/work", vector: false,},
+    "K": {unit: "J", quantity: "kinetic energy", key: "energy/work", vector: false,},
+    "U": {unit: "J", quantity: "potential energy", key: "energy/work", vector: false,},
+    "P": {unit: "W", quantity: "power", key: "power", vector: false,},
+    "\\eta": {unit: "unitless", quantity: "energy efficiency", key: "energy efficiency", vector: false,},
+    "\\vec{\\tau}": {unit: "N\\cdot m", quantity: "torque", key: "torque/moment of force", vector: true,},
+    "I": {unit: "kg \\cdot m^2", quantity: "moment of inertia", key: "moment of inertia", vector: false,},
+    "\\vec{L}": {unit: "\\frac{kg\\cdot m^2}{s}", quantity: "angular momentum", key: "angular momentum", vector: true,},
+    "\\vec{H}": {unit: "\\frac{kg\\cdot m^2}{s}", quantity: "angular impulse", key: "angular impulse", vector: true,},
+    "k": {unit: "\\frac{N}{m}", quantity: "spring constant", key: "spring constant", vector: false,},
+    "\\rho": {unit: "\\frac{kg}{m^3}", quantity: "mass density", key: "mass density", vector: false,},
+  },
+  thermal: {},
+  waveOptics: {},
+  em: {},
+  modern: {},
+
+};

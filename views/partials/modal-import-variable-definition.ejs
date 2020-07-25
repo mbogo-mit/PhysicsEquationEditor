@@ -1,0 +1,47 @@
+<div id="modal_import_mechanics_variable_definition" class="modal modal-fixed-footer" type="new">
+  <div class="modal-content">
+    <div class="row">
+      <h4>Mechanics Common Variable Definitions</h4>
+    </div>
+    <div class="row">
+      <div class="col m12">
+        <label>
+          <input type="checkbox" />
+          <span class="">Import All Variables</span>
+        </label>
+      </div>
+    </div>
+    <div class="row">
+      <table>
+        <thead>
+          <tr>
+              <th>Quantity</th>
+              <th>Symbol</th>
+              <th>Unit</th>
+              <th>Use</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% for (const [key, value] of Object.entries(ImportVariableDefinitions.mechanics)) {%>
+          <tr>
+            <td><%= value.quantity %></td>
+            <td><span class="static-physics-equation" latex="<%= key %>"></span></td>
+            <td><span class="static-physics-equation" latex="<%= value.unit %>"></span></td>
+            <td>
+              <label>
+                <input type="checkbox" />
+                <span class=""></span>
+              </label>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn disabled">Update</a>
+    <a href="#!" class="modal-close waves-effect waves-green btn">Cancel</a>
+  </div>
+</div>
