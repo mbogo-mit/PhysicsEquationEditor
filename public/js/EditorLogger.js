@@ -12,11 +12,11 @@ function EditorLogger(){
       example: "",
     },
     "Units do not match": {
-      description: "You are adding or substracting expressions that don't have the same units",
+      description: "You are adding or substracting expressions that don't have the same units, or you are adding to expressions with the same units but one is a vector and the other is a scalar",
       example: "",
     },
     "Units do not equal each other": {
-      description: "You have expressions that are set equal to each other that don't have the same units",
+      description: "You have expressions that are set equal to each other that don't have the same units, or they have the same units but one is a vector and the other is a scalar.",
       example: "",
     },
     "Value expected": {
@@ -51,13 +51,14 @@ function EditorLogger(){
         let undefinedVars = GetUndefinedVariables(ls);
         if(undefinedVars.length == 0){//no undefined variables
           //CheckIfUnitsMatchInMathField(ls);
-          CheckForErrorsInExpression(ls, lineNumber);
+          CheckForErrorsInExpression(ls, lineNumber, ids[i]);
         }
         else{
           this.addLog({warning: {
             warning: "Undefined Variables",
             variables: undefinedVars,
             lineNumber: lineNumber,
+            mfID: ids[i],
           }});
         }
       }
@@ -109,22 +110,44 @@ function EditorLogger(){
   }
 
   this.display = function(){
+    let log = Object.assign({}, this.log);//copying so we don't accidentally change the real log
     //changing html of logger
-    let html = ejs.render(Templates["editorLogger"],{log: Object.assign({}, this.log)});
+    let html = ejs.render(Templates["editorLogger"],{log: log});
     $("#editor-log-container").html(html);
     //once the html is inject we need to add materialize event listeners to all the collapsibles
     $('#editor-log-container .collapsible').collapsible();
     $("#editor-log-container .collapsible .collapsible-body.information-container").css("max-height",`${window.innerHeight - $("#editor-log-container .collapsible.log-container").height()}px`)
     //changing html of log indicators in header
-    $("#btn-log-success-indicator .indicator-count").html(this.log.success.length);
-    $("#btn-log-info-indicator .indicator-count").html(this.log.info.length);
-    $("#btn-log-warning-indicator .indicator-count").html(this.log.warning.length);
-    $("#btn-log-error-indicator .indicator-count").html(this.log.error.length);
+    $("#btn-log-success-indicator .indicator-count").html(log.success.length);
+    $("#btn-log-info-indicator .indicator-count").html(log.info.length);
+    $("#btn-log-warning-indicator .indicator-count").html(log.warning.length);
+    $("#btn-log-error-indicator .indicator-count").html(log.error.length);
 
     //initialize static math fields that are used in the log
     $(".log-static-latex").each(function(){
       MQ.StaticMath($(this)[0]);
     });
+
+    //display warnings and errors in the editor lines
+    for(var i = 0; i < log.error.length; i++){
+      MathFields[log.error[i].mfID].message = {
+        error: null, //units don't match, variable d can't be used
+      }
+      MathFields[log.error[i].mfID].message.error = {type: 1};
+      RenderMessageUI(log.error[i].mfID);//takes the messages for a specific math field and renders it
+    }
+
+    for(var i = 0; i < log.warning.length; i++){
+      MathFields[log.warning[i].mfID].message = {
+        warning: null,//variable undefined,
+      }
+      MathFields[log.warning[i].mfID].message.warning = {
+        type: 1,
+        vars: log.warning[i].variables,
+      }
+      RenderMessageUI(log.warning[i].mfID);//takes the messages for a specific math field and renders it
+    }
+
   }
 
 }

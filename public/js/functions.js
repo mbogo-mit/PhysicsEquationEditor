@@ -190,7 +190,7 @@ function UpdateDefinedVariables(opts){
 
   if(opts.updateErrorMessages != false){
     //after defining the variable we need to generate new error messages for all the MathFields becuase this new definition could change a lot of the error messages
-    GenerateErrorMessagesForAllMathFields();
+    //GenerateErrorMessagesForAllMathFields();
     //after editing we need to check if there are any new Editor errors
     EL.GenerateEditorErrorMessages();
   }
@@ -218,8 +218,8 @@ function UpdatedVariableDefinition(){
   let ls = ($("#modal_define_variable").attr("type") == "new") ? DynamicMathField.latex() : StaticMathField.latex();
   ls = PutBracketsAroundAllSubsSups(ls);
   ls = ls.replace(/\\\s/g).replace(/\s/g,"");//removing unnecessary spaces which include latex formating space "\ " and just empty space "     "
-  //if the user inputed that the variable is a vector but didn't put the vector sign then we will do that for them
-  if(props.type == "vector" && ls.indexOf('\\vec{') == -1){
+  //if the user inputed that the variable is a vector but didn't put the vector sign or related signs then we will do that for them
+  if(props.type == "vector" && (ls.indexOf('\\vec{') == -1 && ls.indexOf('\\hat{') == -1 && ls.indexOf('\\bar{') == -1 && ls.indexOf('\\overline{') == -1)){
     ls = `\\vec{${ls}}`;
   }
   //if the user inputed that the variable is a scalar but has the vector sign in their input then we will remove the vector sign for them
@@ -403,8 +403,16 @@ function MathFieldKeyPressEnter(el){
     <div class="editor_line row">
       <div class="line_label col m1">
         <span class="active line-number">1</span>
-        <span onclick="OpenEditorLog('warning')" class="line-warning" mf="${rid}"><i class="fas fa-exclamation-triangle"></i></span>
-        <span class="line-error" mf="${rid}"><i class="fas fa-exclamation-circle "></i></span>
+        <span onclick="OpenEditorLog('warning')" class="line-warning" mf="${rid}">
+          <svg width="1em" height="1em" viewBox="0 0 16 16" class="amber-text text-lighten-2 bi bi-exclamation-triangle-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 5zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+          </svg>
+        </span>
+        <span onclick="OpenEditorLog('error')" class="line-error" mf="${rid}">
+          <svg width="1em" height="1em" viewBox="0 0 16 16" class="red-text text-lighten-2 bi bi-bug-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M4.978.855a.5.5 0 1 0-.956.29l.41 1.352A4.985 4.985 0 0 0 3 6h10a4.985 4.985 0 0 0-1.432-3.503l.41-1.352a.5.5 0 1 0-.956-.29l-.291.956A4.978 4.978 0 0 0 8 1a4.979 4.979 0 0 0-2.731.811l-.29-.956zM13 6v1H8.5v8.975A5 5 0 0 0 13 11h.5a.5.5 0 0 1 .5.5v.5a.5.5 0 1 0 1 0v-.5a1.5 1.5 0 0 0-1.5-1.5H13V9h1.5a.5.5 0 0 0 0-1H13V7h.5A1.5 1.5 0 0 0 15 5.5V5a.5.5 0 0 0-1 0v.5a.5.5 0 0 1-.5.5H13zm-5.5 9.975V7H3V6h-.5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 0-1 0v.5A1.5 1.5 0 0 0 2.5 7H3v1H1.5a.5.5 0 0 0 0 1H3v1h-.5A1.5 1.5 0 0 0 1 11.5v.5a.5.5 0 1 0 1 0v-.5a.5.5 0 0 1 .5-.5H3a5 5 0 0 0 4.5 4.975z"/>
+          </svg>
+        </span>
         <span class="line-question" mf="${rid}"><i class="fas fa-question-circle"></i></span>
       </div>
       <div class="col m11 my_math_field_col">
@@ -836,7 +844,7 @@ function OpenLineMessageBox(id){
   else if(MathFields[id].message.error != null){
     $("#line-message-box-error").addClass('active');
     if(MathFields[id].message.error.type == 1){
-
+      $("#line-message-box-error").html("click to view error in log");
     }
   }
 
@@ -1078,7 +1086,6 @@ function CopyToClipboard(str) {
 };
 
 function DefineUndefinedVariable(el){
-  console.log(el.attr("latex"));
   StaticMathField.latex(el.attr("latex"));//passing the latex string that corresponds to the variable the user is trying to edit
   OpenDefineVariableModal({init: true, ls: el.attr("latex"), variable: null});
 }

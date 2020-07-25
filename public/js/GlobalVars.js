@@ -8,6 +8,54 @@ let DefaultDefinedVariable = {
 }
 
 let PreDefinedVariables = {
+  "\\hat{x}": {
+    state: "knonwn",
+    type: "vector",
+    units: "length (m)",
+    value: undefined,
+    unitsLatex: "m",
+    unitsMathjs: "1 m",
+  },
+  "\\hat{y}": {
+    state: "knonwn",
+    type: "vector",
+    units: "length (m)",
+    value: undefined,
+    unitsLatex: "m",
+    unitsMathjs: "1 m",
+  },
+  "\\hat{z}": {
+    state: "knonwn",
+    type: "vector",
+    units: "length (m)",
+    value: undefined,
+    unitsLatex: "m",
+    unitsMathjs: "1 m",
+  },
+  "\\hat{r}": {
+    state: "knonwn",
+    type: "vector",
+    units: "length (m)",
+    value: undefined,
+    unitsLatex: "m",
+    unitsMathjs: "1 m",
+  },
+  "\\hat{\\theta}": {
+    state: "knonwn",
+    type: "vector",
+    units: "plane angle: radian (rad)",
+    value: undefined,
+    unitsLatex: "r",
+    unitsMathjs: "1 rad",
+  },
+  "\\hat{\\phi}": {
+    state: "knonwn",
+    type: "vector",
+    units: "plane angle: radian (rad)",
+    value: undefined,
+    unitsLatex: "r",
+    unitsMathjs: "1 rad",
+  },
   "\\nabla": {
     state: "knonwn",
     type: "vector",

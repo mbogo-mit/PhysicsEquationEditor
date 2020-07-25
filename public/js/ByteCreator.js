@@ -469,8 +469,8 @@ function ThisIsTheBeginningOfAVariable(state){
     //we need to see if the current character could be the start of a variable
     if(subLs[0] == "\\"){
       //it could equal a blackslash because it is the start of a vector variable '\vec{}'
-      if(subLs.indexOf("\\vec{") == 0 || subLs.indexOf("\\bar{") == 0 || subLs.indexOf("\\overline{") == 0){
-        let size = (subLs.indexOf("\\vec{") == 0 || subLs.indexOf("\\bar{") == 0) ? "\\bar{".length : "\\overline{".length;
+      if(subLs.indexOf("\\vec{") == 0 || subLs.indexOf("\\bar{") == 0 || subLs.indexOf("\\hat{") == 0 || subLs.indexOf("\\overline{") == 0){
+        let size = (subLs.indexOf("\\vec{") == 0 || subLs.indexOf("\\bar{") == 0 || subLs.indexOf("\\hat{") == 0) ? "\\bar{".length : "\\overline{".length;
         answer.yes = true;
         answer.substring = subLs.substring(0,size);
         answer.newState.currentlyParsingVariable = true;

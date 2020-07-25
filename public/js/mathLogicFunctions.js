@@ -12,10 +12,10 @@ function CheckIfUnitsMatchInMathField(ls){
     //console.log(mathJsStr);
     //now we have to check if the units match in the expression
     mathJsStr = math.rationalize(mathJsStr).toString();
-    console.log(mathJsStr);
+    //console.log(mathJsStr);
     let numerator = mathJsStr.substring(0, mathJsStr.indexOf("/"));
     numerator = math.simplify(numerator).toString();
-    console.log((numerator.indexOf('+') == -1 && numerator.indexOf('-') == -1));
+    //console.log((numerator.indexOf('+') == -1 && numerator.indexOf('-') == -1));
   }
   catch(err){
     console.log(err);

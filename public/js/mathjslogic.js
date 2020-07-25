@@ -21,7 +21,7 @@ math.import({
     v2 = v2.split(",");//making v2 into an array
 
     let expr = `(${v1[0]} * ${v2[0]} + ${v1[1]} * ${v2[1]} + ${v1[2]} * ${v2[2]}) / 1 vector^2`;
-    return `(${math.evaluate(expr).toString()})`;
+    return math.evaluate(expr);
 
   },
   myCrossProduct: function (v1, v2) {
@@ -36,37 +36,34 @@ math.import({
     v2 = v2.split(",");//making v2 into an array
     //a x b = <a2 * b3 - a3 * b2, a3 * b1 - a1 * b3, a1 * b2 - a2 * b1>
     let expr = `[${v1[1]} * ${v2[2]} - ${v1[2]} * ${v2[1]}, ${v1[2]} * ${v2[0]} - ${v1[0]} * ${v2[2]}, ${v1[0]} * ${v2[1]} - ${v1[1]} * ${v2[0]}]/ 1 vector`;
-    return `(${math.evaluate(expr).toString()})`;
+    return math.evaluate(expr);
 
   }
 })
 
-function CheckForErrorsInExpression(ls, lineNumber){
-  console.log(ls);
+function CheckForErrorsInExpression(ls, lineNumber, mfID){
   ls = RemoveCommentsFromLatexString(ls);
   ls = PutBracketsAroundAllSubsSups(ls);
+  ls = SimplifyFunctionDefinitionToJustFunctionVariable(ls);//converts "f(x,y)=xy" to f=xy
   ls = ReplaceVariablesWithMathjsUnits(ls);
   ls = CleanLatexString(ls, ["fractions","addition","parentheses","brackets", "white-space"]);
   ls = FindAndWrapVectorsThatAreBeingMultiplied(ls);
-  console.log(ls);
+  //console.log(ls);
   ls = CleanLatexString(ls,["multiplication"]);
-  console.log(ls);
+  //console.log(ls);
   //console.log(ls);
   let expressions = ls.split(";");
   let exprs = [];
   expressions.map(function(value, i){
     exprs.push(value.split("="));
-    console.log(value);
   });
   let results = [];
-  console.log(exprs);
   for(let i = 0; i < exprs.length; i++){
     results.push([]);
     for(let j = 0; j < exprs[i].length; j++){
       //now that we have parsed the latex string into a mathjs readable string we evaluate it and grab any errors
       //that math js throws and interprets them for the user
       try {
-        console.log("exprs[i][j]", exprs[i][j]);
         let str = math.evaluate(exprs[i][j]).toString();
         results[i].push({success: str});
       }
@@ -78,11 +75,11 @@ function CheckForErrorsInExpression(ls, lineNumber){
   }
 
   //console.log(results);
-  ParseResultsArrayAndGenerateLoggerList(results, lineNumber);
+  ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID);
 
 }
 
-function ParseResultsArrayAndGenerateLoggerList(results, lineNumber){
+function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
   let log = {
     success: [],
     info: [],
@@ -124,6 +121,7 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber){
           error: EL.createLoggerErrorFromMathJsError("Units do not equal each other"),
           info: successes,
           lineNumber: lineNumber,
+          mfID: mfID,
         });
       }
     }
@@ -134,6 +132,7 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber){
           error: EL.createLoggerErrorFromMathJsError(error),
           info: "",
           lineNumber: lineNumber,
+          mfID: mfID,
         });
       });
     }
@@ -420,4 +419,25 @@ function FindIndexOfOpeningParenthesis(ls){
 function ThereIsAVectorInsideString(str){
   //checking that it has brackets and commas
   return str.indexOf("([") != -1 && str.indexOf("])") != -1 && str.indexOf(",") != -1;
+}
+
+function SimplifyFunctionDefinitionToJustFunctionVariable(ls){
+  //this function simplifies the string "f\left(x\right)=x" to "f = x" because the extra stuff was just the user being explicit what variables the "f" function uses
+  let vars = Object.keys(DefinedVariables);
+  for(let i = 0; i < vars.length; i++){
+    let target = vars[i] + "\\left(";
+    while(ls.indexOf(target) != -1){
+      let index = ls.indexOf(target);
+      let closingParenthesis = FindIndexOfClosingParenthesis(ls.substring(index + target.length));
+      console.log(closingParenthesis);
+      if(closingParenthesis != null){
+        closingParenthesis += index + target.length;//accounts for the shift because we were only using a substring of the actaul string
+        //we are going to remove everything inside the parenthesis and including the parenthesis
+        ls = ls.substring(0, index + vars[i].length) + ls.substring(closingParenthesis + 1);
+      }
+    }
+  }
+
+  return ls;
+
 }
