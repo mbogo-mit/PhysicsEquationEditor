@@ -836,13 +836,13 @@ function TogglePhysicsConstant(el, index){
     let obj = Object.assign({}, ListOfPhysicsConstants[index]);
     //console.log(obj);
     if(!el.prev().prop("checked")){
-      M.toast({html: `<span class='green-text text-lighten-4'>${obj.quantity}</span> &nbsp; added to 'My Variables' Tab`, displayLength: 3000});
+      M.toast({html: `<span class='green-text text-lighten-4'>${obj.quantityDescription}</span> &nbsp; added to 'My Variables' Tab`, displayLength: 3000});
       UpdateMyVariablesCollection({ls: obj.symbol, rid: el.attr("rid"), add: true, pc: obj, editable: false, indexChild: index});
     }
     else{
       //we need to check if variable is being used in the editor and if it is this can't be removed
       if(!isVariableBeingUsedInEditor({rid: el.attr("rid"), editable: false})){
-        M.toast({html: `<span class='red-text text-lighten-4'>${obj.quantity}</span> 	&nbsp; removed from 'My Variables' Tab`, displayLength: 3000});
+        M.toast({html: `<span class='red-text text-lighten-4'>${obj.quantityDescription}</span> 	&nbsp; removed from 'My Variables' Tab`, displayLength: 3000});
         UpdateMyVariablesCollection({ls: obj.symbol, rid: el.attr("rid"), remove: true, editable: false});
       }
       else{
@@ -921,7 +921,7 @@ function UpdateMyVariablesCollection(opts = {ls: "", rid: "", update: true, add:
     <li class="collection-item">
       <span class="static-physics-equation" latex="${opts.pc.symbol}" rid="${opts.rid}"></span>
       <span class="right delete-var" onclick="UpdateMyVariablesCollection({ls: '${opts.ls}', rid: '${opts.rid}',remove: true, editable: ${isVariableEditable}, indexChild: ${opts.indexChild}})"><i class="material-icons">close</i></span>
-      <span class="new badge physics-constant" data-badge-caption="${opts.pc.quantity}"></span>
+      <span class="new badge physics-constant" data-badge-caption="${opts.pc.quantityDescription}"></span>
       <span class="new badge constant-info" data-badge-caption=""><span latex="${opts.pc.unit}" rid="${opts.rid}"></span></span>
       <span class="new badge constant-info" data-badge-caption=""><span latex="=${opts.pc.value}" rid="${opts.rid}"></span></span>
 
