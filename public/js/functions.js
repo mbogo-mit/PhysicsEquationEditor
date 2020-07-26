@@ -841,7 +841,7 @@ function TogglePhysicsConstant(el, index){
     }
     else{
       //we need to check if variable is being used in the editor and if it is this can't be removed
-      if(!isVariableBeingUsedInEditor({rid: el.attr("rid"), editable: false})){
+      if(el.prev().attr("disabled") != "disabled"){
         M.toast({html: `<span class='red-text text-lighten-4'>${obj.quantityDescription}</span> 	&nbsp; removed from 'My Variables' Tab`, displayLength: 3000});
         UpdateMyVariablesCollection({ls: obj.symbol, rid: el.attr("rid"), remove: true, editable: false});
       }
@@ -1283,7 +1283,7 @@ function GetAllUsedQuantities(){
 
 }
 
-function CheckIfPhysicsConstantsAreBeingUsed(){
+function DisablePhysicsConstantCheckboxesThatAreBeingUsed(){
   //first we need to make sure that all check boxes are enabled
   $(".physics-constant-checkbox-span").prev().removeAttr("disabled");
   let physicsConstants = {};
