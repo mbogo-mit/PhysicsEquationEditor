@@ -196,6 +196,10 @@ function UpdateDefinedVariables(opts){
   CheckForAndDisplayRelevantEquations();
 }
 
+function IsVariableLatexStringVector(ls){
+  return ls.indexOf("\\vec{") != -1 && ls.indexOf("\\hat{") != -1;
+}
+
 function UpdatedVariableDefinition(){
   $("#btn_udpate_variable_definition").addClass("disabled");//once the button is click it needs to be disabled
   $("#select_known_or_unknown").formSelect();
@@ -665,6 +669,8 @@ function ToggleKeyboard(){
 
 function RenderMessageUI(id){
 
+  console.log(MathFields[id].message);
+
   let elmnt = $(`#${id}`).parents(".editor_line");
   elmnt.find(".line_label span").removeClass('active');
 
@@ -844,6 +850,10 @@ function TogglePhysicsConstant(el, index){
         M.toast({html: "This variable can't be removed because it is being used", displayLength: 3000});
       }
     }
+
+}
+
+function UpdateMyVariableCollectionWithDynamicVariables(undefinedVars){
 
 }
 
@@ -1368,4 +1378,13 @@ function FormatNablaSquared(ls){
   //we need to replace all instances of \nabla^2 with \nabla \cdot \nabla for our editor to know what we mean
   return ls.replace(/nabla\^2/g,"\\nabla\\cdot\\nabla ");
 
+}
+
+function OrderMathFieldIdsByLineNumber(ids){
+  let orderedIds = {};
+  for(var i = 0; i < ids.length; i++){
+    orderedIds[GetLineNumberFromMathFieldId(ids[i])] = ids[i];
+  }
+
+  return orderedIds;
 }

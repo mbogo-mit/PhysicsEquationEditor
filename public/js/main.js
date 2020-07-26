@@ -119,7 +119,7 @@ function CreateNewMathField(id){
   MathFields[id] = {mf:m, message: {
     question: null,//is this variable a physics constant
     warning: null,//variable undefined,
-    error: null, //units don't match, variable d can't be used
+    error: null, //units don't match
   }};
 
   BlurMathFields();
