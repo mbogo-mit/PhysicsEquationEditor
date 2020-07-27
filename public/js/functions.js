@@ -410,6 +410,11 @@ function GetCurrentCursorPositionFromTheRight(id){
   return p;
 }
 
+function AddNewEditorLineToEnd(){
+  MathFieldKeyPressEnter($("#math_field_editor_container .editor_line:last-child"));
+}
+
+
 function MathFieldKeyPressEnter(el){
   //create a new div element then initialize a math field in it
   let rid = RID();
@@ -496,7 +501,7 @@ function UpdateLineLabelHeight(id){
   $(`#${id}`).parents(".editor_line").children(".line_label").css({
     height: $(`#${id}`).parent(".my_math_field_col").css("height")
   });
-  //console.log($(`#${id}`).parent(".my_math_field_col").css("height"));
+  RecalculateHeightOfLineEmptySpace();
 }
 
 function BlurMathFields(){
@@ -509,6 +514,13 @@ function AdjustLineLabelNumber(){
   $(".editor_line").each(function(index){
     $(this).find(".line_label span.line-number").html(index + 1);
   });
+
+  //whenever we are adjust the line number that means the number of lines have change so we need to recalculate the height of the empty space below the lines
+  RecalculateHeightOfLineEmptySpace();
+}
+
+function RecalculateHeightOfLineEmptySpace(){
+  $("#editor_empty_space_container").css("height",`${$("#math_field_editor_container").height() - $("#editor_lines_container").height() - 5}px`);
 }
 
 function CreateFullUnitsString(quantity, name, symbol){

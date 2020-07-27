@@ -109,6 +109,7 @@ $(document).ready(function(){
   });
 
   $("#math_field_editor_container").css("height",`${window.innerHeight - $("#math_field_editor_container").offset().top}px`);
+  RecalculateHeightOfLineEmptySpace();
   $("#my_variables-collection-container").css("height",`${window.innerHeight - $("#my_variables-collection-container")[0].getBoundingClientRect().top}px`);
 
   $("#editor-log-container .collapsible .collapsible-body.information-container").css("max-height",`${window.innerHeight - $("#editor-log-container .collapsible.log-container").height()}px`);
