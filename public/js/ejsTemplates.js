@@ -95,4 +95,35 @@ let Templates = {
   </div>
 
   `,
+  "VariableCollection": {
+    "physics-constant":
+    `
+    <li class="collection-item">
+      <span class="static-physics-equation" latex="<%= opts.ls %>" rid="<%= opts.variable.rid %>"></span>
+      <span class="right delete-var" onclick="UpdateMyVariablesCollection({ls: '<%= opts.ls %>', rid: '<%= opts.variable.rid %>',remove: true, uncheckbox: true, editable: false})"><i class="material-icons">close</i></span>
+      <span class="new badge physics-constant" data-badge-caption="<%= opts.variable.quantityDescription %>"></span>
+      <span class="new badge constant-info" data-badge-caption=""><span latex="<%= opts.variable.unit %>" rid="<%= opts.variable.rid %>"></span></span>
+      <span class="new badge constant-info" data-badge-caption=""><span latex="=<%= opts.variable.value %>" rid="<%= opts.variable.rid %>"></span></span>
+    </li>
+    `,
+    "defined-variable":
+    `
+    <li class="collection-item">
+      <span class="static-physics-equation editable-variable tooltipped" data-position="left" data-tooltip="Edit" latex="<%= opts.ls %>" rid="<%= opts.variable.rid %>" onclick="EditVariableDefinition($(this))"></span>
+      <span class="right delete-var" onclick="UpdateMyVariablesCollection({rid: '<%= opts.variable.rid %>',remove: true, editable: true}})"><i class="material-icons">close</i></span>
+      <span class="new badge <%= opts.variable.state %>" data-badge-caption="<%= opts.variable.state %>"></span>
+      <span class="new badge info" data-badge-caption="<%= opts.variable.type %>"></span>
+      <span class="new badge info" data-badge-caption="<%= opts.variable.units %>"></span>
+    </li>
+    `,
+    "undefined-variable":
+    `
+    <li class="collection-item undefined-variable">
+      <span class="static-physics-equation editable-variable tooltipped" data-position="left" data-tooltip="Edit" latex="<%= opts.ls %>" rid="<%= opts.variable.rid %>" onclick="EditVariableDefinition($(this))"></span>
+      <span class="new badge <%= opts.variable.state %>" data-badge-caption="<%= opts.variable.state %>"></span>
+      <span class="new badge info" data-badge-caption="<%= opts.variable.type %>"></span>
+      <span class="new badge info" data-badge-caption="<%= opts.variable.units %>"></span>
+    </li>
+    `,
+  }
 };

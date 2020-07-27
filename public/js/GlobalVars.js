@@ -198,7 +198,7 @@ let ListOfSIUnits = {
   "unitless" : {name: "unitless variable", symbol: "none", unitsMathjs: "1", canBeVector: true,},
   "coefficient of friction" : {name: "unitless variable", symbol: "none", unitsMathjs: "1", canBeVector: false,},
   "energy efficiency" : {name: "unitless variable", symbol: "none", unitsMathjs: "1", canBeVector: false,},
-
+  "undefined": {name: "undefined variable", symbol: "none", unitsMathjs: "1 undefinedunit", canBeVector: true,},
 };
 
 ListOfPhysicsConstants = [

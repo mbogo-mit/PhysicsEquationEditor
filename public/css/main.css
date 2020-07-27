@@ -313,6 +313,11 @@ body {
   padding-bottom: 15px;
 }
 
+#my_variables .collection-item.undefined-variable{
+  padding-right: 15px !important;
+  background-color: rgba(255, 235, 238, 0.5);
+}
+
 #my_variables .collection-item .delete-var {
   margin-left: 5px;
   visibility: hidden;
@@ -329,6 +334,11 @@ body {
 
 #my_variables .collection-item.active {
   background-color: #fafafa !important;
+  color: #212121;
+}
+
+#my_variables .collection-item.undefined-variable.active {
+  background-color: rgba(255, 235, 238, 1.0) !important;
   color: #212121;
 }
 

@@ -1,4 +1,10 @@
 function EditorLogger(){
+
+  this.undefinedVars = {
+    undefined: {},
+    defined: {},
+  };
+
   this.log = {
     success: [],
     info: [],
@@ -38,32 +44,87 @@ function EditorLogger(){
   }
 
   this.GenerateEditorErrorMessages = function(){
-    let ids = Object.keys(MathFields);
+    let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
     this.clearLog();//clearing log befor adding to it
+    this.clearUndefinedVariables();
 
-    for(var i = 0; i < ids.length; i++){
+    for(const [lineNumber, id] of Object.entries(orderedIds)){
       //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
-      let ls = FormatNablaSquared(MathFields[ids[i]].mf.latex());
+      let ls = FormatNablaSquared(MathFields[id].mf.latex());
       ls = PutBracketsAroundAllSubsSups(ls);
       ls = RemoveDifferentialOperatorDFromLatexString(ls);
-      let lineNumber = GetLineNumberFromMathFieldId(ids[i]);
       if(ls.length > 0){//there is something to evaluate
         let undefinedVars = GetUndefinedVariables(ls);
-        if(undefinedVars.length == 0){//no undefined variables
-          CheckForErrorsInExpression(ls, lineNumber, ids[i]);
-        }
-        else{
-          this.addLog({warning: {
-            warning: "Undefined Variables",
-            variables: undefinedVars,
-            lineNumber: lineNumber,
-            mfID: ids[i],
-          }});
-        }
+        this.recordUndefinedVariables(undefinedVars);
+        CheckForErrorsInExpression(ls, lineNumber, id);
       }
     }
 
     this.display();
+  }
+
+  this.ParsePreviousLinesAgainWithNewInfo = function(endingLineNumber){
+    let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
+    this.clearLog();//clearing log befor adding to it
+    this.clearUndefinedVariables(true, false);//clearing undefined variables but not defined undefined variables
+
+    for(const [lineNumber, id] of Object.entries(orderedIds)){
+      if(lineNumber == endingLineNumber){
+        break;//we break because we have already parsed this line and there are no more previous lines
+      }
+      else{
+        //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
+        let ls = FormatNablaSquared(MathFields[id].mf.latex());
+        ls = PutBracketsAroundAllSubsSups(ls);
+        ls = RemoveDifferentialOperatorDFromLatexString(ls);
+        if(ls.length > 0){//there is something to evaluate
+          let undefinedVars = GetUndefinedVariables(ls);
+          this.recordUndefinedVariables(undefinedVars);
+          CheckForErrorsInExpression(ls, lineNumber, id);
+        }
+      }
+
+    }
+  }
+
+  this.recordUndefinedVariables = function(undefinedVars){
+    let definedUndefinedVariables = Object.keys(this.undefinedVars.defined);
+    for(let i = 0; i < undefinedVars.length; i++){
+      if(this.undefinedVars.undefined[undefinedVars[i]] == undefined){
+        //we need to check first that we haven't already given this undefined variable a definition based on equations that were written in previous lines.
+        //so we check that this undefined variable is not a key in this.undefinedVars.defined because that would mean it is defined
+        if(!definedUndefinedVariables.includes(undefinedVars[i])){
+          //we are going to add this new undefined variable to the list of undefined variables
+          this.undefinedVars.undefined[undefinedVars[i]] = {
+            state: "unknown",
+            type: (IsVariableLatexStringVector(undefinedVars[i])) ? "vector" : "scalar",
+            units: "undefined (none)",
+            value: undefined,
+            unitsMathjs: "1 undefinedunit",
+            rid: RID(),
+          };
+        }
+
+      }
+    }
+  }
+
+  this.recordDefinitionForUndefinedVariable = function(definedUndefinedVariable, unitsMathjs){
+    let fullUnitsString = GetFullUnitsStringFromUnitsMathJs(unitsMathjs);
+    let customUnitsString = unitsMathjs.split(" ");
+    customUnitsString.splice(0,1);
+    customUnitsString = customUnitsString.join(" ");
+    this.undefinedVars.defined[definedUndefinedVariable] = {
+      state: "unknown",
+      type: (IsVariableLatexStringVector(definedUndefinedVariable)) ? "vector" : "scalar",
+      value: undefined,
+      fullUnitsString: (fullUnitsString != null) ? fullUnitsString : customUnitsString,
+      units: (fullUnitsString != null) ? TrimUnitInputValue(fullUnitsString) : customUnitsString,
+      unitsMathjs: unitsMathjs,
+      rid: RID(),
+    };
+    //then after giving this variable a definiton we need to remove it from the undefined object of this.undefinedVars
+    delete this.undefinedVars.undefined[definedUndefinedVariable];
   }
 
   this.addLog = function(log){
@@ -80,6 +141,15 @@ function EditorLogger(){
       warning: [],
       error: [],
     };
+  }
+
+  this.clearUndefinedVariables = function(clearUndefined = true, clearDefined = true){
+    if(clearUndefined){
+      this.undefinedVars.undefined = {};
+    }
+    if(clearDefined){
+      this.undefinedVars.defined = {};
+    }
   }
 
   this.createLoggerErrorFromMathJsError = function(err){
@@ -127,19 +197,24 @@ function EditorLogger(){
       MQ.StaticMath($(this)[0]);
     });
 
+    //we need to first clear all the messages from every mathfield and set them to the default state before we populate them with information and render
+    for (const [key, value] of Object.entries(MathFields)) {
+      MathFields[key].message = {
+        question: null,//is this variable a physics constant
+        warning: null,//variable undefined,
+        error: null, //units don't match
+      };
+
+      RenderMessageUI(key);//then render the change
+    }
+
     //display warnings and errors in the editor lines
     for(var i = 0; i < log.error.length; i++){
-      MathFields[log.error[i].mfID].message = {
-        error: null, //units don't match, variable d can't be used
-      }
       MathFields[log.error[i].mfID].message.error = {type: 1};
       RenderMessageUI(log.error[i].mfID);//takes the messages for a specific math field and renders it
     }
 
     for(var i = 0; i < log.warning.length; i++){
-      MathFields[log.warning[i].mfID].message = {
-        warning: null,//variable undefined,
-      }
       MathFields[log.warning[i].mfID].message.warning = {
         type: 1,
         vars: log.warning[i].variables,
@@ -147,6 +222,8 @@ function EditorLogger(){
       RenderMessageUI(log.warning[i].mfID);//takes the messages for a specific math field and renders it
     }
 
+    //after generating errors and defined undefined and defined undefined variables we need to rerender my variable collection
+    OrderCompileAndRenderMyVariablesCollection();
   }
 
 }
