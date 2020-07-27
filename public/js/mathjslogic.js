@@ -142,7 +142,7 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
 
   }
 
-  console.log(results);
+  //console.log(results);
   ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID);
 
 }
@@ -569,7 +569,6 @@ function SimplifyFunctionDefinitionToJustFunctionVariable(ls){
     while(ls.indexOf(target) != -1){
       let index = ls.indexOf(target);
       let closingParenthesis = FindIndexOfClosingParenthesis(ls.substring(index + target.length));
-      console.log(closingParenthesis);
       if(closingParenthesis != null){
         closingParenthesis += index + target.length;//accounts for the shift because we were only using a substring of the actaul string
         //we are going to remove everything inside the parenthesis and including the parenthesis

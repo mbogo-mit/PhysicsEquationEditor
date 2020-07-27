@@ -111,8 +111,8 @@ let Templates = {
     <li class="collection-item">
       <span class="static-physics-equation editable-variable tooltipped" data-position="left" data-tooltip="Edit" latex="<%= opts.ls %>" rid="<%= opts.variable.rid %>" onclick="EditVariableDefinition($(this))"></span>
       <span class="right delete-var" onclick="UpdateMyVariablesCollection({rid: '<%= opts.variable.rid %>',remove: true, editable: true})"><i class="material-icons">close</i></span>
-      <span class="new badge <%= opts.variable.state %>" data-badge-caption="<%= opts.variable.state %>"></span>
-      <span class="new badge info" data-badge-caption="<%= opts.variable.units %>"></span>
+      <span onclick="ToggleVariableState('<%= opts.variable.rid %>')" class="new badge <%= opts.variable.state %>" data-badge-caption="<%= opts.variable.state %>"></span>
+      <span class="new badge info units <%= (opts.variable.dynamicUnits) ? 'dynamic-units' : ''%>" data-badge-caption="<%= opts.variable.units %>"></span>
       <% if(opts.variable.type == "vector" && !opts.variable.canBeVector){%>
         <span class="new badge info cantBeVector btn-floating pulse tooltipped" data-position="left" data-tooltip="This unit can't be a vector" data-badge-caption="<%= opts.variable.type %>">
           <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-bug" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -128,8 +128,9 @@ let Templates = {
     `
     <li class="collection-item undefined-variable">
       <span class="static-physics-equation editable-variable tooltipped" data-position="left" data-tooltip="Edit" latex="<%= opts.ls %>" rid="<%= opts.variable.rid %>" onclick="EditVariableDefinition($(this))"></span>
-      <span class="new badge <%= opts.variable.state %>" data-badge-caption="<%= opts.variable.state %>"></span>
-      <span class="new badge info" data-badge-caption="<%= opts.variable.units %>"></span>
+      <span class="right delete-var" onclick="UpdateMyVariablesCollection({remove: true, cantRemove: true})"><i class="material-icons">close</i></span>
+      <span onclick="ToggleVariableState('<%= opts.variable.rid %>')" class="new badge <%= opts.variable.state %>" data-badge-caption="<%= opts.variable.state %>"></span>
+      <span class="new badge info undefined-units units" data-badge-caption="<%= opts.variable.units %>"></span>
       <span class="new badge info uneditable" data-badge-caption="<%= opts.variable.type %>"></span>
     </li>
     `,

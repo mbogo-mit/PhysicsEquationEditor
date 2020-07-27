@@ -5,6 +5,8 @@ function EditorLogger(){
     defined: {},
   };
 
+  this.savedUndefinedVars = {};
+
   this.log = {
     success: [],
     info: [],
@@ -46,6 +48,7 @@ function EditorLogger(){
   this.GenerateEditorErrorMessages = function(){
     let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
     this.clearLog();//clearing log befor adding to it
+    this.saveUndefinedVariablesData();
     this.clearUndefinedVariables();
 
     for(const [lineNumber, id] of Object.entries(orderedIds)){
@@ -96,7 +99,7 @@ function EditorLogger(){
         if(!definedUndefinedVariables.includes(undefinedVars[i])){
           //we are going to add this new undefined variable to the list of undefined variables
           this.undefinedVars.undefined[undefinedVars[i]] = {
-            state: "unknown",
+            state: this.retrieveSavedUndefinedVariablesData(undefinedVars[i]).state,
             type: (IsVariableLatexStringVector(undefinedVars[i])) ? "vector" : "scalar",
             units: "undefined (none)",
             value: undefined,
@@ -114,7 +117,7 @@ function EditorLogger(){
     let isVariableVector = IsVariableLatexStringVector(definedUndefinedVariable);
 
     this.undefinedVars.defined[definedUndefinedVariable] = {
-      state: "unknown",
+      state: this.retrieveSavedUndefinedVariablesData(definedUndefinedVariable).state,
       type: (isVariableVector) ? "vector" : "scalar",
       value: undefined,
       canBeVector: fullUnitsString.canBeVector,
@@ -122,6 +125,7 @@ function EditorLogger(){
       units: (fullUnitsString.custom) ? fullUnitsString.str : TrimUnitInputValue(fullUnitsString.str),
       unitsMathjs: GetUnitsFromMathJsVectorString(unitsMathjs),//if it is not a vector it won't effect the string
       rid: RID(),
+      dynamicUnits: true,
     };
     //then after giving this variable a definiton we need to remove it from the undefined object of this.undefinedVars
     delete this.undefinedVars.undefined[definedUndefinedVariable];
@@ -150,6 +154,31 @@ function EditorLogger(){
     if(clearDefined){
       this.undefinedVars.defined = {};
     }
+  }
+
+  this.saveUndefinedVariablesData = function(){
+    this.savedUndefinedVars = Object.assign({}, this.undefinedVars);
+    console.log(this.savedUndefinedVars);
+  }
+
+  this.retrieveSavedUndefinedVariablesData = function(ls){
+    for(const [key, value] of Object.entries(this.savedUndefinedVars.undefined)){
+      if(ls == key){
+        console.log('found match');
+        return value;
+      }
+    }
+
+    for(const [key, value] of Object.entries(this.savedUndefinedVars.defined)){
+      if(ls == key){
+        console.log('found match');
+        return value;
+      }
+    }
+    //if we can't find this variable in past data then we will just return a default variable
+    return {
+      state: "unknown",
+    };
   }
 
   this.createLoggerErrorFromMathJsError = function(err){
