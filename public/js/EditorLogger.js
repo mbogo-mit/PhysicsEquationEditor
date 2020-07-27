@@ -56,7 +56,7 @@ function EditorLogger(){
       if(ls.length > 0){//there is something to evaluate
         let undefinedVars = GetUndefinedVariables(ls);
         this.recordUndefinedVariables(undefinedVars);
-        CheckForErrorsInExpression2(ls, lineNumber, id);
+        CheckForErrorsInExpression(ls, lineNumber, id);
       }
     }
 
@@ -80,7 +80,7 @@ function EditorLogger(){
         if(ls.length > 0){//there is something to evaluate
           let undefinedVars = GetUndefinedVariables(ls);
           this.recordUndefinedVariables(undefinedVars);
-          CheckForErrorsInExpression2(ls, lineNumber, id);
+          CheckForErrorsInExpression(ls, lineNumber, id);
         }
       }
 

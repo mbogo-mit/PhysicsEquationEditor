@@ -42,44 +42,6 @@ math.import({
   }
 })
 
-function CheckForErrorsInExpression(ls, lineNumber, mfID){
-  ls = RemoveCommentsFromLatexString(ls);
-  ls = PutBracketsAroundAllSubsSups(ls);
-  ls = SimplifyFunctionDefinitionToJustFunctionVariable(ls);//converts "f(x,y)=xy" to f=xy
-  ls = ReplaceVariablesWithMathjsUnits(ls);
-  ls = CleanLatexString(ls, ["fractions","addition","parentheses","brackets", "white-space"]);
-  ls = FindAndWrapVectorsThatAreBeingMultiplied(ls);
-  //console.log(ls);
-  ls = CleanLatexString(ls,["multiplication"]);
-  //console.log(ls);
-  //console.log(ls);
-  let expressions = ls.split(";");
-  let exprs = [];
-  expressions.map(function(value, i){
-    exprs.push(value.split("="));
-  });
-  let results = [];
-  for(let i = 0; i < exprs.length; i++){
-    results.push([]);
-    for(let j = 0; j < exprs[i].length; j++){
-      //now that we have parsed the latex string into a mathjs readable string we evaluate it and grab any errors
-      //that math js throws and interprets them for the user
-      try {
-        let str = math.evaluate(exprs[i][j]).toString();
-        results[i].push({success: str});
-      }
-      catch(err){
-        results[i].push({error: err.message});
-      }
-    }
-
-  }
-
-  //console.log(results);
-  ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID);
-
-}
-
 function IsSignleUndefinedVariable(ls){
   //the only way you can be a single undefined variable is if there is only one undefined variable in the string and there is only one variable in the string.
   let uvs = GetTrulyUndefinedVariables(ls);
@@ -98,7 +60,7 @@ function IsSignleUndefinedVariable(ls){
   return false;
 }
 
-function CheckForErrorsInExpression2(ls, lineNumber, mfID){
+function CheckForErrorsInExpression(ls, lineNumber, mfID){
   ls = RemoveCommentsFromLatexString(ls);
   ls = PutBracketsAroundAllSubsSups(ls);
   ls = SimplifyFunctionDefinitionToJustFunctionVariable(ls);//converts "f(x,y)=xy" to f=xy
@@ -175,11 +137,11 @@ function CheckForErrorsInExpression2(ls, lineNumber, mfID){
   }
 
   console.log(results);
-  ParseResultsArrayAndGenerateLoggerList2(results, lineNumber, mfID);
+  ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID);
 
 }
 
-function ParseResultsArrayAndGenerateLoggerList2(results, lineNumber, mfID){
+function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
   let log = {
     success: [],
     info: [],
@@ -258,11 +220,11 @@ function ParseResultsArrayAndGenerateLoggerList2(results, lineNumber, mfID){
     }
 
     //so after possibly updating the list of defined undefined variables we need to see if there are any truly undefined variables and log them as a warning
-    let trulyUndefeindVars = GetTrulyUndefinedVariables(MathFields[mfID].mf.latex());
-    if(trulyUndefeindVars.length > 0){
+    let trulyUndefinedVars = GetTrulyUndefinedVariables(MathFields[mfID].mf.latex());
+    if(trulyUndefinedVars.length > 0){
       EL.addLog({warning: {
         warning: "Undefined Variables",
-        variables: trulyUndefeindVars,
+        variables: trulyUndefinedVars,
         lineNumber: lineNumber,
         mfID: mfID,
       }});
@@ -304,72 +266,6 @@ function GetTrulyUndefinedVariables(ls){
   }
 
   return trulyUndefinedVars;
-}
-
-
-function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
-  let log = {
-    success: [],
-    info: [],
-    warning: [],
-    error: [],
-  };
-
-  results.map(function(r, index){
-
-    let successes = [];
-    let errors = [];
-    r.map(function(data, i){
-
-      if(data.success != undefined){
-        successes.push(data.success);
-      }
-
-      if(data.error){
-        errors.push(data.error);
-      }
-
-    });
-
-    if(successes.length > 1){
-      //check if units match for success equations
-      let equationUnitsMatch = false;
-
-      try {
-        //trying to add the units of each equation and see if they add if they don't then they are not the same unit so an error will occur
-        math.evaluate(successes.join(" + "));
-        equationUnitsMatch = true;
-      }
-      catch(err){
-        equationUnitsMatch = false;
-      }
-
-      if(!equationUnitsMatch){
-        log.error.push({
-          error: EL.createLoggerErrorFromMathJsError("Units do not equal each other"),
-          info: successes,
-          lineNumber: lineNumber,
-          mfID: mfID,
-        });
-      }
-    }
-
-    if(errors.length > 0){
-      errors.map(function(error, index){
-        log.error.push({
-          error: EL.createLoggerErrorFromMathJsError(error),
-          info: "",
-          lineNumber: lineNumber,
-          mfID: mfID,
-        });
-      });
-    }
-
-
-  });
-
-  EL.addLog(log);
-
 }
 
 function ReplaceVariablesWithMathjsUnits(ls){

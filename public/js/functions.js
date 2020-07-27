@@ -853,6 +853,25 @@ function TogglePhysicsConstant(el, index){
 
 }
 
+function GetDefinedPhysicsConstants(){
+  let vars = [];
+  for(const [key, value] of Object.entries(PreDefinedVariables)){
+    if(value.type == "physics constant"){
+      vars.push(key);
+    }
+  }
+  return vars;
+}
+
+
+function CompileAndOrderVariables(){
+  //get all the variables we need
+  let trulyUndefinedVars = GetTrulyUndefinedVariables();
+  let definedVars = GetDefinedPhysicsConstants().concat(Object.keys(DefinedVariables)).concat(Object.keys(EL.undefinedVars.defined));
+
+  //now we have to order them by when they show up in the editor
+}
+
 
 function UpdateMyVariablesCollection(opts = {ls: "", rid: "", update: true, add: false, pc: {}, remove: false, editable: true}){
 
