@@ -30,7 +30,7 @@ function RID(){
           <% for(var i = 0; i < lopc.length; i++){ %>
           <tr>
             <td><%= lopc[i].quantityDescription %></td>
-            <td><span id class="static-physics-equation" latex="<%= lopc[i].symbol%>"></span></td>
+            <td><span onclick="CopyPhysicsConstantToClipboard($(this))" class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" latex="<%= lopc[i].symbol%>"></span></td>
             <td><span class="static-physics-equation" latex="<%= lopc[i].value %>"></span></td>
             <td><span class="static-physics-equation" latex="<%= lopc[i].unit %>"></span></td>
             <td>
