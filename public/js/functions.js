@@ -1109,6 +1109,11 @@ function CopyPhysicsEquationToClipboard(el){
   M.toast({html: "Equation copied to clipboard", displayLength: 3000});
 }
 
+function CopyPhysicsConstantToClipboard(el){
+  CopyToClipboard(el.attr("latex"));
+  M.toast({html: "physics constant copied to clipboard", displayLength: 3000});
+}
+
 function CopyToClipboard(str) {
   //console.log(str);
   const el = document.createElement('textarea');

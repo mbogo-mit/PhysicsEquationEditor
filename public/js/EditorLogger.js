@@ -114,9 +114,23 @@ function EditorLogger(){
     let customUnitsString = unitsMathjs.split(" ");
     customUnitsString.splice(0,1);
     customUnitsString = customUnitsString.join(" ");
+    customUnitsString = customUnitsString.replace(/vector/g, "");
+    let isVariableVector = IsVariableLatexStringVector(definedUndefinedVariable);
+
+    if(isVariableVector){
+      if(unitsMathjs.indexOf("vector") == -1){//variable is suppose to be a vector but doens't have vector unit inside of it so we multiply one in
+        //making the unit have a vector
+        unitsMathjs = math.evaulate(`(1 vector) (${unitsMathjs})`).toString();
+      }
+    }
+    else{
+      if(unitsMathjs.indexOf("vector") != -1){//variable is not suppose to be a vector but has a vector unit inside of it so we take it out
+        unitsMathjs = unitsMathjs.replace(/vector/g, "");
+      }
+    }
     this.undefinedVars.defined[definedUndefinedVariable] = {
       state: "unknown",
-      type: (IsVariableLatexStringVector(definedUndefinedVariable)) ? "vector" : "scalar",
+      type: (isVariableVector) ? "vector" : "scalar",
       value: undefined,
       fullUnitsString: (fullUnitsString != null) ? fullUnitsString : customUnitsString,
       units: (fullUnitsString != null) ? TrimUnitInputValue(fullUnitsString) : customUnitsString,
