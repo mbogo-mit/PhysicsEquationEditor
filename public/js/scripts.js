@@ -110,9 +110,6 @@ $(document).ready(function(){
   $("#edit_variable_description").click(function(){
     OpenDefineVariableModal({init: true});
   });
-  $("#btn_define_new_variable").click(function(){
-    OpenDefineVariableModal({init: false});
-  });
 
   $("#math_field_editor_container").css("height",`${window.innerHeight - $("#math_field_editor_container").offset().top}px`);
   RecalculateHeightOfLineEmptySpace();
