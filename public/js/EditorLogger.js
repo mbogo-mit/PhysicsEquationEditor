@@ -69,8 +69,8 @@ function EditorLogger(){
     this.clearUndefinedVariables(true, false);//clearing undefined variables but not defined undefined variables
 
     for(const [lineNumber, id] of Object.entries(orderedIds)){
-      if(lineNumber == endingLineNumber){
-        break;//we break because we have already parsed this line and there are no more previous lines
+      if(lineNumber > endingLineNumber){
+        break;//we break the job of this function was only to parse previous lines and the current line we were on when we called this function
       }
       else{
         //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
@@ -111,30 +111,16 @@ function EditorLogger(){
 
   this.recordDefinitionForUndefinedVariable = function(definedUndefinedVariable, unitsMathjs){
     let fullUnitsString = GetFullUnitsStringFromUnitsMathJs(unitsMathjs);
-    let customUnitsString = unitsMathjs.split(" ");
-    customUnitsString.splice(0,1);
-    customUnitsString = customUnitsString.join(" ");
-    customUnitsString = customUnitsString.replace(/vector/g, "");
     let isVariableVector = IsVariableLatexStringVector(definedUndefinedVariable);
 
-    if(isVariableVector){
-      if(unitsMathjs.indexOf("vector") == -1){//variable is suppose to be a vector but doens't have vector unit inside of it so we multiply one in
-        //making the unit have a vector
-        unitsMathjs = math.evaulate(`(1 vector) (${unitsMathjs})`).toString();
-      }
-    }
-    else{
-      if(unitsMathjs.indexOf("vector") != -1){//variable is not suppose to be a vector but has a vector unit inside of it so we take it out
-        unitsMathjs = unitsMathjs.replace(/vector/g, "");
-      }
-    }
     this.undefinedVars.defined[definedUndefinedVariable] = {
       state: "unknown",
       type: (isVariableVector) ? "vector" : "scalar",
       value: undefined,
-      fullUnitsString: (fullUnitsString != null) ? fullUnitsString : customUnitsString,
-      units: (fullUnitsString != null) ? TrimUnitInputValue(fullUnitsString) : customUnitsString,
-      unitsMathjs: unitsMathjs,
+      canBeVector: fullUnitsString.canBeVector,
+      fullUnitsString: fullUnitsString.str,
+      units: (fullUnitsString.custom) ? fullUnitsString.str : TrimUnitInputValue(fullUnitsString.str),
+      unitsMathjs: GetUnitsFromMathJsVectorString(unitsMathjs),//if it is not a vector it won't effect the string
       rid: RID(),
     };
     //then after giving this variable a definiton we need to remove it from the undefined object of this.undefinedVars

@@ -55,8 +55,14 @@ $(document).ready(function(){
     $(this).removeClass('active');
   });
 
-  $(".physics-constant-checkbox-span").each(function(i){
+  $(".physics-constant-checkbox-span").each(function(){
     $(this).click(function(){
+      CheckIfPhysicsConstantCheckboxIsDisabled($(this));
+    });
+  });
+
+  $(".physics-constant-checkbox-input").each(function(i){
+    $(this).change(function(){
       TogglePhysicsConstant($(this), i);
     });
   });

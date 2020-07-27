@@ -203,16 +203,20 @@ function IsVariableLatexStringVector(ls){
 function GetFullUnitsStringFromUnitsMathJs(unitsMathjs){
   //this function takes a unitsMathjs variable and tries to find the SI Unit that matches it
   //if it can't find the unit it returns null
-  unitsMathjs = unitsMathjs.replace(/vector/g,"");
+  unitsMathjs = (unitsMathjs.indexOf("vector") != -1) ? GetUnitsFromMathJsVectorString(unitsMathjs) : unitsMathjs;
   for(const [key, value] of Object.entries(ListOfSIUnits)){
     try{
       //if this line doesn't through an error than these two units are equal and we have found our match
       math.evaluate(`${value.unitsMathjs} + ${unitsMathjs}`);
-      return CreateFullUnitsString(key, value.name, value.symbol);
+      return {str: CreateFullUnitsString(key, value.name, value.symbol), custom: false, canBeVector: value.canBeVector};
     }
     catch(err){}
   }
-  return null;
+  //if we couldn't identify the unit then we assume it is custom so we need to return the unit back to them but without any constants in front of it
+  unitsMathjs = unitsMathjs.split(" ");
+  unitsMathjs.splice(0,1);//removing constants infront of units string
+  unitsMathjs = unitsMathjs.join(" ");
+  return {str: unitsMathjs, custom: true, canBeVector: true};
 }
 
 function UpdatedVariableDefinition(){
@@ -863,25 +867,25 @@ function CloseLineMessageBox(){
   $("#line-message-box").css("display","none");
 }
 
+function CheckIfPhysicsConstantCheckboxIsDisabled(el){
+  //we need to check if variable is being used in the editor and if it is this can't be removed
+  if(el.prev().attr("disabled") == "disabled"){
+    M.toast({html: "This variable can't be removed because it is being used", displayLength: 3000});
+  }
+}
+
 function TogglePhysicsConstant(el, index){
     let obj = Object.assign({}, ListOfPhysicsConstants[index]);
-    //console.log(obj);
-    if(!el.prev().prop("checked")){
+    console.log(obj);
+    if(el.prop("checked")){
       M.toast({html: `<span class='green-text text-lighten-4'>${obj.quantityDescription}</span> &nbsp; added to 'My Variables' Tab`, displayLength: 3000});
       UpdateMyVariablesCollection({ls: obj.symbol, rid: el.attr("rid"), add: true, pc: obj, editable: false});
+      DisablePhysicsConstantCheckboxesThatAreBeingUsed();
     }
     else{
-      //we need to check if variable is being used in the editor and if it is this can't be removed
-      if(el.prev().attr("disabled") != "disabled"){
-        M.toast({html: `<span class='red-text text-lighten-4'>${obj.quantityDescription}</span> 	&nbsp; removed from 'My Variables' Tab`, displayLength: 3000});
-        UpdateMyVariablesCollection({ls: obj.symbol, rid: el.attr("rid"), remove: true, editable: false});
-      }
-      else{
-        //if it is being used then we just show a notitication that the variable can't be deleted
-        M.toast({html: "This variable can't be removed because it is being used", displayLength: 3000});
-      }
+      M.toast({html: `<span class='red-text text-lighten-4'>${obj.quantityDescription}</span> 	&nbsp; removed from 'My Variables' Tab`, displayLength: 3000});
+      UpdateMyVariablesCollection({ls: obj.symbol, rid: el.attr("rid"), remove: true, editable: false});
     }
-
 }
 
 function GetDefinedPhysicsConstants(){
@@ -961,11 +965,14 @@ function OrderCompileAndRenderMyVariablesCollection(){
   //RENDER
   $("#my_variables-collection-container .collection").html(html);//rendering new collection
   //Add event listeners and initialize static math fields
-  $(`#my_variables .collection span`).each(function(){
+  $("#my_variables .collection span").each(function(){
     if($(this).attr("rid") != undefined && $(this).attr("latex") != undefined){
       MQ.StaticMath($(this)[0]).latex($(this).attr("latex"));
     }
   });
+
+  //tooltipping everything that was just created and needs a tooltip
+  $("#my_variables .tooltipped").tooltip();
 
   //updating hover event
   $("#my_variables .collection-item").unbind("mouseout mouseover");
@@ -1039,6 +1046,7 @@ function UpdateMyVariablesCollection(opts = {ls: "", rid: "", update: true, add:
         $(`.physics-constant-checkbox-span[rid='${opts.rid}']`).prev().prop("checked",false);
       }
       //removing variable from defined variables object
+      console.log("removing variable from defined variables object");
       UpdateDefinedVariables({
         type: "remove",
         rid: opts.rid,

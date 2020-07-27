@@ -40,7 +40,13 @@ math.import({
     return math.evaluate(expr);
 
   }
-})
+});
+
+function GetUnitsFromMathJsVectorString(mathjsVectorString){
+  let unitsMathjs = mathjsVectorString.replace(/[\[\]]/g,"");//removing brackets
+  unitsMathjs = unitsMathjs.split(",")[0].replace(/vector/g,"");
+  return unitsMathjs
+}
 
 function IsSignleUndefinedVariable(ls){
   //the only way you can be a single undefined variable is if there is only one undefined variable in the string and there is only one variable in the string.
@@ -307,6 +313,7 @@ function ReplaceVariablesWithMathjsUnits(ls){
         else if(Object.keys(EL.undefinedVars.defined).includes(vars[c])){
           variable = Object.assign({}, EL.undefinedVars.defined[vars[c]]);
         }
+
         //we need to check if this variable is a vector and if so then we have to format unitsMathjs variable differently
         let unitsMathjs = variable.unitsMathjs;
         if(variable.type == "vector"){

@@ -357,6 +357,20 @@ body {
   color: #424242;
 }
 
+#my_variables .collection .info.uneditable {
+  color: #9e9e9e;
+}
+#my_variables .collection .info.cantBeVector {
+  color: #424242;
+  background-color: #ef9a9a !important;
+  width: auto !important;
+}
+
+#my_variables .collection .info.cantBeVector svg {
+  position: relative;
+  top: 2px;
+}
+
 #my_variables .collection .constant-info {
   background-color: transparent;
   color: #424242;

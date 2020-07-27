@@ -27,7 +27,9 @@ function RID(){
         </thead>
 
         <tbody>
-          <% for(var i = 0; i < lopc.length; i++){ %>
+          <% for(var i = 0; i < lopc.length; i++){
+            let rid = RID();
+          %>
           <tr>
             <td><%= lopc[i].quantityDescription %></td>
             <td><span onclick="CopyPhysicsConstantToClipboard($(this))" class="static-physics-equation tooltipped" data-position="left" data-tooltip="Copy" latex="<%= lopc[i].symbol%>"></span></td>
@@ -35,8 +37,8 @@ function RID(){
             <td><span class="static-physics-equation" latex="<%= lopc[i].unit %>"></span></td>
             <td>
               <label>
-                <input type="checkbox" />
-                <span class="physics-constant-checkbox-span" rid="<%= RID() %>" symbol="<%= lopc[i].symbol%>"></span>
+                <input class="physics-constant-checkbox-input" rid="<%= rid %>" type="checkbox" />
+                <span class="physics-constant-checkbox-span" rid="<%= rid %>" symbol="<%= lopc[i].symbol%>"></span>
               </label>
             </td>
           </tr>
