@@ -197,7 +197,22 @@ function UpdateDefinedVariables(opts){
 }
 
 function IsVariableLatexStringVector(ls){
-  return ls.indexOf("\\vec{") != -1 && ls.indexOf("\\hat{") != -1;
+  return ls.indexOf("\\vec{") != -1 || ls.indexOf("\\hat{") != -1;
+}
+
+function GetFullUnitsStringFromUnitsMathJs(unitsMathjs){
+  //this function takes a unitsMathjs variable and tries to find the SI Unit that matches it
+  //if it can't find the unit it returns null
+  unitsMathjs = unitsMathjs.replace(/vector/g,"");
+  for(const [key, value] of Object.entries(ListOfSIUnits)){
+    try{
+      //if this line doesn't through an error than these two units are equal and we have found our match
+      math.evaluate(`${value.unitsMathjs} + ${unitsMathjs}`);
+      return CreateFullUnitsString(key, value.name, value.symbol);
+    }
+    catch(err){}
+  }
+  return null;
 }
 
 function UpdatedVariableDefinition(){
@@ -496,12 +511,16 @@ function AdjustLineLabelNumber(){
   });
 }
 
+function CreateFullUnitsString(quantity, name, symbol){
+  return `${quantity}: ${name} (${symbol})`;
+}
+
 function GenerateAutoCompleteData(){
   let data = {};
   let unitReference = {};
   UnitReference = {};
   for (let [key, value] of Object.entries(ListOfSIUnits)) {
-    let k = `${key}: ${value.name} (${value.symbol})`;
+    let k = CreateFullUnitsString(key, value.name, value.symbol);
     data[k] = null;
     value.quantity = key;
     unitReference[k] = value;
@@ -837,7 +856,7 @@ function TogglePhysicsConstant(el, index){
     //console.log(obj);
     if(!el.prev().prop("checked")){
       M.toast({html: `<span class='green-text text-lighten-4'>${obj.quantityDescription}</span> &nbsp; added to 'My Variables' Tab`, displayLength: 3000});
-      UpdateMyVariablesCollection({ls: obj.symbol, rid: el.attr("rid"), add: true, pc: obj, editable: false, indexChild: index});
+      UpdateMyVariablesCollection({ls: obj.symbol, rid: el.attr("rid"), add: true, pc: obj, editable: false});
     }
     else{
       //we need to check if variable is being used in the editor and if it is this can't be removed
@@ -864,135 +883,77 @@ function GetDefinedPhysicsConstants(){
 }
 
 
-function CompileAndOrderVariables(){
+function OrderCompileAndRenderMyVariablesCollection(){
+  //ORDER
   //get all the variables we need
-  let trulyUndefinedVars = GetTrulyUndefinedVariables();
+  let trulyUndefinedVars = Object.keys(EL.undefinedVars.undefined);
+  let orderedTrulyUndefinedVars = [];
   let definedVars = GetDefinedPhysicsConstants().concat(Object.keys(DefinedVariables)).concat(Object.keys(EL.undefinedVars.defined));
-
+  let orderedDefinedVars = [];
   //now we have to order them by when they show up in the editor
-}
-
-
-function UpdateMyVariablesCollection(opts = {ls: "", rid: "", update: true, add: false, pc: {}, remove: false, editable: true}){
-
-  //first we need to identify where this variable is coming from "PreDefinedVariables" or "DefinedVariables" and that determines if the the variable is editable or not
-  let currentVariable;
-  let isVariableEditable = Object.keys(DefinedVariables).includes(opts.ls);
-  if(isVariableEditable){
-    currentVariable = Object.assign({}, DefinedVariables[opts.ls]);
-  }else{
-    currentVariable = Object.assign({}, PreDefinedVariables[opts.ls]);
-  }
-
-  if(opts.update){
-    let updateCollection = false;
-
-    $(`#my_variables .collection-item .static-physics-equation`).each(function(){
-      if($(this).attr("rid") == opts.rid){
-        updateCollection = true;
-        //we need to remove all badges and put new ones
-        $(this).parent().children(".new.badge, .delete-var").remove();
-        let html = `
-          <span class="right delete-var" onclick="UpdateMyVariablesCollection({rid: '${opts.rid}',remove: true, editable: ${isVariableEditable}})"><i class="material-icons">close</i></span>
-          <span class="new badge ${currentVariable.state}" data-badge-caption="${currentVariable.state}"></span>
-          <span class="new badge info" data-badge-caption="${currentVariable.type}"></span>
-          <span class="new badge info" data-badge-caption="${currentVariable.units}"></span>
-        `;
-        $(html).insertAfter($(this));
-        return;
-
-      }
-    });
-
-    if(!updateCollection){
-      let html = `
-      <li class="collection-item">
-        <span class="static-physics-equation editable-variable tooltipped" data-position="left" data-tooltip="Edit" latex="${opts.ls}" rid="${opts.rid}" onclick="EditVariableDefinition($(this))"></span>
-        <span class="right delete-var" onclick="UpdateMyVariablesCollection({rid: '${opts.rid}',remove: true, editable: ${isVariableEditable}})"><i class="material-icons">close</i></span>
-        <span class="new badge ${currentVariable.state}" data-badge-caption="${currentVariable.state}"></span>
-      `;
-      if(currentVariable.value == undefined){
-        html += `
-        <span class="new badge info" data-badge-caption="${currentVariable.type}"></span>
-        <span class="new badge info" data-badge-caption="${currentVariable.units}"></span>
-        `;
+  let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
+  for(const [lineNumber, id] of Object.entries(orderedIds)){
+    //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
+    let variables = GetVariablesFromLatexString(MathFields[id].mf.latex());
+    for(var i = 0; i < variables.length; i++){
+      let index = trulyUndefinedVars.indexOf(variables[i]);
+      if(index != -1){
+        orderedTrulyUndefinedVars.push(variables[i]);
+        trulyUndefinedVars.splice(index,1);//remove it form array because we have accounted for it in the ordered list
       }
       else{
-        html += `
-        <span class="new badge info" data-badge-caption="${currentVariable.units}"></span>
-        <span class="new badge constant-info" data-badge-caption=""><span latex="=${currentVariable.value}" rid="${opts.rid}"></span></span>
-        `;
-      }
-
-      `
-      </li>
-      `;
-      $("#my_variables .collection").append(html);
-      //adding materialize event listener
-      $(`.editable-variable[rid='${opts.rid}']`).tooltip();
-    }
-  }
-  else if(opts.add){
-    let html = `
-    <li class="collection-item">
-      <span class="static-physics-equation" latex="${opts.pc.symbol}" rid="${opts.rid}"></span>
-      <span class="right delete-var" onclick="UpdateMyVariablesCollection({ls: '${opts.ls}', rid: '${opts.rid}',remove: true, editable: ${isVariableEditable}, indexChild: ${opts.indexChild}})"><i class="material-icons">close</i></span>
-      <span class="new badge physics-constant" data-badge-caption="${opts.pc.quantityDescription}"></span>
-      <span class="new badge constant-info" data-badge-caption=""><span latex="${opts.pc.unit}" rid="${opts.rid}"></span></span>
-      <span class="new badge constant-info" data-badge-caption=""><span latex="=${opts.pc.value}" rid="${opts.rid}"></span></span>
-
-    </li>
-    `;
-    $("#my_variables .collection").append(html);
-    //adding variable to defined variables
-    UpdateDefinedVariables({
-      type: "add",
-      ls: opts.pc.symbol,
-      rid: opts.rid,
-      editable: opts.editable,
-      props: {
-        state: "known",
-        type: 'physics constant',
-        units: opts.pc.unitString,
-        size: "0",
-        unitsMathjs: opts.pc.unitsMathjs,
-        quantity: opts.pc.quantity,
-      },
-    });
-  }
-  else if(opts.remove){
-    //before we remove this variable we need to check if it is being used in the editor
-    if(!isVariableBeingUsedInEditor({rid: opts.rid, editable: opts.editable})){
-      $(`#my_variables .collection-item .static-physics-equation`).each(function(){
-        if($(this).attr("rid") == opts.rid){
-          $(this).parent().remove();
+        index = definedVars.indexOf(variables[i]);
+        if(index != -1){
+          orderedDefinedVars.push(variables[i]);
+          definedVars.splice(index,1);//remove it form array because we have accounted for it in the ordered list
         }
-      });
-      if(opts.indexChild != undefined){
-        //this means that we are deleting a physics constants because they are the only ones that know what number child they are in the list of physics constants
-        //because we are deleting the physics constant we have to uncheck the box in the physics constants list under "Use" column
-        $($(`.physics-constant-checkbox-span`)[opts.indexChild]).prev().prop("checked",false)
       }
-      //removing variable from defined variables object
-      UpdateDefinedVariables({
-        type: "remove",
-        rid: opts.rid,
-        editable: opts.editable,
-      });
+
     }
-    else{
-      //if it is being used then we just show a notitication that the variable can't be deleted
-      M.toast({html: "This variable can't be removed because it is being used", displayLength: 3000});
+  }
+
+  //if there is anything left in the unorded arrays then just append it to the ordered lists
+  orderedTrulyUndefinedVars = orderedTrulyUndefinedVars.concat(trulyUndefinedVars);
+  orderedDefinedVars = orderedDefinedVars.concat(definedVars);
+
+  //COMPILE
+  html = "";
+  for(var i = 0; i < orderedTrulyUndefinedVars.length; i++){
+    let opts = {
+      ls: orderedTrulyUndefinedVars[i],
+      variable: Object.assign({}, EL.undefinedVars.undefined[orderedTrulyUndefinedVars[i]]),
+    }
+    html += ejs.render(Templates["VariableCollection"]["undefined-variable"], {opts: opts});
+  }
+
+  for(var i = 0; i < orderedDefinedVars.length; i++){
+    let opts = {
+      ls: orderedDefinedVars[i],
+    };
+
+    if(Object.keys(DefinedVariables).includes(orderedDefinedVars[i])){
+      opts.variable = Object.assign({}, DefinedVariables[orderedDefinedVars[i]]);
+      html += ejs.render(Templates["VariableCollection"]["defined-variable"], {opts: opts});
+    }
+    else if(Object.keys(PreDefinedVariables).includes(orderedDefinedVars[i])){
+      opts.variable = Object.assign({}, PreDefinedVariables[orderedDefinedVars[i]]);
+      html += ejs.render(Templates["VariableCollection"]["physics-constant"], {opts: opts});
+    }
+    else if(Object.keys(EL.undefinedVars.defined).includes(orderedDefinedVars[i])){
+      opts.variable = Object.assign({}, EL.undefinedVars.defined[orderedDefinedVars[i]]);
+      html += ejs.render(Templates["VariableCollection"]["defined-variable"], {opts: opts});
     }
 
   }
 
-  if((opts.add || opts.update) && opts.rid != undefined && opts.rid != ""){
-    //initializing static mathfield for any latex string that might be used
-    $(`#my_variables .collection [rid='${opts.rid}']`).each(function(){
+  //RENDER
+  $("#my_variables-collection-container .collection").html(html);//rendering new collection
+  //Add event listeners and initialize static math fields
+  $(`#my_variables .collection span`).each(function(){
+    if($(this).attr("rid") != undefined && $(this).attr("latex") != undefined){
       MQ.StaticMath($(this)[0]).latex($(this).attr("latex"));
-    });
-  }
+    }
+  });
 
   //updating hover event
   $("#my_variables .collection-item").unbind("mouseout mouseover");
@@ -1013,12 +974,92 @@ function UpdateMyVariablesCollection(opts = {ls: "", rid: "", update: true, add:
 
 }
 
+function UpdateMyVariablesCollection(opts = {ls: "", rid: "", update: true, add: false, pc: {}, remove: false, editable: true}){
+
+  //first we need to identify where this variable is coming from "PreDefinedVariables" or "DefinedVariables" and that determines if the the variable is editable or not
+  let currentVariable;
+  let isVariableEditable = Object.keys(DefinedVariables).includes(opts.ls);
+  if(isVariableEditable){
+    currentVariable = Object.assign({}, DefinedVariables[opts.ls]);
+  }else{
+    currentVariable = Object.assign({}, PreDefinedVariables[opts.ls]);
+  }
+
+  if(opts.update){
+    let updateCollection = false;
+
+    $(`#my_variables .collection-item .static-physics-equation`).each(function(){
+      if($(this).attr("rid") == opts.rid){
+        updateCollection = true;
+        return;
+      }
+    });
+
+    if(!updateCollection){
+      //adding materialize event listener
+      $(`.editable-variable[rid='${opts.rid}']`).tooltip();
+    }
+  }
+  else if(opts.add){
+    //adding variable to defined variables
+    UpdateDefinedVariables({
+      type: "add",
+      ls: opts.pc.symbol,
+      rid: opts.rid,
+      editable: opts.editable,
+      props: {
+        state: "known",
+        type: 'physics constant',
+        unitString: opts.pc.unitString,
+        unit: opts.pc.unit,
+        value: opts.pc.value,
+        unitsMathjs: opts.pc.unitsMathjs,
+        quantity: opts.pc.quantity,
+        quantityDescription: opts.pc.quantityDescription
+      },
+    });
+  }
+  else if(opts.remove){
+    //before we remove this variable we need to check if it is being used in the editor
+    if(!isVariableBeingUsedInEditor({rid: opts.rid, editable: opts.editable})){
+      //if it is a physics constant unchecking the box
+      if($(`.physics-constant-checkbox-span[rid='${opts.rid}']`).length > 0 && opts.uncheckbox){
+        $(`.physics-constant-checkbox-span[rid='${opts.rid}']`).prev().prop("checked",false);
+      }
+      //removing variable from defined variables object
+      UpdateDefinedVariables({
+        type: "remove",
+        rid: opts.rid,
+        editable: opts.editable,
+      });
+    }
+    else{
+      //if it is being used then we just show a notitication that the variable can't be deleted
+      M.toast({html: "This variable can't be removed because it is being used", displayLength: 3000});
+    }
+
+  }
+
+  //after the variables have been edited we need to rerender the my variables collection
+  OrderCompileAndRenderMyVariablesCollection();
+
+}
+
 function isVariableBeingUsedInEditor(opts){
   let vars = (opts.editable) ? (Object.assign({}, DefinedVariables)) : (Object.assign({}, PreDefinedVariables));
-  let latexString;
+  let latexString = undefined;
   for (const [key, value] of Object.entries(vars)) {
     if(value.rid == opts.rid){
       latexString = key;
+    }
+  }
+  //if we couldn't find the variable in the DefinedVariables then it has to be in the EL.undefinedVars.defined object
+  if(latexString == undefined){
+    vars = Object.assign({}, EL.undefinedVars.defined);
+    for (const [key, value] of Object.entries(vars)) {
+      if(value.rid == opts.rid){
+        latexString = key;
+      }
     }
   }
 
@@ -1041,6 +1082,23 @@ function EditVariableDefinition(el){
       StaticMathField.latex(key);//passing the latex string that corresponds to the variable the user is trying to edit
       //use existing variable because the user wants to edit an exisiting variable
       OpenDefineVariableModal({init: true, ls: key, variable: value});
+      return;
+    }
+  }
+  for (const [key, value] of Object.entries(EL.undefinedVars.undefined)) {
+    if(value.rid == el.attr("rid")){
+      StaticMathField.latex(key);//passing the latex string that corresponds to the variable the user is trying to edit
+      //use existing variable because the user wants to edit an exisiting variable
+      OpenDefineVariableModal({init: true, ls: key, variable: value});
+      return;
+    }
+  }
+  for (const [key, value] of Object.entries(EL.undefinedVars.defined)) {
+    if(value.rid == el.attr("rid")){
+      StaticMathField.latex(key);//passing the latex string that corresponds to the variable the user is trying to edit
+      //use existing variable because the user wants to edit an exisiting variable
+      OpenDefineVariableModal({init: true, ls: key, variable: value});
+      return;
     }
   }
 

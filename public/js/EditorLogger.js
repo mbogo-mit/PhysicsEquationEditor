@@ -101,6 +101,7 @@ function EditorLogger(){
             units: "undefined (none)",
             value: undefined,
             unitsMathjs: "1 undefinedunit",
+            rid: RID(),
           };
         }
 
@@ -109,11 +110,18 @@ function EditorLogger(){
   }
 
   this.recordDefinitionForUndefinedVariable = function(definedUndefinedVariable, unitsMathjs){
+    let fullUnitsString = GetFullUnitsStringFromUnitsMathJs(unitsMathjs);
+    let customUnitsString = unitsMathjs.split(" ");
+    customUnitsString.splice(0,1);
+    customUnitsString = customUnitsString.join(" ");
     this.undefinedVars.defined[definedUndefinedVariable] = {
       state: "unknown",
       type: (IsVariableLatexStringVector(definedUndefinedVariable)) ? "vector" : "scalar",
       value: undefined,
+      fullUnitsString: (fullUnitsString != null) ? fullUnitsString : customUnitsString,
+      units: (fullUnitsString != null) ? TrimUnitInputValue(fullUnitsString) : customUnitsString,
       unitsMathjs: unitsMathjs,
+      rid: RID(),
     };
     //then after giving this variable a definiton we need to remove it from the undefined object of this.undefinedVars
     delete this.undefinedVars.undefined[definedUndefinedVariable];
@@ -214,6 +222,8 @@ function EditorLogger(){
       RenderMessageUI(log.warning[i].mfID);//takes the messages for a specific math field and renders it
     }
 
+    //after generating errors and defined undefined and defined undefined variables we need to rerender my variable collection
+    OrderCompileAndRenderMyVariablesCollection();
   }
 
 }
