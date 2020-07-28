@@ -534,6 +534,10 @@ body {
   overflow-y: scroll;
 }
 
+#my_variables-collection-container .collection {
+  border: none;
+}
+
 #similar-variables-info-container {
   font-size: 14px;
   color: #616161;

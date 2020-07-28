@@ -122,4 +122,7 @@ $(document).ready(function(){
     RenderSIUnitsSearch();
   });
 
+  //keepboard should be down to begin with
+  ToggleKeyboard();
+
 });

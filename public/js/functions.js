@@ -1653,7 +1653,6 @@ function UpdateVariableUnits(el){
       }
     }
 
-    console.log(fullUnitsString);
     props.fullUnitsString = fullUnitsString;
     props.units = TrimUnitInputValue(fullUnitsString);
     props.unitsMathjs = UnitReference[fullUnitsString].unitsMathjs;
