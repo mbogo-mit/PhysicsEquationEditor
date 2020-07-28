@@ -25,7 +25,7 @@ $(document).ready(function(){
 
   $('.tabs').tabs();
   $("#modal-physics-equation-more-information").modal();
-  $("#modal_import_mechanics_variable_definition").modal({
+  $("#modal_import_variable_definition").modal({
     onOpenStart: function(){
       $("#btn-update-imported-variables").addClass("disabled");
     },

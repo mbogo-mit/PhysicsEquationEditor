@@ -109,7 +109,11 @@
   <span class="static-physics-equation editable-variable" latex="<%= opts.ls %>" rid="<%= opts.variable.rid %>"></span>
   <span class="right delete-var" onclick="UpdateMyVariablesCollection({rid: '<%= opts.variable.rid %>',remove: true, editable: true})"><i class="material-icons">close</i></span>
   <span onclick="ToggleVariableState('<%= opts.variable.rid %>')" class="new badge <%= opts.variable.state %>" data-badge-caption="<%= opts.variable.state %>"></span>
-  <span onclick="DefineVariableUnits($(this), '<%= opts.variable.rid %>')" class="new badge info units <%= (opts.variable.dynamicUnits) ? 'dynamic-units' : ''%>" data-badge-caption="<%= opts.variable.units %>"></span>
+  <% if(opts.variable.dynamicUnits){%>
+    <span onclick="DefineVariableUnits($(this), '<%= opts.variable.rid %>')" class="new badge info units dynamic-units tooltipped" data-position="bottom" data-tooltip="This unit was dynamically created by the editor" data-badge-caption="<%= opts.variable.units %>"></span>
+  <%}else{%>
+    <span onclick="DefineVariableUnits($(this), '<%= opts.variable.rid %>')" class="new badge info units tooltipped" data-position="bottom" data-tooltip="This unit was set by the user or imported" data-badge-caption="<%= opts.variable.units %>"></span>
+  <%}%>
   <% if(opts.variable.type == "vector" && !opts.variable.canBeVector){%>
     <span class="new badge info cantBeVector btn-floating pulse tooltipped" data-position="left" data-tooltip="This unit can't be a vector" data-badge-caption="<%= opts.variable.type %>">
       <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-bug" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -141,4 +145,57 @@
   </div>
 </div>
 <% } %>
+<!---------------------------------->
+
+
+<!-- imported-variables-modal-content -->
+<div class="row">
+  <h4><%= header %></h4>
+</div>
+<div class="row">
+  <div class="col m12">
+    <label>
+      <input id="import-all-mechanics-variables" type="checkbox" />
+      <span>Import All Variables</span>
+    </label>
+  </div>
+</div>
+<div class="row">
+  <table>
+    <thead>
+      <tr>
+          <th>Symbol</th>
+          <th>Quantity</th>
+          <th>Use</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% for (const [key, value] of Object.entries(importedVariables)) {%>
+      <tr>
+        <td><span class="static-physics-equation" latex="<%= key %>"></span></td>
+        <td><%= value.quantityDescription %> (<%= value.units %>)</td>
+        <td>
+          <% if(value.disabled){%>
+          <label>
+            <input class="variable-checkbox" type="checkbox" rid="<%= value.rid %>" latex="<%= key %>" disabled="disabled"/>
+            <span class=""></span>
+          </label>
+          <%}else if(value.checked){%>
+            <label>
+              <input class="variable-checkbox" type="checkbox" rid="<%= value.rid %>" latex="<%= key %>" checked="checked"/>
+              <span class=""></span>
+            </label>
+          <%}else{%>
+            <label>
+              <input class="variable-checkbox" type="checkbox" rid="<%= value.rid %>" latex="<%= key %>"/>
+              <span class=""></span>
+            </label>
+          <%}%>
+        </td>
+      </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
 <!---------------------------------->

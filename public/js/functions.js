@@ -6,16 +6,6 @@ Warning: tells you when you are using irrelevant equations, when variables with 
 Error: dimensional analysis fails on a line
 
 */
-function RID(){
-  let c = "abcdefghijklmnopqrstuvwxyz0123456789";
-  let rid = "";
-  for(var i = 0; i < 10; i++){
-    let r = Math.random() * c.length;
-    rid += c.substring(r, r+1);
-  }
-
-  return rid;
-}
 
 function replaceLatexKeywordsWithSpace(latexString){
   let cmds = ["\\sqrt","\\frac"];
@@ -37,8 +27,98 @@ function SelectedStringDefined(str){
   return str in DefinedVariables;
 }
 
+function RenderImportedVariablesTable(key){
+  let headers = {
+    mechanics: "Import Mechanics Variables Definitions",
+    thermal: "Import Thermal Variables Definitions",
+    waveOptics: "Import Wave Optics Variables Definitions",
+    em: "Import Electricity & Magnetism Variables Definitions",
+    modern: "Import Modern Physics Variables Definitions",
+  }
+  let vars = Object.assign({}, ImportVariableDefinitions[key]);
+  //we are going to go through vars and add information to it so that we know if a checkbox should be check, unchecked, or disabled
+  for(const [key, value] of Object.entries(vars)){
+    vars[key].checked = false;//variable should be unchchecked until we can prove that the user has already imported it
+    if(SimilarDefinedVariables[key] != undefined){
+      if(SimilarDefinedVariables[key].rid == value.rid){//this means that the user has imported this variable so when they open up the import modal again the variable should already be checked
+        vars[key].checked = true;
+      }
+      else{//this means that the user has imported a variable with the same ls but from a different section like modern physics or thermal so we must disable this option so that the definitions don't collide with each other
+        vars[key].disabled = true;
+      }
+    }
+  }
+
+  //now we need to render the object, then inject the html into the modal
+  let html = ejs.render(Templates["imported-variables-modal-content"], {header: headers[key], importedVariables: vars});
+  $("#import-variable-definition-modal-content").html(html);
+  //render the latex strings
+  $("#modal_import_variable_definition .static-physics-equation").each(function(i){
+    MQ.StaticMath($(this)[0]).latex($(this).attr("latex"));
+  });
+  //add event listeners for checkboxes
+  $("#import-all-mechanics-variables").change(function(){
+    $("#btn-update-imported-variables").removeClass("disabled");
+    if($(this).prop("checked")){
+      $(".variable-checkbox").prop("checked",true);
+    }
+    else{
+      $(".variable-checkbox").prop("checked",false);
+    }
+  });
+
+  $(".variable-checkbox").change(function(){
+    $("#btn-update-imported-variables").removeClass("disabled");
+  });
+  //now open the modal
+  $("#modal_import_variable_definition").modal("open");
+}
+
+function UpdateImportedVariables(){
+  //we need to go through all the checkboxes and add the ones that are checked and remove the ones that are not checked
+  $("#import-variable-definition-modal-content tbody .variable-checkbox").each(function(){
+    let ls = $(this).attr("latex");
+    if($(this).prop("checked")){
+      let variableRid = $(this).attr("rid");
+      let props = {};
+      //getting the properties of this specific variable
+      for(const [key, value] of Object.entries(ImportVariableDefinitions)){
+        if(value[ls] != undefined){
+          if(value[ls].rid == variableRid){
+            props = {
+              state: "unknown",
+              type: (value[ls].vector) ? "vector" : "scalar",
+              units: TrimUnitInputValue(CreateFullUnitsString(value[ls].quantity, ListOfSIUnits[value[ls].quantity].name, ListOfSIUnits[value[ls].quantity].symbol)),
+              unitsMathjs: value[ls].unitsMathjs,
+              quantity: value[ls].quantity,
+              rid: value[ls].rid,
+              canBeVector: value[ls].vector,
+            };
+            break;//we found the variable we are looking for and got all the information we need from it so we out
+          }
+        }
+      }
+      //then we update to import the variable in
+      UpdateSimilarDefinedVariables({
+        type: "update",
+        ls: ls,
+        props: props,
+      });
+    }
+    else{
+      //if it is not checked we need to remove it
+      UpdateSimilarDefinedVariables({
+        type: "remove",
+        ls: ls,
+      });
+    }
+  });
+
+  $("#modal_import_variable_definition").modal("close");
+}
+
+
 function UpdateSimilarDefinedVariables(opts){
-  console.log("UpdateSimilarDefinedVariables");
   if(opts.type == "update"){
     SimilarDefinedVariables[opts.ls] = {
       state: opts.props.state,
@@ -46,12 +126,13 @@ function UpdateSimilarDefinedVariables(opts){
       units: opts.props.units,
       unitsMathjs: opts.props.unitsMathjs,
       quantity: opts.props.quantity,
+      rid: opts.props.rid,
+      canBeVector: opts.props.canBeVector
     };
   }
   else if(opts.type == "remove"){
     delete SimilarDefinedVariables[opts.ls];
   }
-  //console.log(SimilarDefinedVariables);
 }
 
 
@@ -991,7 +1072,7 @@ function CheckIfAutoGeneratedVariablesAreBeingUsed(){
 }
 
 function RemoveDifferentialOperatorDFromLatexString(ls){
-  let acceptableStrings = ["\\vec"].concat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split(""));
+  let acceptableStrings = ["\\vec"].concat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split("")).concat(LatexGreekLetters);
   let newLs = "";
   let i = 0;
   let str = "";
@@ -1020,6 +1101,15 @@ function RemoveDifferentialOperatorDFromLatexString(ls){
         }
       }
 
+    }
+    else if(str.indexOf("\\Delta") == 0 && str.length > "\\Delta".length){//we check for \Delta again without a space because in latex when a latex string comes after another one there is no need for a space. the space is only for no latex strings
+      for(let c = 0; c < acceptableStrings.length; c++){
+        if(str.substring("\\Delta".length).indexOf(acceptableStrings[c]) == 0){//this means that the acceptable character comes right after "d" and uses "d" as a differntial operator for example the equation: dxdydz=dv, where x,y,z,v all use "d" as an operator
+          skipCharacter = true;//we want to skip this character
+          delta = "\\Delta".length;
+          break;//once we find a character that works we don't have to continue to parse through the rest of the array
+        }
+      }
     }
     else if(str.indexOf("_{") == 0 || str.indexOf("^{") == 0){
       //we don't parse any information in a sup or sub because those wouldnt have any actual operations happening inside them so we just record everything inside these ranges and move on

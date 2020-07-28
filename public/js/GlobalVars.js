@@ -1,8 +1,60 @@
 //Demensional Analysis, Getting Relevant and Unique Equations, Checks Simplifications
+function RID(){
+  let c = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let rid = "";
+  for(var i = 0; i < 10; i++){
+    let r = Math.random() * c.length;
+    rid += c.substring(r, r+1);
+  }
+
+  return rid;
+}
+
 let UnitsDropdownMenuOpen = false
 
-let ImportedVariableDefinitions = {
-  //starts out empty because no variable definitions are imported yet
+let ImportVariableDefinitions = {
+  //the key is the variable, unit is the latex string the describes the units for that variable, and key is the quantity name and key for ListOfSIUnits for the specific variable
+  mechanics: {
+    "t": {units: "s", quantityDescription: "time", quantity: "time", vector: false, unitsMathjs: "1 s", rid: RID(),},
+    "T": {units: "s", quantityDescription: "period", quantity: "time", vector: false, unitsMathjs: "1 s", rid: RID(),},
+    "f": {units: "Hz", quantityDescription: "frequency", quantity: "frequency", vector: false, unitsMathjs: "1 Hz",rid: RID(),},
+    "m": {units: "kg", quantityDescription: "mass", quantity: "mass", vector: false, unitsMathjs: "1 kg",rid: RID(),},
+    "l": {units: "m", quantityDescription: "length", quantity: "length", vector: false, unitsMathjs: "1 m",rid: RID(),},
+    "\\vec{x}": {units: "m", quantityDescription: "length", quantity: "length", vector: true, unitsMathjs: "1 m",rid: RID(),},
+    "\\vec{y}": {units: "m", quantityDescription: "length", quantity: "length", vector: true, unitsMathjs: "1 m",rid: RID(),},
+    "\\vec{z}": {units: "m", quantityDescription: "length", quantity: "length", vector: true, unitsMathjs: "1 m",rid: RID(),},
+    "\\vec{r}": {units: "m", quantityDescription: "radius", quantity: "length", vector: true, unitsMathjs: "1 m",rid: RID(),},
+    "h": {units: "m", quantityDescription: "height", quantity: "length", vector: false, unitsMathjs: "1 m",rid: RID(),},
+    "A": {units: "m^2", quantityDescription: "area", quantity: "area", vector: false, unitsMathjs: "1 m^2",rid: RID(),},
+    "V": {units: "m^3", quantityDescription: "volume", quantity: "volume", vector: false, unitsMathjs: "1 m^3",rid: RID(),},
+    "\\vec{v}": {units: "m/s", quantityDescription: "velocity", quantity: "velocity", vector: true, unitsMathjs: "1 m/s",rid: RID(),},
+    "\\vec{a}": {units: "m/s^2", quantityDescription: "velocity", quantity: "acceleration", vector: true, unitsMathjs: "1 m/s^2", rid: RID(),},
+    "\\vec{F}": {units: "N", quantityDescription: "force", quantity: "force", vector: true, unitsMathjs: "1 N", rid: RID(),},
+    "\\vec{N}": {units: "N", quantityDescription: "normal force", quantity: "force", vector: true, unitsMathjs: "1 N", rid: RID(),},
+    "\\mu": {units: "unitless", quantityDescription: "coefficient of friction", quantity: "coefficient of friction", vector: false, unitsMathjs: "1", rid: RID(),},
+    "\\vec{\\theta}": {units: "rad", quantityDescription: "plane angle", quantity: "plane angle", vector: true, unitsMathjs: "1 rad", rid: RID(),},
+    "\\vec{\\omega}": {units: "rad/s", quantityDescription: "angular velocity", quantity: "angular velocity", vector: true, unitsMathjs: "1 rad/s", rid: RID(),},
+    "\\vec{\\alpha}": {units: "rad/s^2", quantityDescription: "angular acceleration", quantity: "angular acceleration", vector: true, unitsMathjs: "1 rad/s^2", rid: RID(),},
+    "\\vec{p}": {units: "kg*m/s", quantityDescription: "momentum", quantity: "momentum", vector: true, unitsMathjs: " 1 kg m/s", rid: RID(),},
+    "\\vec{J}": {units: "kg*m/s", quantityDescription: "impulse", quantity: "impulse", vector: true, unitsMathjs: "1 kg m/s", rid: RID(),},
+    "W": {units: "J", quantityDescription: "work", quantity: "energy/work", vector: false, unitsMathjs: "1 J", rid: RID(),},
+    "E": {units: "J", quantityDescription: "energy", quantity: "energy/work", vector: false, unitsMathjs: "1 J", rid: RID(),},
+    "K": {units: "J", quantityDescription: "kinetic energy", quantity: "energy/work", vector: false, unitsMathjs: "1 J", rid: RID(),},
+    "U": {units: "J", quantityDescription: "potential energy", quantity: "energy/work", vector: false, unitsMathjs: "1 J", rid: RID(),},
+    "P": {units: "W", quantityDescription: "power", quantity: "power", vector: false, unitsMathjs: "1 W", rid: RID(),},
+    "\\eta": {units: "unitless", quantityDescription: "energy efficiency", quantity: "energy efficiency", vector: false, unitsMathjs: "1", rid: RID(),},
+    "\\vec{\\tau}": {units: "N*m", quantityDescription: "torque", quantity: "torque/moment of force", vector: true, unitsMathjs: "1 N m", rid: RID(),},
+    "I": {units: "kg*m^2", quantityDescription: "moment of inertia", quantity: "moment of inertia", vector: false, unitsMathjs: "1 kg m^2", rid: RID(),},
+    "\\vec{L}": {units: "kg*m^2/s", quantityDescription: "angular momentum", quantity: "angular momentum", vector: true, unitsMathjs: "1 kg m^2/s", rid: RID(),},
+    "\\vec{H}": {units: "kg*m^2/s", quantityDescription: "angular impulse", quantity: "angular impulse", vector: true, unitsMathjs: "", rid: RID(),},
+    "k": {units: "N/m", quantityDescription: "spring constant", quantity: "spring constant", vector: false, unitsMathjs: "1 N/m", rid: RID(),},
+    "\\rho": {units: "kg/m^3", quantityDescription: "mass density", quantity: "mass density", vector: false, unitsMathjs: "1 kg/m^3", rid: RID(),},
+  },
+  thermal: {},
+  waveOptics: {},
+  em: {},
+  modern: {},
+
 };
 
 let PreDefinedVariables = {
@@ -60,7 +112,7 @@ let PreDefinedVariables = {
     type: "constant",
     units: "unitless",
     value: Math.PI.toFixed(5),
-    unitsMathjs: "1 rad",
+    unitsMathjs: "1",
   },
   "e": {
     state: "known",

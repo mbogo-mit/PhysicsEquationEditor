@@ -1,45 +1,8 @@
-<div id="modal_import_mechanics_variable_definition" class="modal modal-fixed-footer" type="new">
-  <div class="modal-content">
-    <div class="row">
-      <h4>Mechanics Common Variable Definitions</h4>
-    </div>
-    <div class="row">
-      <div class="col m12">
-        <label>
-          <input id="import-all-mechanics-variables" type="checkbox" />
-          <span>Import All Variables</span>
-        </label>
-      </div>
-    </div>
-    <div class="row">
-      <table>
-        <thead>
-          <tr>
-              <th>Symbol</th>
-              <th>Quantity</th>
-              <th>Use</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <% for (const [key, value] of Object.entries(ImportVariableDefinitions.mechanics)) {%>
-          <tr>
-            <td><span class="static-physics-equation" latex="<%= key %>"></span></td>
-            <td><%= value.quantity %> (<%= value.unit %>)</td>
-            <td>
-              <label>
-                <input class="variable-checkbox" type="checkbox"/>
-                <span class=""></span>
-              </label>
-            </td>
-          </tr>
-          <% } %>
-        </tbody>
-      </table>
-    </div>
+<div id="modal_import_variable_definition" class="modal modal-fixed-footer" type="new">
+  <div id="import-variable-definition-modal-content" class="modal-content">
   </div>
   <div class="modal-footer">
-    <a id="btn-update-imported-variables" href="#!" class="modal-close waves-effect waves-green btn disabled">Update</a>
+    <a id="btn-update-imported-variables" href="#!" class="waves-effect waves-green btn disabled" onclick="UpdateImportedVariables()">Update</a>
     <a href="#!" class="modal-close waves-effect waves-green btn">Cancel</a>
   </div>
 </div>
