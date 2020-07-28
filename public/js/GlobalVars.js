@@ -1,5 +1,5 @@
 //Demensional Analysis, Getting Relevant and Unique Equations, Checks Simplifications
-
+let UnitsDropdownMenuOpen = false
 
 let ImportedVariableDefinitions = {
   //starts out empty because no variable definitions are imported yet

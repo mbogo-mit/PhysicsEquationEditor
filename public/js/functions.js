@@ -1060,10 +1060,13 @@ function OrderMathFieldIdsByLineNumber(ids){
 }
 
 function DefineVariableUnits(el, rid){
-  //expanding unit badge
-  ToggleVariableBadgeUnitsSize(el, rid, true);
-  //displaying dropdown search menu
-  DisplayUnitDropdownSearchMenu(el, rid);
+  if(!UnitsDropdownMenuOpen){//if the menu is not open then open it
+    //expanding unit badge
+    ToggleVariableBadgeUnitsSize(el, rid, true);
+    //displaying dropdown search menu
+    DisplayUnitDropdownSearchMenu(el, rid);
+  }
+
 }
 
 function ToggleVariableBadgeUnitsSize(el = null, rid = "", expand = false){
@@ -1091,6 +1094,9 @@ function DisplayUnitDropdownSearchMenu(el, rid){
 
   RenderSIUnitsSearch();//start a search to bring up all the variables
 
+  //this line of code is needed because we need a slight delay so that the dropdown is not immediately closed by MainScreenClicked() function
+  setTimeout(function(){UnitsDropdownMenuOpen = true;}, 500);
+
 }
 
 function RenderSIUnitsSearch(){
@@ -1114,7 +1120,8 @@ function SelectSIUnitRow(el){
 }
 
 function CloseUnitDropdownSearchMenu(){
-  $("#units-dropdown-menu").css("display","none");
+  UnitsDropdownMenuOpen = false;
+  $("#units-dropdown-menu").css({display: "none", top: -1000});
   $("#input-user-units-search").val("");
   $("#units-search-results").html("");
   $("#btn-update-variable-units").removeAttr("rid");
@@ -1184,4 +1191,12 @@ function UpdateVariableUnits(el){
     UpdateMyVariablesCollection({update: true});
   }
 
+}
+
+function MainScreenClicked(e){
+  if(UnitsDropdownMenuOpen){
+    if($("#units-dropdown-menu").find(e.target).length == 0){
+      CloseUnitDropdownSearchMenu();
+    };
+  }
 }

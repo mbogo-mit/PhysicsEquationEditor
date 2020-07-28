@@ -100,4 +100,8 @@ $(document).ready(function(){
   //keepboard should be down to begin with
   ToggleKeyboard();
 
+  $("#main-screen").click(function(e){
+    MainScreenClicked(e);
+  })
+
 });
