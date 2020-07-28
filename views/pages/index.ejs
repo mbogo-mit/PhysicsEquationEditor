@@ -8,10 +8,8 @@
     <%- include("../partials/loading-screen.ejs");%>
     <div id="main-screen">
       <%- include("../partials/nav.ejs");%>
-      <%- include("../partials/modal-define-variable.ejs");%>
       <%- include("../partials/modal-import-variable-definition.ejs", {ImportVariableDefinitions: ImportVariableDefinitions});%>
       <%- include("../partials/my-container.ejs",{loe:loe, lopc: lopc});%>
-      <%- include('../partials/variable-description-menu.ejs');%>
       <%- include('../partials/line-message-box.ejs');%>
       <%- include('../partials/keyboard-container.ejs');%>
       <%- include('../partials/units-dropdown-menu.ejs');%>
