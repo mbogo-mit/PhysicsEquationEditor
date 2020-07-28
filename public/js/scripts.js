@@ -24,7 +24,12 @@ $(document).ready(function(){
   MessageBoxMathFields.warning.m1 = MQ.StaticMath($("#warning-box-undefined-vars")[0]);
 
   $('.tabs').tabs();
-  $("#modal-physics-equation-more-information, #modal_import_mechanics_variable_definition").modal();
+  $("#modal-physics-equation-more-information").modal();
+  $("#modal_import_mechanics_variable_definition").modal({
+    onOpenStart: function(){
+      $("#btn-update-imported-variables").addClass("disabled");
+    },
+  })
   $('.collapsible').collapsible();
   $("#physics_equations .collapsible").collapsible({
     onOpenEnd: function(){
@@ -103,5 +108,19 @@ $(document).ready(function(){
   $("#main-screen").click(function(e){
     MainScreenClicked(e);
   })
+
+  $("#import-all-mechanics-variables").change(function(){
+    $("#btn-update-imported-variables").removeClass("disabled");
+    if($(this).prop("checked")){
+      $(".variable-checkbox").prop("checked",true);
+    }
+    else{
+      $(".variable-checkbox").prop("checked",false);
+    }
+  });
+
+  $(".variable-checkbox").change(function(){
+    $("#btn-update-imported-variables").removeClass("disabled");
+  });
 
 });

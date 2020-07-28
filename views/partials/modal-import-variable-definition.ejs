@@ -6,8 +6,8 @@
     <div class="row">
       <div class="col m12">
         <label>
-          <input type="checkbox" />
-          <span class="">Import All Variables</span>
+          <input id="import-all-mechanics-variables" type="checkbox" />
+          <span>Import All Variables</span>
         </label>
       </div>
     </div>
@@ -15,9 +15,8 @@
       <table>
         <thead>
           <tr>
-              <th>Quantity</th>
               <th>Symbol</th>
-              <th>Unit</th>
+              <th>Quantity</th>
               <th>Use</th>
           </tr>
         </thead>
@@ -25,12 +24,11 @@
         <tbody>
           <% for (const [key, value] of Object.entries(ImportVariableDefinitions.mechanics)) {%>
           <tr>
-            <td><%= value.quantity %></td>
             <td><span class="static-physics-equation" latex="<%= key %>"></span></td>
-            <td><span class="static-physics-equation" latex="<%= value.unit %>"></span></td>
+            <td><%= value.quantity %> (<%= value.unit %>)</td>
             <td>
               <label>
-                <input type="checkbox" />
+                <input class="variable-checkbox" type="checkbox"/>
                 <span class=""></span>
               </label>
             </td>
@@ -41,7 +39,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <a href="#!" class="modal-close waves-effect waves-green btn disabled">Update</a>
+    <a id="btn-update-imported-variables" href="#!" class="modal-close waves-effect waves-green btn disabled">Update</a>
     <a href="#!" class="modal-close waves-effect waves-green btn">Cancel</a>
   </div>
 </div>
