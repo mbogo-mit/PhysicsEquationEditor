@@ -117,4 +117,9 @@ $(document).ready(function(){
 
   $("#editor-log-container .collapsible .collapsible-body.information-container").css("max-height",`${window.innerHeight - $("#editor-log-container .collapsible.log-container").height()}px`);
 
+  //when user is searching for units in the units dropdown
+  $("#input-user-units-search").on("input",function(){
+    RenderSIUnitsSearch();
+  });
+
 });

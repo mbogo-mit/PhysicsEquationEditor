@@ -1545,3 +1545,131 @@ function OrderMathFieldIdsByLineNumber(ids){
 
   return orderedIds;
 }
+
+function DefineVariableUnits(el, rid){
+  //expanding unit badge
+  ToggleVariableBadgeUnitsSize(el, rid, true);
+  //displaying dropdown search menu
+  DisplayUnitDropdownSearchMenu(el, rid);
+}
+
+function ToggleVariableBadgeUnitsSize(el = null, rid = "", expand = false){
+  if(expand){
+    //we need to calculate how large to expand it
+    let w = el.parent(".collection-item").width() - $(`.static-physics-equation[rid='${rid}']`).width() - 185;
+    el.css("width",`${w}px`);
+  }
+  else{
+    $("#my_variables-collection-container .badge.units").css("width","auto");
+  }
+}
+
+function DisplayUnitDropdownSearchMenu(el, rid){
+  let r = el[0].getBoundingClientRect();
+  if(r.top < window.innerHeight / 2){
+    $("#units-dropdown-menu").css({top: r.top + r.height + 10, left: r.left, width: r.width, display: "block"});
+  }
+  else{
+    $("#units-dropdown-menu").css({top: r.top - ($("#units-dropdown-menu").height() + 10), left: r.left, width: r.width, display: "block"});
+  }
+
+  //setting value so that the menu knowns what to update once the user has chosen the unit they want
+  $("#btn-update-variable-units").attr("rid",rid);
+
+  RenderSIUnitsSearch();//start a search to bring up all the variables
+
+}
+
+function RenderSIUnitsSearch(){
+  //everytime you search you should disable the updated button because no si unit is selected
+  $("#btn-update-variable-units").addClass("disabled");
+  let search = $("#input-user-units-search").val();
+  results = [];
+  for(const [key, value] of Object.entries(UnitReference)){
+    if(key.search(search) != -1){
+      results.push(key);
+    }
+  }
+  let html = ejs.render(Templates["units-search-results"], {results: results});
+  $("#units-search-results").html(html);
+}
+
+function SelectSIUnitRow(el){
+  $(".si-unit-row").removeClass("active");
+  el.addClass("active");
+  $("#btn-update-variable-units").removeClass("disabled");
+}
+
+function CloseUnitDropdownSearchMenu(){
+  $("#units-dropdown-menu").css("display","none");
+  $("#input-user-units-search").val("");
+  $("#units-search-results").html("");
+  $("#btn-update-variable-units").removeAttr("rid");
+  $("#btn-update-variable-units").addClass("disabled");
+  ToggleVariableBadgeUnitsSize();
+}
+
+function UpdateVariableUnits(el){
+
+  if(!el.hasClass("disabled")){
+    let rid = el.attr("rid");
+    let fullUnitsString = $("#units-search-results .si-unit-row.active").attr("fullUnitssString");
+
+    let foundVariable = false;
+    let ls = "";
+    let props = {};
+
+    for(const [key, value] of Object.entries(DefinedVariables)){
+      if(value.rid == rid){
+        foundVariable = true;
+        ls = key;
+        props.type = value.type;
+        props.state = value.state;
+        break;
+      }
+    }
+
+    if(!foundVariable){
+      for(const [key, value] of Object.entries(EL.undefinedVars.undefined)){
+        if(value.rid == rid){
+          foundVariable = true;
+          ls = key;
+          props.type = value.type;
+          props.state = value.state;
+          break;
+        }
+      }
+    }
+
+    if(!foundVariable){
+      for(const [key, value] of Object.entries(EL.undefinedVars.defined)){
+        if(value.rid == rid){
+          foundVariable = true;
+          ls = key;
+          props.type = value.type;
+          props.state = value.state;
+          break;
+        }
+      }
+    }
+
+    console.log(fullUnitsString);
+    props.fullUnitsString = fullUnitsString;
+    props.units = TrimUnitInputValue(fullUnitsString);
+    props.unitsMathjs = UnitReference[fullUnitsString].unitsMathjs;
+    props.quantity = UnitReference[fullUnitsString].quantity;
+
+    UpdateDefinedVariables({
+      type: "update",
+      ls: ls,
+      editable: true,
+      props: props,
+    });
+
+    CloseUnitDropdownSearchMenu();
+
+    //then after we have edited either DefinedVariables or EL.undefinedVars.defined then we need to update the collection with the new information
+    UpdateMyVariablesCollection({update: true});
+  }
+
+}

@@ -158,20 +158,17 @@ function EditorLogger(){
 
   this.saveUndefinedVariablesData = function(){
     this.savedUndefinedVars = Object.assign({}, this.undefinedVars);
-    console.log(this.savedUndefinedVars);
   }
 
   this.retrieveSavedUndefinedVariablesData = function(ls){
     for(const [key, value] of Object.entries(this.savedUndefinedVars.undefined)){
       if(ls == key){
-        console.log('found match');
         return value;
       }
     }
 
     for(const [key, value] of Object.entries(this.savedUndefinedVars.defined)){
       if(ls == key){
-        console.log('found match');
         return value;
       }
     }
