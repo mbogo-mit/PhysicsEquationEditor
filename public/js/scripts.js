@@ -2,6 +2,8 @@ $(document).ready(function(){
 
   $("#determinate-loader").css("width","100%");
 
+  ListOfPhysicsConstants = JSON.parse($("#main-screen").attr("lopc"));
+
   setTimeout(function(){
     $("#loading-screen").animate({
       opacity: 0.0

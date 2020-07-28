@@ -1730,7 +1730,7 @@ ListOfPhysicsConstants = [
   {
     quantity: "force",
     quantityDescription: "Acceleration due to gravity",
-    symbol: "\\vec{g}",
+    symbol: "g",
     value: "9.8",
     unit: "\\frac{m}{s^2}",
     unitString: "m/s^2",

@@ -113,7 +113,7 @@ let Templates = {
       <% if(opts.variable.dynamicUnits){%>
         <span onclick="DefineVariableUnits($(this), '<%= opts.variable.rid %>')" class="new badge info units dynamic-units tooltipped" data-position="bottom" data-tooltip="This unit was dynamically created by the editor" data-badge-caption="<%= opts.variable.units %>"></span>
       <%}else{%>
-        <span onclick="DefineVariableUnits($(this), '<%= opts.variable.rid %>')" class="new badge info units tooltipped" data-position="bottom" data-tooltip="This unit was set by the user" data-badge-caption="<%= opts.variable.units %>"></span>
+        <span onclick="DefineVariableUnits($(this), '<%= opts.variable.rid %>')" class="new badge info units tooltipped" data-position="bottom" data-tooltip="This unit was set by the user or imported" data-badge-caption="<%= opts.variable.units %>"></span>
       <%}%>
       <% if(opts.variable.type == "vector" && !opts.variable.canBeVector){%>
         <span class="new badge info cantBeVector btn-floating pulse tooltipped" data-position="left" data-tooltip="This unit can't be a vector" data-badge-caption="<%= opts.variable.type %>">
