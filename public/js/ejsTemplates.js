@@ -59,9 +59,8 @@ let Templates = {
                 <div class="collapsible-body">
                   <div class="row">
                     <div class="col m12">
-                      <span>Click to variables to define them: </span>
                       <% for(let c =0; c < log.warning[i].variables.length; c++){%>
-                          <span class="undefined-variable-badge log-static-latex" onclick="DefineUndefinedVariable($(this))" latex="<%= log.warning[i].variables[c] %>"><%= log.warning[i].variables[c] %></span>
+                          <span class="undefined-variable-badge log-static-latex" latex="<%= log.warning[i].variables[c] %>"><%= log.warning[i].variables[c] %></span>
                       <% }%>
                     </div>
                   </div>
@@ -93,7 +92,6 @@ let Templates = {
       </ul>
     </div>
   </div>
-
   `,
   "VariableCollection": {
     "physics-constant":
@@ -109,7 +107,7 @@ let Templates = {
     "defined-variable":
     `
     <li class="collection-item">
-      <span class="static-physics-equation editable-variable tooltipped" data-position="left" data-tooltip="Edit" latex="<%= opts.ls %>" rid="<%= opts.variable.rid %>" onclick="EditVariableDefinition($(this))"></span>
+      <span class="static-physics-equation editable-variable" latex="<%= opts.ls %>" rid="<%= opts.variable.rid %>"></span>
       <span class="right delete-var" onclick="UpdateMyVariablesCollection({rid: '<%= opts.variable.rid %>',remove: true, editable: true})"><i class="material-icons">close</i></span>
       <span onclick="ToggleVariableState('<%= opts.variable.rid %>')" class="new badge <%= opts.variable.state %>" data-badge-caption="<%= opts.variable.state %>"></span>
       <span onclick="DefineVariableUnits($(this), '<%= opts.variable.rid %>')" class="new badge info units <%= (opts.variable.dynamicUnits) ? 'dynamic-units' : ''%>" data-badge-caption="<%= opts.variable.units %>"></span>
@@ -127,7 +125,7 @@ let Templates = {
     "undefined-variable":
     `
     <li class="collection-item undefined-variable">
-      <span class="static-physics-equation editable-variable tooltipped" data-position="left" data-tooltip="Edit" latex="<%= opts.ls %>" rid="<%= opts.variable.rid %>" onclick="EditVariableDefinition($(this))"></span>
+      <span class="static-physics-equation editable-variable" latex="<%= opts.ls %>" rid="<%= opts.variable.rid %>"></span>
       <span class="right delete-var" onclick="UpdateMyVariablesCollection({remove: true, cantRemove: true})"><i class="material-icons">close</i></span>
       <span onclick="ToggleVariableState('<%= opts.variable.rid %>')" class="new badge <%= opts.variable.state %>" data-badge-caption="<%= opts.variable.state %>"></span>
       <span onclick="DefineVariableUnits($(this), '<%= opts.variable.rid %>')" class="new badge info undefined-units units" data-badge-caption="<%= opts.variable.units %>"></span>

@@ -73,22 +73,6 @@ body {
   box-shadow: none !important;
 }
 
-#modal_define_variable[type="new"] #static-math-define-variable {
-  display: none;
-}
-
-#modal_define_variable[type="new"] #dynamic-math-define-variable {
-  display: inline-block;
-}
-
-#modal_define_variable[type="existing"] #static-math-define-variable {
-  display: inline-block;
-}
-
-#modal_define_variable[type="existing"] #dynamic-math-define-variable, #modal_define_variable[type="existing"] #dynamic-math-define-variable-helper-text, #variable-type-helper-text {
-  display: none;
-}
-
 #define-variable-text {
   font-size: 25px;
   color: #424242;
@@ -114,16 +98,6 @@ body {
   border-bottom: 2px solid #009688;
 }
 
-
-#modal_define_variable {
-  height: 600px;
-  max-height: 90%;
-}
-
-#modal_define_variable .modal_header {
-  font-size: 20px;
-}
-
 #constant-variable-value-text {
   color: #757575;
   font-size: .8rem;
@@ -132,22 +106,6 @@ body {
 #input-exact-value-wrapper {
   padding-left: 30px;
   display: none;
-}
-
-#edit_variable_description {
-  padding: 10.5px 3px 8px 3px;
-  background-color: white;
-  position:relative;
-  left:-21px;
-  cursor: pointer;
-  border-top: 1px solid #eeeeee;
-  border-left: 1px solid #eeeeee;
-  border-bottom: 1px solid #eeeeee;
-  color: black;
-}
-
-#edit_variable_description i:hover{
-  color: #e0e0e0;
 }
 
 #variable-value-math-field {
@@ -246,41 +204,6 @@ body {
 
 #equation-editor-errors {
   margin-top: 20px;
-}
-
-#variable_description_menu {
-  top: 0px;
-  left: 0px;
-  position: absolute;
-  height: 30px;
-  display: none;
-  background-color: white;
-}
-
-#variable_description_menu table {
-  position:relative;
-  top:-32px;
-  background-color: white;
-}
-
-#variable_description_menu table td {
-  padding: 0px 3px !important;
-  border-right: 1px solid #eeeeee;
-  border-top: 1px solid #eeeeee;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-#variable_description_menu table th {
-  padding: 0px 3px !important;
-  border-right: 1px solid #eeeeee;
-  border-top: 1px solid #eeeeee;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-#variable_description_menu table .variable_state {
-  border-left: 1px solid #eeeeee;
 }
 
 .relevant-equations-badge {

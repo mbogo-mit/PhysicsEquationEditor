@@ -17,80 +17,6 @@ function RID(){
   return rid;
 }
 
-function AddHoverEventToVariablesAndVectors(id){
-  //first we are going to add hover event to vectors only
-
-  $(`#${id} var, .mq-nonSymbola`).unbind('mouseenter mouseleave');
-
-  $(`#${id} var, .mq-nonSymbola`).hover(function(){
-    if(!MOUSEDOWN){
-      if(!ParsedHoverRequest){
-        ParsedHoverRequest = true;
-        CurrentlyHoveredMCI = $(this).attr("mathquill-command-id");
-
-        HoveredOutOfTaggedVariable = false;
-        setTimeout(function(r){
-          if(!HoveredOutOfTaggedVariable){
-            ShowSelectionMenu(r);////right after we tag a variable we need to show all the information about the variable
-          }
-        }, ShowMenuTimeout,$(this)[0].getBoundingClientRect());
-
-        TagVariable(id);
-        //console.log("hover");
-      }
-    }
-
-  },function(){//hover out
-    ParsedHoverRequest = false;
-    HoveredOutOfTaggedVariable = true;
-
-    setTimeout(function(){
-      if(!HoveringOverVariableDescriptionMenu){
-        HideSelectionMenu();
-      }
-    }, HideMenuTimeout);
-
-  });
-
-  $(`#${id} .mq-non-leaf > .mq-diacritic-above`).each(function(){
-    $(this).parent().unbind('mouseenter mouseleave');
-    $(this).parent().find("var, .mq-nonSymbola").unbind('mouseenter mouseleave');//remove hover event from any variable inside the vector because the vector already has a hover event
-    $(this).parent().hover(function(){
-      if(!MOUSEDOWN){
-        if(!ParsedHoverRequest){
-          ParsedHoverRequest = true;
-          let r = $(this)[0].getBoundingClientRect();
-          CurrentlyHoveredMCI = $(this).attr("mathquill-command-id");
-
-          HoveredOutOfTaggedVariable = false;
-          setTimeout(function(r){
-            if(!HoveredOutOfTaggedVariable){
-              ShowSelectionMenu(r);////right after we tag a variable we need to show all the information about the variable
-            }
-          }, ShowMenuTimeout,$(this)[0].getBoundingClientRect());
-
-          TagVariable(id);
-          //console.log("hover");
-        }
-      }
-    },function(){//hover out
-      ParsedHoverRequest = false;
-      HoveredOutOfTaggedVariable = true;
-
-      setTimeout(function(){
-        if(!HoveringOverVariableDescriptionMenu){
-          HideSelectionMenu();
-        }
-      }, HideMenuTimeout);
-    });
-
-    //after putting the hover event on the vector as a whole we need to remove the hover event
-    //from any var tags that may be inside the vector so they are not triggered when the user hovers over the vector
-    $(this).parent().find("var, .mq-nonSymbola").unbind("mouseover");
-  });
-
-}
-
 function replaceLatexKeywordsWithSpace(latexString){
   let cmds = ["\\sqrt","\\frac"];
   for(var i = 0; i < cmds.length; i++){
@@ -109,31 +35,6 @@ function SelectedStringPossibleVariable(str){
 
 function SelectedStringDefined(str){
   return str in DefinedVariables;
-}
-
-function ShowSelectionMenu(r){
-  $("#variable_description_menu").css({top: r.top + 45, left: r.left + 20});
-  $("#variable_description_menu").css("display","block");
-}
-
-function PopulateSelectionMenu(props, editable = true){
-  //fill the menu with the proper data
-  if(editable){
-    $("#edit_variable_description").css("display","inline");
-  }
-  else{
-    $("#edit_variable_description").css("display","none");
-  }
-  $("#variable_description_menu tbody .variable_state").html(props.state);
-  $("#variable_description_menu tbody .variable_type").html(props.type);
-  $("#variable_description_menu tbody .variable_units").html(props.units);
-
-}
-
-function HideSelectionMenu(){
-  $("#variable_description_menu").css("display","none");
-
-  HoveringOverVariableDescriptionMenu = false;//if the menu is not showing then the user can't be hovering over it
 }
 
 function UpdateSimilarDefinedVariables(opts){
@@ -219,72 +120,6 @@ function GetFullUnitsStringFromUnitsMathJs(unitsMathjs){
   return {str: unitsMathjs, custom: true, canBeVector: true};
 }
 
-function UpdatedVariableDefinition(){
-  $("#btn_udpate_variable_definition").addClass("disabled");//once the button is click it needs to be disabled
-  $("#select_known_or_unknown").formSelect();
-  $("#select_variable_type").formSelect();
-  let props = {
-    state: ($("#select_known_or_unknown").formSelect('getSelectedValues')[0]),
-    type: $("#select_variable_type").formSelect('getSelectedValues')[0],
-    units: TrimUnitInputValue($("#input-units-autocomplete").val()),
-    fullUnitsString: $("#input-units-autocomplete").val(),
-    value: (isExactValueInputFilledProperly() && VariableValueMathField.latex().length > 0) ? VariableValueMathField.latex() : undefined,
-    unitsMathjs: UnitReference[$("#input-units-autocomplete").val()].unitsMathjs,//returns latex string for that particular input
-    quantity: UnitReference[$("#input-units-autocomplete").val()].quantity,
-  };
-
-  //figuring out if we are defining an new variable or an existing one
-  let ls = ($("#modal_define_variable").attr("type") == "new") ? DynamicMathField.latex() : StaticMathField.latex();
-  ls = PutBracketsAroundAllSubsSups(ls);
-  ls = ls.replace(/\\\s/g).replace(/\s/g,"");//removing unnecessary spaces which include latex formating space "\ " and just empty space "     "
-  //if the user inputed that the variable is a vector but didn't put the vector sign or related signs then we will do that for them
-  if(props.type == "vector" && (ls.indexOf('\\vec{') == -1 && ls.indexOf('\\hat{') == -1 && ls.indexOf('\\bar{') == -1 && ls.indexOf('\\overline{') == -1)){
-    ls = `\\vec{${ls}}`;
-  }
-  //if the user inputed that the variable is a scalar but has the vector sign in their input then we will remove the vector sign for them
-  if(props.type == "scalar" && ls.indexOf('\\vec{') != -1){
-    ls = ls.substring(5,ls.length - 1);//removes "\vec{" from beginning and "}" from end
-  }
-
-  if($("#input-similar-defined-variables").prop("checked")){
-    UpdateSimilarDefinedVariables({
-      type: "update",
-      ls: ls.replace(/_\{[^\}\{\s]*\}/g,""),//removes underscores to make variable more generic
-      props: {
-        state: "unknown",
-        type: props.type,
-        units: props.units,
-        unitsMathjs: props.unitsMathjs,
-        quantity: props.quantity,
-      },
-    });
-  }
-  else{
-    UpdateSimilarDefinedVariables({
-      type: "remove",
-      ls: ls.replace(/_\{[^\}\{\s]*\}/g,""),//removes underscores to make variable more generic
-    });
-  }
-
-  UpdateDefinedVariables({
-    type: "update",
-    ls: ls,
-    editable: true,
-    props: props,
-  });
-  UpdateMyVariablesCollection({update: true});
-
-  //clear modal and resetting all values
-  $("#select_known_or_unknown").val("");
-  $("#select_variable_type").val("");
-  $("#input-units-autocomplete").val("");
-  VariableValueMathField.latex("");
-  $("#input-exact-value-wrapper").css("display","none");
-  $("#input-similar-defined-variables").prop("checked",true);
-
-  MathFields[FocusedMathFieldId].mf.focus();
-}
-
 function ToggleVariableState(rid){
   let foundVariable = false;
 
@@ -343,123 +178,6 @@ function TrimUnitInputValue(str){
   }
 
   return str;
-}
-
-function TagVariable(id){
-  CurrentlyTaggingVariables = true;
-  console.log('Tag Variable!');
-  if(CurrentlyHoveredMCI != null){
-
-    //before we do anything we need to save the current position of the cursor so we can put it back to where it was once we are done
-    let cp = GetCurrentCursorPositionFromTheRight(id);
-
-    //mathField.focus();
-    MathFields[id].mf.moveToLeftEnd();
-    //$("#math-field .mq-selection").children().unwrap();
-    let hoveredElmnt = $(`#${id} [mathquill-command-id='${CurrentlyHoveredMCI}']`);
-    //console.log(CurrentlyHoveredMCI);
-    //console.log($(`[mathquill-command-id='${CurrentlyHoveredMCI}']`));
-    //this while loop positions the mathquil cursor in the right place
-    while(!hoveredElmnt.prev().hasClass("mq-cursor")){
-      MathFields[id].mf.keystroke("Right")
-    }
-
-    if(hoveredElmnt.next().hasClass("mq-supsub")){
-      //console.log(hoveredElmnt.next().children(".mq-sub"));
-      if(hoveredElmnt.next().children(".mq-sub").length > 0){
-        //selecting the subscript of the variable as well
-        MathFields[id].mf.keystroke("Shift-Right");
-      }
-    }
-
-    //then we select the element we just hovered
-    MathFields[id].mf.keystroke("Shift-Right");
-
-    let ls = MathFields[id].mf.latex();
-
-    MathFields[id].mf.typedText("$")
-    let ls3 = MathFields[id].mf.latex();
-    //console.log("ls3 " + ls3);
-    ls = AdjustLatexForSubSup(ls, ls3);//editing ls if we see that their is inconsistency with how sub or sups are formatted
-    //console.log("ls " + ls);
-    let ls2 = MathFields[id].mf.latex().split("\\$");
-    //console.log(ls2);
-    let startIndex = ls.indexOf(ls2[0]);//start Index is always 0 based on my testing
-    //we should only check the part of the string that comes after the variable we are trying to tag so we need to start the string substring at the index of the length of the first half of the string that is on the left of the variable that is being tagged
-    //once we get the index we need to add back (startIndex + ls2[0].length) because that is how much off the number is from the orginal string beacuse we used a substring that is not the whole length of the string
-    let endIndex = ls.substring(startIndex + ls2[0].length).indexOf(ls2[1]) + startIndex + ls2[0].length;
-    let selectedString = "";
-    if(endIndex == startIndex + ls2[0].length){//this expression equals true when ls2[1] = "" meaning that the variable we are trying to tag is on the very right edge of the equation
-      selectedString = ls.substring(startIndex + ls2[0].length);
-    }
-    else{
-      selectedString = ls.substring(startIndex + ls2[0].length, endIndex);
-    }
-
-    MathFields[id].mf.keystroke("Shift-Left");
-    MathFields[id].mf.keystroke("Del");
-    MathFields[id].mf.write(selectedString);
-    StaticMathField.latex(selectedString);
-    //console.log(selectedString);
-    if(Object.keys(DefinedVariables).includes(selectedString)){
-      PopulateSelectionMenu(Object.assign({}, DefinedVariables[selectedString]), true);
-    }
-    else if(Object.keys(PreDefinedVariables).includes(selectedString)){
-      PopulateSelectionMenu(Object.assign({}, PreDefinedVariables[selectedString]), false);
-    }
-    else{
-      PopulateSelectionMenu(Object.assign({}, DefaultDefinedVariable), true);
-    }
-
-    //we should only place the cursor back if this mathfield is the mathfield that is currently being focused on by the user
-    if(FocusedMathFieldId == id){
-      //ok now that we are done editing we need to put the cursor back to its previous location
-      MathFields[id].mf.moveToRightEnd();
-      for(var c = 0; c < cp; c++){
-        MathFields[id].mf.keystroke("Left");
-      }
-    }
-    else{
-      MathFields[id].mf.blur();
-    }
-
-  }
-
-  CurrentlyTaggingVariables = false;
-}
-
-function AdjustLatexForSubSup(ls1,ls2){
-  //we are going to compare the two strings and the minute they are not in agreement we will check if the character before that disagrement was a _ or ^ and it will tell us that their is an inconsistnecy in formatting so we will fix ls1 and return it
-  let i = 0;
-  while(i < ls1.length && i < ls2.length){
-    if(ls1[i] != ls2[i]){//the minute the string don't match we will stop the while loop but we need to run checks to figure out why they don't match and it if has to do with ^ and _ formating of brackets
-      if(i != 0){//i has to be greater than 0 for it to be a bracket formatting problem because there has to be a character (^ or _) before the mismatch
-        //now we have to check if the previous character is a ^ or _
-        if(ls1[i-1] == "^" || ls2[i-1] =="_"){//the character before the mismatch has to be a ^ or _ for us to consider changing the latex string
-          //copy
-          let str = ls1.slice();
-          //edit and save
-          ls1 = str.substring(0,i) + "{" + str.substring(i,i+1) + "}" + str.substring(i+1);
-        }
-      }
-      break;
-    }
-    i++;
-  }
-
-  return ls1;
-}
-
-function GetCurrentCursorPositionFromTheRight(id){
-  //this function counts how many keystrokes it takes to get to the very right of the line and then returns that number so when the dom is edited and the cursor is moved around we can figure out where to put it later
-  let p = 0;
-  while(!$(`#${id} .mq-root-block`).children().last().hasClass("mq-cursor")){
-    MathFields[id].mf.keystroke("Right");
-    p++;
-  }
-  MathFields[id].mf.moveToLeftEnd();
-
-  return p;
 }
 
 function AddNewEditorLineToEnd(){
@@ -595,27 +313,6 @@ function GenerateAutoCompleteData(){
   return data;
 }
 
-function CheckUnitsValue(){
-
-  console.log("Check Units Value")
-
-  //console.log($("#input-units-autocomplete").val());
-
-  if(Object.keys(AutoGeneratedUnitData).includes($("#input-units-autocomplete").val())){
-    $("#units-helper-text").html("Valid Unit");
-    $("#units-helper-text").attr("valid","true");
-    $("#units-helper-text").addClass("teal-text");
-    $("#units-helper-text").removeClass("red-text");
-  }
-  else{
-    $("#units-helper-text").html("Unit not recognized");
-    $("#units-helper-text").attr("valid",false);
-    $("#units-helper-text").removeClass("teal-text");
-    $("#units-helper-text").addClass("red-text");
-  }
-
-}
-
 function IsInputAValidVariable(ls){
   console.log("IsInputAValidVariable");
   //console.log(ls);
@@ -635,80 +332,6 @@ function IsInputAValidVariable(ls){
   }
 
   return false;
-}
-
-function CheckModalForm(){
-  console.log("Checkmodalform");
-  let disableButton = true;
-  //checks if form is properly filled
-  if($("#select_known_or_unknown").val() != null && $("#select_variable_type").val() != null){
-    let exactValueFilledProperly = false;
-
-    if($("#select_known_or_unknown").val() == "known" && $("#select_variable_type").val() == "scalar"){
-      $("#input-exact-value-wrapper").css("display","block");
-      exactValueFilledProperly = isExactValueInputFilledProperly();
-    }
-    else{
-      $("#input-exact-value-wrapper").css("display","none");
-      exactValueFilledProperly = true;
-    }
-
-    if(exactValueFilledProperly){
-
-      //style exact value input text green because input is filled properly
-      $("#input-exact-value-wrapper .helper-text").addClass("teal-text");
-      $("#input-exact-value-wrapper .helper-text").removeClass("red-text");
-      $("#input-exact-value-wrapper .helper-text").html("Valid Input");
-
-      if($("#units-helper-text").attr("valid") == "true"){
-        //checking if the variable is a vector and if so then we need to check if it can be. if it is a scalar then everything is good
-        //console.log($("#input-units-autocomplete").val());
-        if($("#select_variable_type").val() == "scalar" || UnitReference[$("#input-units-autocomplete").val()].canBeVector){
-          //if the if statement returns true than the unit and the type of unit (scalar or vector) agree with each other
-          $("#variable-type-helper-text").css('display','none');//don't display error message
-          if(($("#dynamic-math-define-variable").attr("valid") == "true" || $("#modal_define_variable").attr("type") == "existing")){
-            disableButton = false;
-          }
-        }
-        else{
-          //the only way the if statement returned false is if the variable is a vector but the unit the user chose can't be a vector
-          $("#variable-type-helper-text").css('display','inline-block');
-        }
-      }
-
-    }
-    else{
-      //style exact value input text red because input is not filled properly
-      $("#input-exact-value-wrapper .helper-text").addClass("red-text");
-      $("#input-exact-value-wrapper .helper-text").removeClass("teal-text");
-      $("#input-exact-value-wrapper .helper-text").html("Invalid Input");
-    }
-
-  }
-
-
-
-  if(disableButton){
-    $("#btn_udpate_variable_definition").addClass("disabled");
-  }
-  else{
-    $("#btn_udpate_variable_definition").removeClass("disabled");
-  }
-
-}
-
-function isExactValueInputFilledProperly(){
-  let ls = VariableValueMathField.latex();
-  //removing any acceptable characters that could trigger an unwanted character
-  ls = ls.replace(/\\cdot/g,"").replace(/\\frac/g,"").replace(/\\times/g,"").replace(/\\pi/g,"").replace(/[ei]/g);
-  let unwantedChars = "+*=!@#$%&ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-  for(var i = 0; i < unwantedChars.length; i++){
-    if(ls.includes(unwantedChars[i])){
-      return false;
-    }
-  }
-
-  return true;
 }
 
 function SetMathFieldsUI(){
@@ -1122,34 +745,6 @@ function isVariableBeingUsedInEditor(opts){
 
 }
 
-function EditVariableDefinition(el){
-  for (const [key, value] of Object.entries(DefinedVariables)) {
-    if(value.rid == el.attr("rid")){
-      StaticMathField.latex(key);//passing the latex string that corresponds to the variable the user is trying to edit
-      //use existing variable because the user wants to edit an exisiting variable
-      OpenDefineVariableModal({init: true, ls: key, variable: value});
-      return;
-    }
-  }
-  for (const [key, value] of Object.entries(EL.undefinedVars.undefined)) {
-    if(value.rid == el.attr("rid")){
-      StaticMathField.latex(key);//passing the latex string that corresponds to the variable the user is trying to edit
-      //use existing variable because the user wants to edit an exisiting variable
-      OpenDefineVariableModal({init: true, ls: key, variable: value});
-      return;
-    }
-  }
-  for (const [key, value] of Object.entries(EL.undefinedVars.defined)) {
-    if(value.rid == el.attr("rid")){
-      StaticMathField.latex(key);//passing the latex string that corresponds to the variable the user is trying to edit
-      //use existing variable because the user wants to edit an exisiting variable
-      OpenDefineVariableModal({init: true, ls: key, variable: value});
-      return;
-    }
-  }
-
-}
-
 function CopyPhysicsEquationToClipboard(el){
   CopyToClipboard(el.attr("latex"));
   M.toast({html: "Equation copied to clipboard", displayLength: 3000});
@@ -1174,88 +769,6 @@ function CopyToClipboard(str) {
   document.body.removeChild(el);
 };
 
-function DefineUndefinedVariable(el){
-  StaticMathField.latex(el.attr("latex"));//passing the latex string that corresponds to the variable the user is trying to edit
-  OpenDefineVariableModal({init: true, ls: el.attr("latex"), variable: null});
-}
-
-function OpenDefineVariableModal(opts = {init: true}){
-  //checking input box regardless of whether or not it is a new variable that is being defined or an existing. It should always assume similar variables have same units unless the user unchecks the box
-  $("#input-similar-defined-variables").prop("checked",true);
-  //closing more info container when modal is first opened
-  $("#similar-variables-info-container").removeClass("opened");
-  $("#similar-variables-info-container").css({height: 0, opacity: 0});
-
-  //making sure that unit type error helper text is not showing because when the modal is first opened everything is formatted correctly regardless if we are making a new variable or editing an exisiting one
-  $("#variable-type-helper-text").css("display",'none');
-
-  //before opening modal we need to initialize all the select inputs
-  $('#select_known_or_unknown, #select_variable_type').formSelect();
-  let variable = null;
-  if(opts.init){
-    $("#modal_define_variable").attr("type","existing");//we are defining an existing variable
-    if(Object.keys(DefinedVariables).includes(opts.ls)){
-      variable = Object.assign({}, opts.variable);
-
-
-      //console.log('variable', variable);
-
-      $('#select_known_or_unknown, #select_variable_type').formSelect();//this actutally updates the form
-      $("#select_known_or_unknown").val(variable.state);
-      $("#select_variable_type").val(variable.type);
-      $('#select_known_or_unknown, #select_variable_type').formSelect();//this actutally updates the form
-
-      $("#input-units-autocomplete").val(variable.fullUnitsString);
-
-      if(variable.value != undefined){
-        VariableValueMathField.latex(variable.value);
-      }
-      else{
-        VariableValueMathField.latex("");
-      }
-
-      //formating valid unit helper text
-      $("#units-helper-text").attr("valid","true");
-      $("#units-helper-text").html("Valid Unit");
-      $("#units-helper-text").addClass("teal-text");
-      $("#units-helper-text").removeClass("red-text");
-
-    }
-
-  }
-  else{
-    //if init is false that means that a user is trying to create a new variable so they need a dynamic math field so they can write out the variable
-    $("#modal_define_variable").attr("type","new");//we are defining a new variable
-    //making sure the dynamic math field starts out empty so that the user can type whatever they want
-    DynamicMathField.latex("");
-    $("#input-exact-value-wrapper").css("display","none");
-    VariableValueMathField.latex("");
-  }
-
-  if(variable == null){
-
-    $("#select_known_or_unknown").val("");
-    $("#select_variable_type").val("");
-    $('#select_known_or_unknown, #select_variable_type').formSelect();//this actutally updates the form
-
-    $("#input-units-autocomplete").val("");
-
-    //formating helper text for units
-    $("#units-helper-text").html("Unit not recognized");
-    $("#units-helper-text").attr("valid","false");
-    $("#units-helper-text").removeClass("teal-text");
-    $("#units-helper-text").addClass("red-text");
-
-    $("#input-exact-value-wrapper").css("display","none");
-    VariableValueMathField.latex("");
-
-  }
-
-  //if the user clicks on the headers it should open up the editing variable modal
-  $("#modal_define_variable").modal('open');
-  CheckModalForm();//make sure that everything is formatted properly
-
-}
 
 function ToggleMoreInformationOnSimilarVariablesContainer(){
   if($("#similar-variables-info-container").hasClass("opened")){

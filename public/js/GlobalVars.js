@@ -5,13 +5,6 @@ let ImportedVariableDefinitions = {
   //starts out empty because no variable definitions are imported yet
 };
 
-let DefaultDefinedVariable = {
-  state: "Unknown",
-  type: "undefined",
-  units: "undefined",
-  size: "undefined",
-}
-
 let PreDefinedVariables = {
   "\\hat{x}": {
     state: "knonwn",
