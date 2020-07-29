@@ -140,7 +140,7 @@ let Templates = {
   "units-search-results":
   `
   <% for(let i = 0; i < results.length; i++){%>
-  <div class="row my-row si-unit-row" onclick="SelectSIUnitRow($(this))" fullUnitssString="<%= results[i] %>">
+  <div class="row my-row si-unit-row" onclick="UpdateVariableUnits($(this))" fullUnitssString="<%= results[i] %>">
     <div class="col m12">
       <%= results[i] %>
     </div>

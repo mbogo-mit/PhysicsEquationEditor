@@ -58,6 +58,9 @@ let ImportVariableDefinitions = {
 
 };
 
+let VectorMagnitudeVariables = {};
+let SimilarVectorMagnitudeVariables = {};
+
 let PreDefinedVariables = {
   "\\hat{x}": {
     state: "knonwn",

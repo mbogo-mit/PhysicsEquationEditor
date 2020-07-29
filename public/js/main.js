@@ -1,65 +1,6 @@
 
 var MQ = MathQuill.getInterface(2); // keeps the API stable
 
-var StaticMathField = MQ.StaticMath(document.getElementById('static-math-define-variable'));
-var VariableValueMathField = MQ.MathField(document.getElementById('variable-value-math-field'),{
-  handlers: {
-    edit: function(){
-      CheckModalForm();
-    }
-  }
-});
-var DynamicMathField = MQ.MathField(document.getElementById('dynamic-math-define-variable'), {
-  spaceBehavesLikeTab: false,
-  restrictMismatchedBrackets: true,
-  sumStartsWithNEquals: true,
-  supSubsRequireOperand: true,
-  autoCommands: 'pi theta lambda sqrt sum int',
-  autoOperatorNames: 'sin',
-  charsThatBreakOutOfSupSub: '+-=<>',
-  handlers: {
-    edit: function() {
-      //this checks if the latex in this math filed is a valid variable
-      if(IsInputAValidVariable(DynamicMathField.latex())){
-        console.log("true");
-        $("#dynamic-math-define-variable").attr("valid","true");
-        $("#dynamic-math-define-variable-helper-text").html("Valid Input");
-        $("#dynamic-math-define-variable-helper-text").addClass("teal-text");
-        $("#dynamic-math-define-variable-helper-text").removeClass("red-text");
-      }
-      else{
-        console.log("false");
-        $("#dynamic-math-define-variable").attr("valid","false");
-        $("#dynamic-math-define-variable-helper-text").html("Invalid Input");
-        $("#dynamic-math-define-variable-helper-text").removeClass("teal-text");
-        $("#dynamic-math-define-variable-helper-text").addClass("red-text");
-      }
-      CheckModalForm();
-    },
-    enter: function(){
-
-    },
-    moveOutOf: function(dir, mathField) {
-      //tagging variables may cause this event to fire by accident so we need to make sure that the event was not fire because of the processes that occur while tagging a variable
-      if (dir === MQ.R){
-
-      }
-      else if(dir === MQ.L){
-
-      }
-    },
-    downOutOf: function(mathField) {
-
-    },
-    upOutOf: function(mathField){
-
-    },
-    deleteOutOf: function(dir, mathField){
-
-    }
-  }
-});
-
 //initializing first line
 CreateNewMathField("first_math_field");
 
