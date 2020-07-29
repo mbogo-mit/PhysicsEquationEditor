@@ -42,7 +42,7 @@ function FlattenFractionsInLatexString(ls){
 function FindIndexOfClosingBracket(ls){
   let unclosedBrackets = 1;
   let i = 0;
-  while(unclosedBrackets > 0){
+  while(i < ls.length){
     if(ls[i] == "{"){
       unclosedBrackets += 1;
     }
@@ -53,9 +53,12 @@ function FindIndexOfClosingBracket(ls){
     if(unclosedBrackets > 0){
       i++;
     }
+    else{
+      return i;
+    }
 
   }
-  return i;
+  return null;
 }
 
 /*

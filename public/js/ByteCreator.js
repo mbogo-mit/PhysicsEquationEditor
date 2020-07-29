@@ -409,7 +409,7 @@ function ConstructVarFromBytes(key){
 }
 
 function GetVariablesFromLatexString(ls){
-  ls = PutBracketsAroundAllSubsSups(ls);
+  ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
   ls = RemoveDifferentialOperatorDFromLatexString(ls);
   let vars = [];
   let str = "";

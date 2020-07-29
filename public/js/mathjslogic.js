@@ -68,7 +68,7 @@ function IsSignleUndefinedVariable(ls){
 
 function CheckForErrorsInExpression(ls, lineNumber, mfID){
   ls = RemoveCommentsFromLatexString(ls);
-  ls = PutBracketsAroundAllSubsSups(ls);
+  ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
   ls = SimplifyFunctionDefinitionToJustFunctionVariable(ls);//converts "f(x,y)=xy" to f=xy
 
   let expressions = ls.split(",");
@@ -106,6 +106,8 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
       }
     }
   }
+
+  //console.log(exprs);
 
 
   let results = [];
@@ -295,7 +297,7 @@ function GetTrulyUndefinedVariables(ls){
 }
 
 function ReplaceVariablesWithMathjsUnits(ls){
-  let vars = Object.keys(DefinedVariables).concat(Object.keys(PreDefinedVariables)).concat(Object.keys(EL.undefinedVars.defined));
+  let vars = Object.keys(DefinedVariables).concat(Object.keys(PreDefinedVariables)).concat(Object.keys(EL.undefinedVars.defined)).concat(Object.keys(VectorMagnitudeVariables));
   //sorting them by length so the longer string are the ones that get tested first because the longer strings
   //may have pieces of shorter string in them so if we are trying to find the variable "a_{r}"", and we defined "a" and "a_{r}"
   //if "a" comes before "a_{r}" it will find instances of "a_{r}". But if "a_{r}" goes first than those variables will be already
@@ -332,6 +334,9 @@ function ReplaceVariablesWithMathjsUnits(ls){
         }
         else if(Object.keys(EL.undefinedVars.defined).includes(vars[c])){
           variable = Object.assign({}, EL.undefinedVars.defined[vars[c]]);
+        }
+        else if(Object.keys(VectorMagnitudeVariables).includes(vars[c])){
+          variable = Object.assign({}, VectorMagnitudeVariables[vars[c]]);
         }
 
         //we need to check if this variable is a vector and if so then we have to format unitsMathjs variable differently
