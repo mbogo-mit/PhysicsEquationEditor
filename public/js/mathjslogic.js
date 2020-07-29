@@ -116,12 +116,20 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
       if(exprs[i][j].parsed){
         //now that we have parsed the latex string into a mathjs readable string we evaluate it and grab any errors
         //that math js throws and interprets them for the user
+        let str = "";
         try {
-          let str = math.evaluate(exprs[i][j].str).toString();
+          str = math.evaluate(exprs[i][j].str).toString();
           results[i].push({success: str});
         }
         catch(err){
-          results[i].push({error: err.message});
+          //if it throws an error then we can try evaluating the string but taking out radians and steradians because they are untiless pretty much but the editor see them as units
+          try {
+            str = math.evaluate(exprs[i][j].str.replace(/rad/g,"").replace(/sr/g,"")).toString();
+            results[i].push({success: str});
+          }
+          catch(err2){
+            results[i].push({error: err2.message});
+          }
         }
 
       }
@@ -190,7 +198,19 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
         equationUnitsMatch = true;
       }
       catch(err){
-        equationUnitsMatch = false;
+        try{
+          //removing rad and steradian from equations to see if they will equal each other because the editor can't recorgnize the arc formula  s=r\theta cuz units wise you are saying 1m=1m*rad
+          let editedSuccesses = [];
+          for(var i = 0; i < successes.length; i++){
+            editedSuccesses.push(successes[i].replace(/rad/g,"").replace(/sr/g,""));
+          }
+          equationUnits = math.evaluate(editedSuccesses.join(" + ")).toString();
+          equationUnitsMatch = true;
+        }
+        catch(err2){
+          equationUnitsMatch = false;
+        }
+
       }
 
       if(!equationUnitsMatch){

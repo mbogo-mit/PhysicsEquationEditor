@@ -770,7 +770,6 @@ function UpdateMyVariablesCollection(opts = {ls: "", rid: "", update: true, add:
           $(`.physics-constant-checkbox-span[rid='${opts.rid}']`).prev().prop("checked",false);
         }
         //removing variable from defined variables object
-        console.log("removing variable from defined variables object");
         UpdateDefinedVariables({
           type: "remove",
           rid: opts.rid,
