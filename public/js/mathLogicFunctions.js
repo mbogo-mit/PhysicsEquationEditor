@@ -1,16 +1,5 @@
 let ListOfFunctions = ["\\sum", "\\prod","\\sqrt","\\sin", "\\cos", "\\tan", "\\csc", "\\sec", "\\cot", "\\sinh", "\\cosh", "\\tanh", "\\coth", "\\arcsin", "\\arccos", "\\arctan", "\\exp", "\\lg", "\\ln", "\\log",];
 
-function ReplaceSpecialLatexCharacterWithBasicCharacterCounterpart(ls){
-  ls = ls.replace(/\\cdot/g,"*").replace(/\\times/g,"*").replace(/\\ast/g,"*");//replacing latex special operators with standard operators
-  ls = ls.replace(/\\pm/g,"+").replace(/[^\{(]-/g,"+");//replacing latex special operators with standard operators
-  ls = ls.replace(/[^\{(]-/g,"+").replace(/[=]/g,"+");//replace all minuses that are not exponents with plus because mathjs doesn't like to simplify things that are subtracting
-  ls = ls.replace(/\\left\(/g,"(").replace(/\\right\)/g,")");//replacing latex parentheses with normal "(" and ")"
-  ls = ls.replace(/\{/g,"(").replace(/\}/g,")");//replacing brackets for parentheses
-  ls = ls.replace(/\\\s/g, '');//removing "\ " blackslash with space after
-  ls = ls.replace(/\s/g, "");//removing empty space
-  return ls;
-}
-
 function TakeOutFractionLatexFormatting(ls){
   let index = 0;
   while(ls.indexOf("\\frac") != -1){

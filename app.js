@@ -62,8 +62,8 @@ ListOfEquations = {
       name: "Newton's 2nd Law",
       info: {},
       equations: [
-        "\\sum F = m\\vec{a}",
-        "\\sum F = \\frac{d\\vec{p}}{dt}"
+        "\\sum \\vec{F} = m\\vec{a}",
+        "\\sum \\vec{F} = \\frac{d\\vec{p}}{dt}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"acceleration": 1,"force": 1,"mass": 1},
@@ -74,7 +74,7 @@ ListOfEquations = {
       name: "Weight",
       info: {},
       equations: [
-        "\\vec{W}=m\\vec{g}"
+        "\\vec{W}=mg\\hat{y}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"force": 1,"mass": 1,"acceleration": 1},
