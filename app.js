@@ -1,10 +1,8 @@
 const express = require('express');
-const request = require('request');
 const path = require('path');
 const ejs = require('ejs');
 const app = express();
 const PORT = 3000;
-const APPID = "UX9RLT-6T2797PJPJ";
 
 app.use(express.json());
 
