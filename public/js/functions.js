@@ -103,6 +103,15 @@ function UpdateImportedVariables(){
         ls: ls,
         props: props,
       });
+      //if the variable is a vector we are also going to import its magnitude
+      if(IsVariableLatexStringVector(ls)){
+        props.type = "scalar"
+        UpdateSimilarDefinedVariables({
+          type: "update",
+          ls: RemoveVectorLatexString(ls),//this takes a latex string \vec{a} and returns a
+          props: props,
+        });
+      }
     }
     else{
       //if it is not checked we need to remove it
@@ -110,10 +119,20 @@ function UpdateImportedVariables(){
         type: "remove",
         ls: ls,
       });
+      //if the variable is a vector we need to try to remove its magnitude as well
+      if(IsVariableLatexStringVector(ls)){
+        UpdateSimilarDefinedVariables({
+          type: "remove",
+          ls: RemoveVectorLatexString(ls),
+        });
+      }
     }
   });
 
   $("#modal_import_variable_definition").modal("close");
+
+  //we need to run error logger again because we have updated the imported variables
+  EL.GenerateEditorErrorMessages();
 }
 
 
@@ -141,6 +160,27 @@ function RemoveVectorLatexString(ls){
     return ls.substring(startIndex, i + startIndex);
   }
   return null;
+}
+
+function RemoveBarAndOverlineFromLatexString(ls){
+  let startIndex, i;
+  while(ls.indexOf("\\bar{") != -1){
+    startIndex = ls.indexOf("\\bar{") + "\\bar{".length;
+    i = FindIndexOfClosingBracket(ls.substring(startIndex));
+    if(i != null){
+      ls = ls.substring(startIndex, i + startIndex);
+    }
+  }
+
+  while(ls.indexOf("\\overline{") != -1){
+    startIndex = ls.indexOf("\\overline{") + "\\overline{".length;
+    i = FindIndexOfClosingBracket(ls.substring(startIndex));
+    if(i != null){
+      ls = ls.substring(startIndex, i + startIndex);
+    }
+  }
+
+  return ls;
 }
 
 function UpdateVectorMagnitudeVariables(opts){
@@ -543,6 +583,7 @@ function TryToAssignDefinitionsToUndefinedVariables(undefinedVars){
     let ls = undefinedVars[i];
 
     let uv = ls.replace(/_\{[^\}\{\s]*\}/g,"");//removing underscores to make it more generic to see if it can match with any of the generic variables that are in SimilarDefinedVariables
+    uv = RemoveBarAndOverlineFromLatexString(uv);
     let index = keys.indexOf(uv);
     if(index != -1){//we found a match
       //so now we will define this variable that was before seen as undefined by seeding with the information found in SimilarDefinedVariables object
@@ -691,6 +732,8 @@ function OrderCompileAndRenderMyVariablesCollection(){
   let trulyUndefinedVars = Object.keys(EL.undefinedVars.undefined);
   let orderedTrulyUndefinedVars = [];
   let definedVars = GetDefinedPhysicsConstants().concat(Object.keys(DefinedVariables)).concat(Object.keys(EL.undefinedVars.defined));
+  //we need to remove vector magniutdes from definedVars that appear in VectorMagnitudeVariables object because we don't need to display the magnitude of a vector if the vector is already going to be displayed in the variables collection
+  definedVars = definedVars.filter(v => !Object.keys(VectorMagnitudeVariables).includes(v));
   let orderedDefinedVars = [];
   //now we have to order them by when they show up in the editor
   let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));

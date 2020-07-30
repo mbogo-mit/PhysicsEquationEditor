@@ -96,6 +96,7 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
         str = CleanLatexString(str, ["fractions","addition","parentheses","brackets", "white-space"]);
         str = FindAndWrapVectorsThatAreBeingMultiplied(str);
         str = CleanLatexString(str,["multiplication"]);
+        str = CleanLatexString(str,["latexFunctions"]);//this takes functions in latex and converts them to something mathjs can understand. for example converting \sqrt into sqrt so math js understands
 
         exprs[i][j].parsed = true;
         exprs[i][j].str = str;
@@ -107,7 +108,7 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
     }
   }
 
-  //console.log(exprs);
+  console.log(exprs);
 
 
   let results = [];
@@ -126,7 +127,7 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
         catch(err){
           //if it throws an error then we can try evaluating the string but taking out radians and steradians because they are untiless pretty much but the editor see them as units
           try {
-            str = math.evaluate(exprs[i][j].str.replace(/rad/g,"").replace(/sr/g,"")).toString();
+            str = math.evaluate(exprs[i][j].str.replace(/rad/g,"(m / m)").replace(/sr/g,"(m^2 / m^2)")).toString();
             results[i].push({success: str});
           }
           catch(err2){
@@ -152,7 +153,7 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
 
   }
 
-  //console.log(results);
+  console.log(results);
   ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID);
 
 }
@@ -204,7 +205,7 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
           //removing rad and steradian from equations to see if they will equal each other because the editor can't recorgnize the arc formula  s=r\theta cuz units wise you are saying 1m=1m*rad
           let editedSuccesses = [];
           for(var i = 0; i < successes.length; i++){
-            editedSuccesses.push(successes[i].replace(/rad/g,"").replace(/sr/g,""));
+            editedSuccesses.push(successes[i].replace(/rad/g,"(m / m)").replace(/sr/g,"(m^2 / m^2)"));
           }
           equationUnits = math.evaluate(editedSuccesses.join(" + ")).toString();
           equationUnitsMatch = true;
@@ -393,14 +394,14 @@ function ReplaceVariablesWithMathjsUnits(ls){
 function CleanLatexString(ls, types){
   //so this function removes latex based formating like \frac
   if(types.includes('fractions')){
-    ls = TakeOutFractionLatexFormatting(ls);//all \frac for matting is gone: \frac{...}{...} -> {...}/{...}
+    ls = TakeOutFractionLatexFormatting(ls);//all \frac formatting is gone: \frac{...}{...} -> {...}/{...}
   }
-  ls = ReplaceSpecialLatexCharacterWithBasicCharacterCounterpart2(ls, types);
+  ls = ReplaceSpecialLatexCharacterWithBasicCharacterCounterpart(ls, types);
 
   return ls;
 }
 
-function ReplaceSpecialLatexCharacterWithBasicCharacterCounterpart2(ls, types){
+function ReplaceSpecialLatexCharacterWithBasicCharacterCounterpart(ls, types){
   if(types.includes("multiplication")){
     ls = ls.replace(/\\cdot/g,"*").replace(/\\times/g,"*").replace(/\\ast/g,"*");//replacing latex special operators with standard operators
   }
@@ -415,6 +416,21 @@ function ReplaceSpecialLatexCharacterWithBasicCharacterCounterpart2(ls, types){
   }
   if(types.includes("white-space")){
     ls = ls.replace(/\\\s/g, '');//removing "\ " blackslash with space after
+  }
+  if(types.includes("latexFunctions")){
+    //console.log("latexFunctions");
+    let latexFunctionConversions = {//i have to put 4 backslashes because these strings are going into a regex statement so i have to escape the backslashes
+      "\\\\sqrt": "sqrt",
+      "\\\\sin": "sin",
+      "\\\\int": "",
+      "\\\\sum": "",
+    };
+    let r;
+    for(const [key, value] of Object.entries(latexFunctionConversions)){
+      r = new RegExp(key, 'g');
+      ls = ls.replace(r, value);
+    }
+    //console.log(ls);
   }
 
   return ls;
