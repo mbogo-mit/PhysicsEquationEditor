@@ -888,27 +888,6 @@ function CopyToClipboard(str) {
   document.body.removeChild(el);
 };
 
-
-function ToggleMoreInformationOnSimilarVariablesContainer(){
-  if($("#similar-variables-info-container").hasClass("opened")){
-    $("#similar-variables-info-container").removeClass("opened");
-    $("#similar-variables-info-container").animate({
-      height: 0,
-      opacity: 0,
-    }, 500);
-  }
-  else{
-    $("#similar-variables-info-container").addClass("opened");
-    $("#similar-variables-info-container").css("height","100%");
-    let h = $("#similar-variables-info-container").height();
-    $("#similar-variables-info-container").height(0);
-    $("#similar-variables-info-container").animate({
-      height: h,
-      opacity: 1,
-    }, 500);
-  }
-}
-
 function CloseEditorLog(){
   $("#editor-log-container").animate({
     right: -0.416 * window.innerWidth,
