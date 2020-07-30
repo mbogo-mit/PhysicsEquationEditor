@@ -8,6 +8,8 @@
     <%- include("../partials/loading-screen.ejs");%>
     <div id="main-screen" lopc="<%= JSON.stringify(lopc)%>">
       <%- include("../partials/nav.ejs");%>
+
+      <%- include("../partials/modal-physics-equation-more-information.ejs");%>
       <%- include("../partials/modal-import-variable-definition.ejs");%>
       <%- include("../partials/my-container.ejs",{loe:loe, lopc: lopc});%>
       <%- include('../partials/line-message-box.ejs');%>
