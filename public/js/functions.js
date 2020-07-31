@@ -980,7 +980,7 @@ function CheckForAndDisplayRelevantEquations(){
   //this function goes through the dom of physics equations and checks the quanities they relate and sees if the equation is relevant for the defined quanities in the editor
   //an equation is relevant when there are no quanitites that the user is not using  and when it has one quantity that the user is using and has set as known.
   //additionally the user has to have the same number of each quantity or more for an equation to be relevant
-
+  console.log(usedQuantities);
   let sections = ["mechanics-equations","thermal-equations","waves-optics-equations","electricity-magnetism-equations","modern-physics-equations"];
 
   let totalNumberOfRelevantEquationsInSection = 0;
@@ -1049,7 +1049,7 @@ function GetAllUsedQuantities(){
   for (const [key, value] of Object.entries(PreDefinedVariables)) {
     if(value.quantity != undefined){
       if(usedQuantities[value.quantity] == undefined){
-        usedQuantities[value.quantity] = {number: 1, state: value.state};
+        usedQuantities[value.quantity] = {number: 1, state: value.state, quantityDescription: value.quantityDescription};
       }
       else{
         usedQuantities[value.quantity].number += 1;
@@ -1388,27 +1388,6 @@ function CheckHotKeys(){
       if(selectedString.length == 0){//this means the user wanted to generate a vector sign so we need to place the cursor in the right position once they generate the vector sign
         MathFields[FocusedMathFieldId].mf.keystroke("Left");
       }
-
-
-      /*
-      let changedLs = MathFields[FocusedMathFieldId].mf.latex().split("\\$#!\\$");//using this as the delimeter because latex puts backslashs infront of dollar signs
-      if(currentLs.length == changedLs[0].length + changeLs[1].length){
-        //this means the user didn't select anything and they just want to generate a vector sign
-        MathFields[FocusedMathFieldId].mf.latex(`${changedLs[0]}\\vec{}${changedLs[1]}`);
-      }
-      let startIndex = currentLs.indexOf(changedLs[0]) + changedLs[0].length;
-      if(startIndex == 0){
-        startIndex += 1;//this is for the edge case where the thing the person is selecting is at the beginning of the string
-      }
-      let endIndex = currentLs.substring(startIndex).indexOf(changedLs[1]) + startIndex;
-      let selectedString = currentLs.substring(startIndex, endIndex);
-      EditingMathFields = false;
-      MathFields[FocusedMathFieldId].mf.latex(`${changedLs[0]}\\vec{${selectedString}}${changedLs[1]}`);
-      console.log(selectedString);
-      if(selectedString.length == 0){//this means the user wanted to generate a vector sign so we need to place the cursor in the right position once they generate the vector sign
-        MathFields[FocusedMathFieldId].mf.keystroke("Left");
-      }
-      */
       HotKeySequenceReset = false;
     }
   }
