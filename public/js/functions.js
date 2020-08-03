@@ -448,7 +448,7 @@ function MoveCursor1Line(id, move = "down", direction = "right"){
 
 function UpdateLineLabelHeight(id){
   $(`#${id}`).parents(".editor_line").children(".line_label").css({
-    height: $(`#${id}`).parent(".my_math_field_col").css("height");
+    height: $(`#${id}`).parent(".my_math_field_col").css("height")
   });
   RecalculateHeightOfLineEmptySpace();
 }
