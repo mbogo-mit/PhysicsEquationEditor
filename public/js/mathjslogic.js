@@ -115,8 +115,7 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
         exprs[i][j].str = str;
       }
       else{
-        exprs[i][j].isSingleUndefinedVariable = IsSignleUndefinedVariable(exprs[i][j].str);
-        exprs[i][j].singleUndefinedVariable = (exprs[i][j].isSingleUndefinedVariable) ? trulyUndefinedVars[0] : "";
+        exprs[i][j].undefinedVars = trulyUndefinedVars;
       }
     }
   }
@@ -150,15 +149,7 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
 
       }
       else{
-        //if a string is not parsed it is because it has undefined variables in it.
-        //however if it only has one undefined variable, then the user could be using the editor to define a variable interms of other variables
-        if(exprs[i][j].isSingleUndefinedVariable){
-          results[i].push({singleUndefinedVariable: exprs[i][j].singleUndefinedVariable});
-        }
-        else{
-          results[i].push({undefinedVariables: exprs[i][j].str});
-        }
-
+        results[i].push({undefinedExpression: exprs[i][j].str, undefinedVariables: exprs[i][j].undefinedVars});
       }
 
 
@@ -185,7 +176,7 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
   results.map(function(r, index){
 
     let successes = [];
-    let singleUndefinedVariables = [];
+    let possiblySolvableExpressions = [];
     let errors = [];
     r.map(function(data, i){
 
@@ -193,8 +184,8 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
         successes.push(data.success);
       }
 
-      if(data.singleUndefinedVariable != undefined){
-        singleUndefinedVariables.push(data.singleUndefinedVariable);
+      if(data.undefinedExpression != undefined && data.undefinedVariables.length == 1){
+        possiblySolvableExpressions.push({expression: data.undefinedExpression, undefinedVariable: data.undefinedVariables[0]});
       }
 
       if(data.error != undefined){
@@ -250,15 +241,36 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
     }
 
 
-    if(equationUnits != ""){//that means that there is an equation or equations that have matched units that could help us defined our single undefined variables
+    if(equationUnits != ""){//that means that there is an equation or equations that have matched units that could help us defined the each variable in each of our possiblySolvableExpressions array
       //if the equations match then we can use these equations to defined the single undefined variables that may exist
-      for(var c = 0; c < singleUndefinedVariables.length; c++){
-        //going through each single undefined variable and giving it units of the equations that they are set equal too
-        EL.recordDefinitionForUndefinedVariable(singleUndefinedVariables[c], equationUnits);
-        recordedDefinitionForUndefinedVariable = true;
+      let knownUnitStringConstant = "__knownUnit";
+      for(var c = 0; c < possiblySolvableExpressions.length; c++){
+        let uniqueRIDStringArray = GenerateUniqueRIDStringForVariables(possiblySolvableExpressions[c].expression);//this generates an object that relates each variable to a unique rid string so that it is easier for nerdamer to parse to the equation
+        uniqueRIDStringArray.push({//we are adding this because it represents the units of the equations that are set equal to the equation we are parsing currently
+          variable: knownUnitStringConstant,
+          ridString: knownUnitStringConstant,
+          unitsMathjs: equationUnits,
+        });
+        let expression = `${SimpleConvertLatexStringToNerdamerReadableString(possiblySolvableExpressions[c].expression, uniqueRIDStringArray)} = ${knownUnitStringConstant}`;
+        let undefinedVariable = SimpleConvertLatexStringToNerdamerReadableString(possiblySolvableExpressions[c].undefinedVariable, uniqueRIDStringArray);//this just gets the undefined variable interms of its random id string
+        SqrtLoop = 0;//resetting this global variable to 0 which makes sure that nerdamer doesn't go into a loop trying to solve for a variable
+        let solution = nerdamer(expression).solveFor(undefinedVariable).toString();
+        //console.log(solution);
+        if(solution.length != 0){
+          //we need to convert the solution into math js units
+          let mathjsString = ReplaceUniqueRIDStringWithMathjsUnits(solution, uniqueRIDStringArray);
+          try{//we are going to try to evaluate the math js string to get the units of this unknown variable. if it works we will added it to defined undefined vars if it doesn't work then we just catch the error
+            let mathjsUnits = math.evaluate(mathjsString).toString();
+            //if the above line doesn't through an error then we have found a unit definition for this undefined variable so we need to record it
+            EL.recordDefinitionForUndefinedVariable(possiblySolvableExpressions[c].undefinedVariable, mathjsUnits);
+            recordedDefinitionForUndefinedVariable = true;
+          }
+          catch(err){
+            //do nothing
+            //console.log(err);
+          }
+        }
       }
-
-
     }
 
     //so after possibly updating the list of defined undefined variables we need to see if there are any truly undefined variables and log them as a warning
@@ -404,6 +416,209 @@ function ReplaceVariablesWithMathjsUnits(ls){
 
 }
 
+function ReplaceUniqueRIDStringWithMathjsUnits(ls, uniqueRIDStringArray){//this function works exactly like ReplaceVariablesWithMathjsUnits() except it doesn't care about the distincition between vectors and scalars only units
+
+  //now we have to go character by character and replace variables with their unitsMathjs string
+  let i = 0;
+  let delta = 0;
+  let s = "";
+  let newLs = "";
+  let foundMatch = false;
+  while(i < ls.length){
+    foundMatch = false;
+    s = ls.substring(i);
+    //we need to identify what set of characters is at the index we are at
+
+    //lets first check if its a Defined Variable
+    for(var c = 0; c < uniqueRIDStringArray.length; c++){
+      if(s.indexOf(uniqueRIDStringArray[c].ridString) == 0){
+        let variable = {};
+        if(uniqueRIDStringArray[c].ridString == "__knownUnit"){
+          variable.unitsMathjs = uniqueRIDStringArray[c].unitsMathjs;
+        }
+        else if(Object.keys(DefinedVariables).includes(uniqueRIDStringArray[c].variable)){
+          variable = Object.assign({}, DefinedVariables[uniqueRIDStringArray[c].variable]);
+        }
+        else if(Object.keys(PreDefinedVariables).includes(uniqueRIDStringArray[c].variable)){
+          variable = Object.assign({}, PreDefinedVariables[uniqueRIDStringArray[c].variable]);
+        }
+        else if(Object.keys(EL.undefinedVars.defined).includes(uniqueRIDStringArray[c].variable)){
+          variable = Object.assign({}, EL.undefinedVars.defined[uniqueRIDStringArray[c].variable]);
+        }
+        else if(Object.keys(VectorMagnitudeVariables).includes(uniqueRIDStringArray[c].variable)){
+          variable = Object.assign({}, VectorMagnitudeVariables[uniqueRIDStringArray[c].variable]);
+        }
+
+        //we don't care if this variable is a vector or scalar so the only thing we will record is its units
+        let unitsMathjs = variable.unitsMathjs;
+        foundMatch = true;
+        delta = uniqueRIDStringArray[c].ridString.length;
+
+        newLs += ` (${unitsMathjs}) `;
+
+        break;
+      }
+    }
+
+    if(!foundMatch && s[0] == "\\"){
+      //it is possible that it is an operator or a greek letter
+      for(var c = 0; c < ListOfOperators.length; c++){
+        if(s.indexOf(ListOfOperators[c]) == 0){
+          foundMatch = true;
+          newLs += ListOfOperators[c];
+          delta = ListOfOperators[c].length;
+          break;
+        }
+      }
+
+      if(!foundMatch){
+        for(var c = 0; c < LatexGreekLetters.length; c++){
+          if(s.indexOf(LatexGreekLetters[c]) == 0){
+            foundMatch = true;
+            newLs += LatexGreekLetters[c];
+            delta = LatexGreekLetters[c].length;
+            break;
+          }
+        }
+      }
+
+    }
+
+    if(!foundMatch){
+      delta = 1;
+      newLs += s[0];//just pass the value directly to the new latex string
+    }
+
+    i += delta;
+
+  }
+
+  return newLs;
+
+}
+
+function SimpleConvertLatexStringToNerdamerReadableString(ls, uniqueRIDStringArray){
+  //first thing we need to do is convert all vectors latex string into a simple string so that Nerdamer can parse the variable
+  //ls = ReplaceLatexVectorsWithNerdamerReadableVariables(ls);
+  //we then need to remove unit vectors so \hat{ } because with this simple conversion we don't care about vectors we only care about units
+  ls = ls.replace(/\\hat\{[\s\d\w\\\^\-]*\}/g,"(1)");
+  ls = ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray);//this object holds
+  ls = CleanLatexString(ls, ["fractions","addition","parentheses","brackets", "white-space"]);
+  ls = CleanLatexString(ls,["multiplication"]);
+  ls = CleanLatexString(ls,["latexFunctions"]);
+  return nerdamer.convertFromLaTeX(ls).toString();
+}
+
+function ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray){
+  //now we have to go character by character and replace variables with their unitsMathjs string
+  let i = 0;
+  let delta = 0;
+  let s = "";
+  let newLs = "";
+  let foundMatch = false;
+  while(i < ls.length){
+    foundMatch = false;
+    s = ls.substring(i);
+    //we need to identify what set of characters is at the index we are at
+
+    //lets first check if its a variable
+    for(var c = 0; c < uniqueRIDStringArray.length; c++){
+      if(s.indexOf(uniqueRIDStringArray[c].variable) == 0){
+        foundMatch = true;
+        delta = uniqueRIDStringArray[c].variable.length;
+        newLs += ` (${uniqueRIDStringArray[c].ridString}) `;
+        break;
+      }
+    }
+
+    //if it is not a variable then it could be an operator or greek letter so we need to check
+    if(!foundMatch && s[0] == "\\"){
+      //it is possible that it is an operator or a greek letter
+      for(var c = 0; c < ListOfOperators.length; c++){
+        if(s.indexOf(ListOfOperators[c]) == 0){
+          foundMatch = true;
+          newLs += ListOfOperators[c];
+          delta = ListOfOperators[c].length;
+          break;
+        }
+      }
+
+      if(!foundMatch){
+        for(var c = 0; c < LatexGreekLetters.length; c++){
+          if(s.indexOf(LatexGreekLetters[c]) == 0){
+            foundMatch = true;
+            newLs += LatexGreekLetters[c];
+            delta = LatexGreekLetters[c].length;
+            break;
+          }
+        }
+      }
+
+    }
+
+    if(!foundMatch){
+      delta = 1;
+      newLs += s[0];//just pass the value directly to the new latex string
+    }
+
+    i += delta;
+
+  }
+
+  return newLs;
+}
+
+function GenerateUniqueRIDStringForVariables(ls){
+  let vars = GetVariablesFromLatexString(ls);
+  //we need to organize vars from longest variable to shortest variable just incase a long variable has a piece of a shorter variable in it
+  vars.sort(function(a,b){
+  	if(a.length > b.length){
+    	return -1;
+    }
+    else{
+    	return 1;
+    }
+  });
+
+  let array = [];
+  for(let i = 0; i < vars.length; i++){
+    array.push({
+      variable: vars[i],
+      ridString: `__${RandomVariableString()}`,
+    });
+  }
+  return array;
+}
+
+function RandomVariableString(){//this function is like rid but it doesn't use any numbers
+  let c = "abcdefghijklmnopqrstuvwxyz";
+  let rid = "";
+  for(var i = 0; i < 5; i++){
+    let r = Math.random() * c.length;
+    rid += c.substring(r, r+1);
+  }
+
+  return rid;
+}
+
+function ReplaceLatexVectorsWithNerdamerReadableVariables(ls){
+  let i;
+  let i2;
+  while(ls.indexOf("\\vec{") != -1){
+    i = ls.indexOf("\\vec{");
+    i2 = FindIndexOfClosingBracket(ls.substring(i + "\\vec{".length));
+    if(i2 != null){//make sure the function got the value we want
+      i2 += (i + "\\vec{".length);//adding the shift the comes from using substring in previous line
+    }
+    else{
+      return undefined;//stop the process and break so that we can figure out what happened
+    }
+    //i put a space because when we convert this from latex to Nerdamer readable string it can understand that "a b" = "a * b" so i am putting a space just incase the multiplication was explicity defined
+    ls = ls.substring(0,i) + " _vec___" + ls.substring(i + "\\vec{".length, i2) + "___ " + ls.substring(i2 + 1);
+  }
+  return ls;
+}
+
 function CleanLatexString(ls, types){
   //so this function removes latex based formating like \frac
   if(types.includes('fractions')){
@@ -438,6 +653,51 @@ function ReplaceSpecialLatexCharacterWithBasicCharacterCounterpart(ls, types){
       "\\\\int": "",
       "\\\\sum": "",
     };
+
+    //the code below clears any integrals that are formatted as \int_{...}^{...},\int_(...)^(...), or when the upper or lower bound is not filled so -> \int_{...}, \int^{...}, \int_(...), \int^(...)
+    let i1;
+    let i2;
+    let i3;
+    while(ls.indexOf("\\int_(") != -1){
+      i1 = ls.indexOf("\\int_(");
+      i2 = FindIndexOfClosingParenthesis(ls.substring(i1 + "\\int_(".length));
+      if(i2 != null){
+        i2 += i1 + "\\int_(".length;//accounts for the shift because we used a substring of ls
+        if(ls[i2 + 1] == "^"){//this means the integral is formated like: \int_(...)^(...)
+          i3 = FindIndexOfClosingParenthesis(ls.substring(i2 + 3));
+          if(i3 != null){
+            i3 += i2 + 3;//adjust for shift
+            ls = ls.substring(0,i1) + ls.substring(i3 + 1);//removing integral formatted as: \int_(...)^(...)
+          }
+          else{//theere was trouble finding the closing bracket so just stop
+            console.log("trouble finding closing bracket for integral");
+            break;
+          }
+        }
+        else{
+          ls = ls.substring(0,i1) + ls.substring(i2 + 1);//removing integral formatted as: \int_(...)
+        }
+      }
+      else{//theere was trouble finding the closing bracket so just stop
+        console.log("trouble finding closing bracket for integral");
+        break;
+      }
+    }
+
+    while(ls.indexOf("\\int^(") != -1){
+      i1 = ls.indexOf("\\int^(");
+      i2 = FindIndexOfClosingParenthesis(ls.substring(i1 + "\\int^(".length));
+      if(i2 != null){
+        i2 += i1 + "\\int^(".length;//accounts for the shift because we used a substring of ls
+        ls = ls.substring(0,i1) + ls.substring(i2 + 1);//removing integral formatted as: \int^(...)
+      }
+      else{//theere was trouble finding the closing bracket so just stop
+        console.log("trouble finding closing bracket for integral");
+        break;
+      }
+    }
+
+
     let r;
     for(const [key, value] of Object.entries(latexFunctionConversions)){
       r = new RegExp(key, 'g');
