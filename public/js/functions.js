@@ -980,7 +980,7 @@ function CheckForAndDisplayRelevantEquations(){
   //this function goes through the dom of physics equations and checks the quanities they relate and sees if the equation is relevant for the defined quanities in the editor
   //an equation is relevant when there are no quanitites that the user is not using  and when it has one quantity that the user is using and has set as known.
   //additionally the user has to have the same number of each quantity or more for an equation to be relevant
-  console.log(usedQuantities);
+  //console.log(usedQuantities);
   let sections = ["mechanics-equations","thermal-equations","waves-optics-equations","electricity-magnetism-equations","modern-physics-equations"];
 
   let totalNumberOfRelevantEquationsInSection = 0;
@@ -1258,6 +1258,8 @@ function DisplayUnitDropdownSearchMenu(el, rid){
 
   //setting value so that the menu knowns what to update once the user has chosen the unit they want
   $("#units-search-results").attr("rid",rid);
+  //focusing the input field so the user doesn't have to click they can just start typing
+  $("#input-user-units-search").focus();
 
   RenderSIUnitsSearch();//start a search to bring up all the variables
 
