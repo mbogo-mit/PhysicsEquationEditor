@@ -765,7 +765,9 @@ function OrderCompileAndRenderMyVariablesCollection(){
 
   //if there is anything left in the unorded arrays then just append it to the ordered lists
   orderedTrulyUndefinedVars = orderedTrulyUndefinedVars.concat(trulyUndefinedVars);
+  let unusedUndefinedVars = [].concat(trulyUndefinedVars);
   orderedDefinedVars = orderedDefinedVars.concat(definedVars);
+  let unusedDefinedVars = [].concat(definedVars);
 
   //COMPILE
   html = "";
@@ -773,6 +775,7 @@ function OrderCompileAndRenderMyVariablesCollection(){
     let opts = {
       ls: orderedTrulyUndefinedVars[i],
       variable: Object.assign({}, EL.undefinedVars.undefined[orderedTrulyUndefinedVars[i]]),
+      unused: unusedUndefinedVars.includes(orderedTrulyUndefinedVars[i]),
     }
     html += ejs.render(Templates["VariableCollection"]["undefined-variable"], {opts: opts});
   }
@@ -780,6 +783,7 @@ function OrderCompileAndRenderMyVariablesCollection(){
   for(var i = 0; i < orderedDefinedVars.length; i++){
     let opts = {
       ls: orderedDefinedVars[i],
+      unused: unusedDefinedVars.includes(orderedDefinedVars[i]), 
     };
 
     if(Object.keys(DefinedVariables).includes(orderedDefinedVars[i])){
