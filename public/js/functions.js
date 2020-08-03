@@ -370,14 +370,13 @@ function MathFieldKeyPressEnter(el, enterClicked = false){
   //first we need to copy everything after the cursor so that when we go to the next line that information goes to the next line and is removed from the current line
   let lsForNextLine = "";
   if(enterClicked){
-    EditingMathFields = true;
     let lsBeforeBackspace = MathFields[FocusedMathFieldId].mf.latex();
     MathFields[FocusedMathFieldId].mf.keystroke("Shift-Down");
     MathFields[FocusedMathFieldId].mf.write("");
+    UpdateLineLabelHeight(FocusedMathFieldId);//adjusting the line label height because this math field has changed
     let lsAfterBackspace = MathFields[FocusedMathFieldId].mf.latex();
     //removes the first instance of the information that came before the cursor. it only removes the first because we are passing in a string and not a regex expression
     lsForNextLine = lsBeforeBackspace.replace(lsAfterBackspace, "");
-    EditingMathFields = false;
   }
   //create a new div element then initialize a math field in it
   let rid = RID();
@@ -449,7 +448,7 @@ function MoveCursor1Line(id, move = "down", direction = "right"){
 
 function UpdateLineLabelHeight(id){
   $(`#${id}`).parents(".editor_line").children(".line_label").css({
-    height: $(`#${id}`).parent(".my_math_field_col").css("height")
+    height: $(`#${id}`).parent(".my_math_field_col").css("height");
   });
   RecalculateHeightOfLineEmptySpace();
 }
