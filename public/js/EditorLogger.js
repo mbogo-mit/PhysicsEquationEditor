@@ -1,5 +1,7 @@
 function EditorLogger(){
 
+  this.rawExpressionData = {};
+
   this.undefinedVars = {
     undefined: {},
     defined: {},
@@ -20,7 +22,7 @@ function EditorLogger(){
       example: "",
     },
     "Units do not match": {
-      description: "You are adding or substracting expressions that don't have the same units, or you are adding to expressions with the same units but one is a vector and the other is a scalar",
+      description: "You are adding or substracting expressions that don't have the same units, or you are adding two expressions with the same units but one is a vector and the other is a scalar",
       example: "",
     },
     "Units do not equal each other": {
@@ -52,7 +54,6 @@ function EditorLogger(){
     this.clearUndefinedVariables();
 
     for(const [lineNumber, id] of Object.entries(orderedIds)){
-      //console.log(lineNumber);
       //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
       let ls = FormatNablaSquared(MathFields[id].mf.latex());
       ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
@@ -64,13 +65,28 @@ function EditorLogger(){
       }
     }
 
+    this.UpdateKnownUnknownVariables();
+
     //after parsing through everything and building up the list of defined undefined variables we need to check if there are any relevant equations for the set of variables we have in DefinedVariables and this.undefinedVars.defined
     CheckForAndDisplayRelevantEquations();
 
     this.display();
   }
 
-  this.ParsePreviousLinesAgainWithNewInfo = function(endingLineNumber){
+  this.ParsePreviousLinesAgainWithNewInfoAboutUnknownVariables = function(endingLineNumber){
+    for(const [lineNumber, expressions] of Object.entries(this.rawExpressionData)){
+      if(lineNumber > endingLineNumber){
+        break;//we break the job of this function was only to parse previous lines and the current line we were on when we called this function
+      }
+      else{
+        IdentifyAllKnownUnknownVariables(expressions);
+      }
+
+    }
+
+  }
+
+  this.ParsePreviousLinesAgainWithNewInfoAboutUndefinedVariables = function(endingLineNumber){
     let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
     this.clearLog();//clearing log befor adding to it
     this.clearUndefinedVariables(true, false);//clearing undefined variables but not defined undefined variables
@@ -80,7 +96,6 @@ function EditorLogger(){
         break;//we break the job of this function was only to parse previous lines and the current line we were on when we called this function
       }
       else{
-        //console.log("Repeat: " + lineNumber);
         //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
         let ls = FormatNablaSquared(MathFields[id].mf.latex());
         ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
@@ -92,6 +107,17 @@ function EditorLogger(){
         }
       }
 
+    }
+  }
+
+  this.UpdateKnownUnknownVariables = function(reset = true){
+    //we need to first reset all unknown variables current state to "unknown" so that they have to prove that they are known every time the user makes an edit in the editor
+    if(reset){
+      this.ResetAllUnknownVariblesToCurrentStateUnknown();
+    }
+    //after we have identified all of the undefined and variables and defined undefined variables and have created logs for everything we need to evaluate which variables are unknown and which variables where initil unknown but are defined by all known variables
+    for(const [lineNumber, expressions] of Object.entries(this.rawExpressionData)){
+      IdentifyAllKnownUnknownVariables(expressions);
     }
   }
 
@@ -164,6 +190,10 @@ function EditorLogger(){
     };
   }
 
+  this.clearRawExpressionData = function(){
+    this.rawExpressionData = {};
+  }
+
   this.clearUndefinedVariables = function(clearUndefined = true, clearDefined = true){
     if(clearUndefined){
       this.undefinedVars.undefined = {};
@@ -175,6 +205,32 @@ function EditorLogger(){
       //the process described above can be found in this.recordDefinitionForUndefinedVariable() function
       RemoveAllDynamicUnitsVariablesFromVectorMagnitudeVariables();
       //all defined undefined variables have an attribute dynamicUnits that is set to true which allows use to figure out which vector magnitudes were set by defined undefined variables
+    }
+
+  }
+
+  this.ResetAllUnknownVariblesToCurrentStateUnknown = function(){
+    //definedVariables needs to be set because it persists between edits so every time an edit is made every unknown
+    //variable needs to prove that they are set equal to all known variables in the editor
+    for(const [key, value] of Object.entries(DefinedVariables)){
+      if(value.state == "unknown"){
+        DefinedVariables[key].currentState = "unknown";
+      }
+    }
+
+    //these variables are dynamically created eveyr time the editor is changed so you would think we wouldn't have to reset
+    //these if they were just created. but in the use case where the user changes the state of another variable we wanted to
+    //be able to update the state of all the other variables without having to parse everything and regenerate everything.
+    //This can be seen in the function "ToggleVariableState"
+    for(const [key, value] of Object.entries(this.undefinedVars.undefined)){
+      if(value.state == "unknown"){
+        this.undefinedVars.undefined[key].currentState = "unknown";
+      }
+    }
+    for(const [key, value] of Object.entries(this.undefinedVars.defined)){
+      if(value.state == "unknown"){
+        this.undefinedVars.defined[key].currentState = "unknown";
+      }
     }
 
   }
@@ -207,6 +263,7 @@ function EditorLogger(){
     let error = undefined;
     keys.map(function(key, index){
       if(err.indexOf(key) != -1){
+
         error = {
           type: key,
           description: et[key].description,

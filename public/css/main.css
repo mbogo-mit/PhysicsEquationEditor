@@ -248,6 +248,13 @@ body {
   cursor: pointer;
 }
 
+#my_variables .collection .known-unknown {
+  /*background-color: #ffcdd2;*/
+  background-image: linear-gradient(to bottom right, #ffcdd2, #b2dfdb);
+  color: #424242;
+  cursor: pointer;
+}
+
 #my_variables .collection .info.undefined-units {
   background-image: linear-gradient(to bottom right, #ffcdd2, #ffebee) !important;
   color: #424242;

@@ -347,6 +347,9 @@ function ToggleVariableState(rid){
     }
   }
 
+  //because we changed the state of a variable we need to update the known and unknown status of all the other variables based on the change
+  EL.UpdateKnownUnknownVariables();
+
   //then after we have edited either DefinedVariables or EL.undefinedVars.defined then we need to update the collection with the new information
   UpdateMyVariablesCollection({update: true});
 }
@@ -526,7 +529,6 @@ function DeleteCurrentMathFieldAndCopyContentIntoPreviousMathField(id){
 }
 
 function ToggleKeyboard(){
-  console.log("Toggle Keyboard");
   if($("#toggle-dir").hasClass("fa-caret-down")){
     $("#toggle-dir").removeClass("fa-caret-down");
     $("#toggle-dir").addClass("fa-caret-up");
@@ -783,7 +785,7 @@ function OrderCompileAndRenderMyVariablesCollection(){
   for(var i = 0; i < orderedDefinedVars.length; i++){
     let opts = {
       ls: orderedDefinedVars[i],
-      unused: unusedDefinedVars.includes(orderedDefinedVars[i]), 
+      unused: unusedDefinedVars.includes(orderedDefinedVars[i]),
     };
 
     if(Object.keys(DefinedVariables).includes(orderedDefinedVars[i])){
@@ -1243,6 +1245,9 @@ function ToggleVariableBadgeUnitsSize(el = null, rid = "", expand = false){
   if(expand){
     //we need to calculate how large to expand it
     let w = el.parent(".collection-item").width() - $(`.static-physics-equation[rid='${rid}']`).width() - 185;
+    if(el.prev().hasClass("known-unknown")){
+      w -= 50;//this is because this tag takes more space up so we need to make the expand not as big
+    }
     el.css("width",`${w}px`);
   }
   else{

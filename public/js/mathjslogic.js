@@ -78,33 +78,114 @@ function IsSignleUndefinedVariable(ls){
   return false;
 }
 
+function IdentifyAllKnownUnknownVariables(exprs){
+  let listOfKnownVariables = [];
+  for(var i = 0; i < exprs.length; i++){
+    if(exprs[i].length >= 2){//if there aren't at least two expressions set equal to each other there is no way that a variable that was previously unknown could be equal to all known variables
+      listOfUnknownVariables = exprs[i].map(function(value, index){
+        let vars = GetVariablesFromLatexString(value.str);
+        let unknownVars = [];
+        vars.map(function(v){
+          if(DefinedVariables[v] != undefined){
+            if(DefinedVariables[v].state != "known" && DefinedVariables[v].currentState != "known"){
+              unknownVars.push(v);
+            }
+          }
+          else if(EL.undefinedVars.undefined[v] != undefined){
+            if(EL.undefinedVars.undefined[v].state != "known" && EL.undefinedVars.undefined[v].currentState != "known"){
+              unknownVars.push(v);
+            }
+          }
+          else if(EL.undefinedVars.defined[v] != undefined){
+            if(EL.undefinedVars.defined[v].state != "known" && EL.undefinedVars.defined[v].currentState != "known"){
+              unknownVars.push(v);
+            }
+          }
+        });
+        return unknownVars;
+      });
+
+      //you need at least on of the arrays inside of this array to have a length of zero meaning that it has all known variables for us to think that that any other expression with only one unknown variable
+      let atLeastOneCompletelyKnownExpression = false;
+      let listOfKnownUnknownVariables = [];
+      listOfUnknownVariables.map(function(value, index){
+        if(value.length == 0){
+          atLeastOneCompletelyKnownExpression = true;
+        }
+        else if(value.length == 1){
+          listOfKnownUnknownVariables.push(value[0]);
+        }
+      });
+
+      if(atLeastOneCompletelyKnownExpression){
+        let changedStateOfAtLeastOneVariable = false;
+        //we need to make all of these variables currentState property equal to "known"
+        listOfKnownUnknownVariables.map(function(v){
+          if(DefinedVariables[v] != undefined){
+            DefinedVariables[v].currentState = "known";
+            changedStateOfAtLeastOneVariable = true;
+          }
+          else if(EL.undefinedVars.undefined[v] != undefined){
+            EL.undefinedVars.undefined[v].currentState = "known";
+            changedStateOfAtLeastOneVariable = true;
+          }
+          else if(EL.undefinedVars.defined[v] != undefined){
+            EL.undefinedVars.defined[v].currentState = "known";
+            changedStateOfAtLeastOneVariable = true;
+          }
+        });
+
+        //we need to make sure we actually changed the state of a variable before se set i to 0 because if not we could end up in an infinite loop
+        if(changedStateOfAtLeastOneVariable){
+          //because we changed values and were able to identify new known-unknown variables we need
+          //call "UpdateKnownUnknownVariables" function which will parse the rawExpressionData from the first line with the new information we have put into the known unknown variables.
+          //By passing in "false" this function wont reset the variables currentState values which is what we want because we want the information we have just found to persist. Otherwise we would get a loop
+          EL.UpdateKnownUnknownVariables(false);
+          return;//after this function is done running it means it has already parsed all the lines starting from the top  so we just end right here
+        }
+
+      }
+    }
+  }
+}
+
 function CheckForErrorsInExpression(ls, lineNumber, mfID){
   ls = RemoveCommentsFromLatexString(ls);
   ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
   ls = SimplifyFunctionDefinitionToJustFunctionVariable(ls);//converts "f(x,y)=xy" to f=xy
 
-  let expressions = ls.split(",");
+  let expressions = ls.split(";");
   let exprs = [];
+  let rawData = [];
   expressions.map(function(value, i){
     let v = value.split("=");//getting all the latex string split by = sign
     let a = [];
+    let rd = [];
     for(var c = 0; c < v.length; c++){
       //making an array that holds all the latex strings that are set to each other which will keep track if the string was parsed on not based on whether it had undefined variables in it
-      a.push({
-        parsed: false,
-        str: v[c],
-      });
+      if(v[c].length > 0){
+        a.push({
+          parsed: false,
+          str: v[c],
+        });
+        rd.push({
+          str: v[c],
+        });
+      }
     }
     exprs.push(a);
+    rawData.push(rd.slice());
   });
+
+  EL.rawExpressionData[lineNumber] = rawData.slice();//copying information
 
 
   for(var i = 0; i < exprs.length; i++){
     for(var j = 0; j < exprs[i].length; j++){
       let trulyUndefinedVars = GetTrulyUndefinedVariables(exprs[i][j].str);
       if(trulyUndefinedVars.length == 0){//there must be 0 truly undefined variables for the string to be parsed
-
         let str = ReplaceVariablesWithMathjsUnits(exprs[i][j].str);
+
         str = CleanLatexString(str,["absolute-value"]);
         str = CleanLatexString(str, ["fractions","addition","parentheses","brackets", "white-space"]);
         str = FindAndWrapVectorsThatAreBeingMultiplied(str);
@@ -300,7 +381,7 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
   });
 
   if(recordedDefinitionForUndefinedVariable){
-    EL.ParsePreviousLinesAgainWithNewInfo(lineNumber);
+    EL.ParsePreviousLinesAgainWithNewInfoAboutUndefinedVariables(lineNumber);
   }
 
   EL.addLog(log);
@@ -888,8 +969,20 @@ function SimplifyFunctionDefinitionToJustFunctionVariable(ls){
       let closingParenthesis = FindIndexOfClosingParenthesis(ls.substring(index + target.length));
       if(closingParenthesis != null){
         closingParenthesis += index + target.length;//accounts for the shift because we were only using a substring of the actaul string
-        //we are going to remove everything inside the parenthesis and including the parenthesis
-        ls = ls.substring(0, index + vars[i].length) + ls.substring(closingParenthesis + 1);
+        //now we have the range we need to make sure there are no operators inside this range because then we need to assume it is implicit multiplication
+        let stringInsideParentheses = ls.substring(index + target.length, closingParenthesis + 1 - "\\right)".length);
+        let foundOperator = false;
+        for(let c = 0; c < ListOfOperators.length; c++){
+          if(stringInsideParentheses.indexOf(ListOfOperators[c]) != -1){
+            foundOperator = true;
+            break;//we found one operator so we don't need to parse anymore we know that we can't assume this is a variable apart of a function definition. we must assume this is implicit multiplication
+          }
+        }
+
+        //if we found an operator then we will keep the string inside the parentheses but replace its parentheses "\\left(" -> "(" and "\\right" -> ")" to signify implicit multiplciation.
+        //but if we didn't find an operator we can assume that the string was just apart of a function definition
+        ls = ls.substring(0, index + vars[i].length) + `${(foundOperator) ? "(" + stringInsideParentheses + ")" : "" }` + ls.substring(closingParenthesis + 1);
+
       }
     }
   }
