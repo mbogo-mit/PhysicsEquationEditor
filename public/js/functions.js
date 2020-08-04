@@ -472,7 +472,9 @@ function AdjustLineLabelNumber(){
 }
 
 function RecalculateHeightOfLineEmptySpace(){
-  $("#editor_empty_space_container").css("height",`${$("#math_field_editor_container").height() - $("#editor_lines_container").height() - 5}px`);
+  let h = $("#math_field_editor_container").height() - $("#editor_lines_container").height() - 5;
+  h = (h < 36) ? 36 : h;
+  $("#editor_empty_space_container").css("height",`${h}px`);
 }
 
 function CreateFullUnitsString(quantity, name, symbol){
