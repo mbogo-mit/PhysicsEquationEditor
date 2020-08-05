@@ -309,6 +309,10 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
           mfID: mfID,
         });
       }
+      else{
+        //if the units match then we should do a high level self consistency check
+        EL.linesToCheckForSelfConsistency.push(lineNumber);
+      }
 
     }
     else{
@@ -590,7 +594,7 @@ function SimpleConvertLatexStringToNerdamerReadableString(ls, uniqueRIDStringArr
   return nerdamer.convertFromLaTeX(ls).toString();
 }
 
-function ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray){
+function ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray, recognizeNerdamerFunctions = false){
   //now we have to go character by character and replace variables with their unitsMathjs string
   let i = 0;
   let delta = 0;
@@ -602,15 +606,33 @@ function ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray){
     s = ls.substring(i);
     //we need to identify what set of characters is at the index we are at
 
+    //if this is true then we have converted things to nerdamer functions before we passed it to this function so
+    //we need to make sure that we dont recognize a letter in a nerdamer function as a variable
+    if(recognizeNerdamerFunctions){
+      let nerdamerFunctions = ["integrate(",];
+      for(var c = 0; c < nerdamerFunctions.length; c++){
+        if(s.indexOf(nerdamerFunctions[c]) == 0){
+          foundMatch = true;
+          newLs += nerdamerFunctions[c];
+          delta = nerdamerFunctions[c].length;
+          break;
+        }
+      }
+
+    }
+
     //lets first check if its a variable
-    for(var c = 0; c < uniqueRIDStringArray.length; c++){
-      if(s.indexOf(uniqueRIDStringArray[c].variable) == 0){
-        foundMatch = true;
-        delta = uniqueRIDStringArray[c].variable.length;
-        newLs += ` (${uniqueRIDStringArray[c].ridString}) `;
-        break;
+    if(!foundMatch){
+      for(var c = 0; c < uniqueRIDStringArray.length; c++){
+        if(s.indexOf(uniqueRIDStringArray[c].variable) == 0){
+          foundMatch = true;
+          delta = uniqueRIDStringArray[c].variable.length;
+          newLs += ` (${uniqueRIDStringArray[c].ridString}) `;
+          break;
+        }
       }
     }
+
 
     //if it is not a variable then it could be an operator or greek letter so we need to check
     if(!foundMatch && s[0] == "\\"){
@@ -663,10 +685,13 @@ function GenerateUniqueRIDStringForVariables(ls){
 
   let array = [];
   for(let i = 0; i < vars.length; i++){
-    array.push({
-      variable: vars[i],
-      ridString: `__${RandomVariableString()}`,
-    });
+    if(vars[i] != "\\pi" && vars[i] != "i" && vars[i] != "e"){//we are not going to convert these two variables because they are predefined and understood by nerdamer if you use the convertFromLaTeX function
+      array.push({
+        variable: vars[i],
+        ridString: `__${RandomVariableString()}`,
+      });
+    }
+
   }
   return array;
 }
@@ -731,6 +756,7 @@ function ReplaceSpecialLatexCharacterWithBasicCharacterCounterpart(ls, types){
     let latexFunctionConversions = {//i have to put 4 backslashes because these strings are going into a regex statement so i have to escape the backslashes
       "\\\\sqrt": "sqrt",
       "\\\\sin": "sin",
+      "\\\\cos": "cos",
       "\\\\int": "",
       "\\\\sum": "",
     };
@@ -989,4 +1015,60 @@ function SimplifyFunctionDefinitionToJustFunctionVariable(ls){
 
   return ls;
 
+}
+
+function DoHighLevelSelfConsistencyCheck(expressionArray){
+  let expressionThatDontEqualEachOther = [];
+  //first we need to get a list of all the variables used in each expression and pair up all the expressions that use the same variables
+  let expressionVariablesArray = expressionArray.map(function(value){
+    return GetVariablesFromLatexString(value.str).filter((v) => { return (v != "\\pi" && v != "i" && v != "e")});
+    //this removes "\\pi" and "i" from the variable list because nerdamer see thoses as values and not variables.
+    //This allows us to check if sin(\\pi) = 0. if we didn't do this line than we would say that the left side has the
+    //variable \\pi which the right side doesn't but in reality nerdamer can handle this case
+  });
+  //so now we need to check if there is even a possiblity that we can do a high level check between these expressions
+  for(let i = 0; i < expressionVariablesArray.length; i++){
+    for(let j = i + 1; j < expressionVariablesArray.length; j++){
+      if(expressionVariablesArray[i].length == expressionVariablesArray[j].length){//if the number of variables in the expression don't equal then we definetly know that they don't use the same variables. so the lengths must equal
+
+        let x = 0;
+        let doHighLevelCheck = true;
+        while(x < expressionVariablesArray[i].length){
+          //this if statement is saying that if the 2nd expression doesn't contain a variable that the first expression uses than we cannot do a high level check to see if they are equal
+          if(!expressionVariablesArray[j].includes(expressionVariablesArray[i][x])){
+            doHighLevelCheck = false;
+            break;
+          }
+          x++;
+        }
+
+        if(doHighLevelCheck){
+          //before we do the high level consistency check we need to make sure that the expressions we are parsing dont container functions and characters we dont support yet
+          //mainly for right now we don't support integrals, gradient, and [] that could be used to denote a vector
+          //this lien is temporary. We will soon be able to support parsing and using these operators and notations
+          if(expressionArray[i].str.indexOf("\\int") == -1 && expressionArray[j].str.indexOf("\\int") == -1 && expressionArray[i].str.indexOf("\\nabla") == -1 && expressionArray[j].str.indexOf("\\nabla") == -1 && expressionArray[i].str.indexOf("[") == -1 && expressionArray[j].str.indexOf("[") == -1 && expressionArray[i].str.indexOf("]") == -1 && expressionArray[j].str.indexOf("]") == -1){
+            //we need to do an exact conversion from latex to a string that nerdamer can understand. they have a convertFromLatex function but it is very limited so we will use it sparingly
+            //this line of code converts the two expressions we were analyzing into nerdeamer readable string then we use nerdamers .eq() function to check if they are equal. if they arent then we add these two expression to the "expressionThatDontEqualEachOther" array
+            let uniqueRIDStringArray = GenerateUniqueRIDStringForVariables(expressionArray[i].str);
+            let expression1 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[i].str, uniqueRIDStringArray);
+            let expression2 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[j].str, uniqueRIDStringArray)
+            //console.log(expression1 + " ?= " +  expression2);
+            if(!nerdamer(expression1).eq(expression2)){
+              //console.log("not equal");
+              expressionThatDontEqualEachOther.push([expressionArray[i].str, expressionArray[j].str]);
+            }
+          }
+        }
+
+      }
+    }
+  }
+  return expressionThatDontEqualEachOther;
+}
+
+function ExactConversionFromLatexStringToNerdamerReadableString(ls, uniqueRIDStringArray){
+
+  ls = ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray);
+
+  return nerdamer.convertFromLaTeX(ls).toString();//this is just a place holder for the actual value we will return
 }

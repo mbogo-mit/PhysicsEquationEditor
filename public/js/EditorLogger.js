@@ -1,6 +1,7 @@
 function EditorLogger(){
 
   this.rawExpressionData = {};
+  this.linesToCheckForSelfConsistency = [];
 
   this.undefinedVars = {
     undefined: {},
@@ -29,6 +30,10 @@ function EditorLogger(){
       description: "You have expressions that are set equal to each other that don't have the same units, or they have the same units but one is a vector and the other is a scalar.",
       example: "",
     },
+    "Expressions are not equivalent": {
+      description: "You have expressions on this line that are set equal to each other but are not equivalent",
+      example: "",
+    },
     "Value expected": {
       description: "An equation on this line is formatted incorrectly",
       example: "",
@@ -52,6 +57,8 @@ function EditorLogger(){
     this.clearLog();//clearing log befor adding to it
     this.saveUndefinedVariablesData();
     this.clearUndefinedVariables();
+    this.clearRawExpressionData();
+    this.clearLinesToCheckForSelfConsistency();
 
     for(const [lineNumber, id] of Object.entries(orderedIds)){
       //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
@@ -64,6 +71,10 @@ function EditorLogger(){
         CheckForErrorsInExpression(ls, lineNumber, id);
       }
     }
+
+    //after we have gone through all the lines and parsed everything we will have a list of lines that we can check for selfConsistency so lets do that
+
+    this.CheckLinesForSelfConsistency();
 
     this.UpdateKnownUnknownVariables();
 
@@ -108,6 +119,39 @@ function EditorLogger(){
       }
 
     }
+  }
+
+  this.CheckLinesForSelfConsistency = function(){
+    let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
+    //this function will go through the "this.linesToCheckForSelfConsistency" array and do a high level check for self consistency
+    //this makes sures that there are no duplicate values in the array
+    this.linesToCheckForSelfConsistency = this.linesToCheckForSelfConsistency.filter((value, index, self)=>{
+      return self.indexOf(value) === index
+    });
+    for(let i = 0; i < this.linesToCheckForSelfConsistency.length; i++){
+      for(let j = 0; j < this.rawExpressionData[this.linesToCheckForSelfConsistency[i]].length; j++){
+        let expressionsThatDontEqualEachOtherOnThisLine = [];
+        let a = [];
+        let c = 0;
+        if(this.rawExpressionData[this.linesToCheckForSelfConsistency[i]][j].length >= 2){//you can only do a self consistency check if there at least two expressions set equal to each other
+          a = DoHighLevelSelfConsistencyCheck(this.rawExpressionData[this.linesToCheckForSelfConsistency[i]][j]);
+          while(c < a.length){
+            expressionsThatDontEqualEachOtherOnThisLine.push(a[c]);
+            c++;
+          }
+        }
+        console.log("expressionsThatDontEqualEachOtherOnThisLine", expressionsThatDontEqualEachOtherOnThisLine);
+        if(expressionsThatDontEqualEachOtherOnThisLine.length > 0){
+          this.addLog({error: [{
+            error: EL.createLoggerErrorFromMathJsError("Expressions are not equivalent"),
+            info: "",
+            lineNumber: this.linesToCheckForSelfConsistency[i],
+            mfID: orderedIds[this.linesToCheckForSelfConsistency[i]],
+          }]});
+        }
+      }
+    }
+
   }
 
   this.UpdateKnownUnknownVariables = function(reset = true){
@@ -192,6 +236,11 @@ function EditorLogger(){
 
   this.clearRawExpressionData = function(){
     this.rawExpressionData = {};
+  }
+
+
+  this.clearLinesToCheckForSelfConsistency = function(){
+    this.linesToCheckForSelfConsistency = [];
   }
 
   this.clearUndefinedVariables = function(clearUndefined = true, clearDefined = true){
