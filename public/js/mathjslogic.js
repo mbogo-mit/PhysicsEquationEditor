@@ -1163,7 +1163,13 @@ function FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls,
         delta = i2 + 1;
         let stringInsideIntegral = s.substring("\\int  \\left(".length, i2 - "\\right".length);
         //console.log(stringInsideIntegral);
-        newLs += EvaluateStringInsideIntegralAndReturnNerdamerString(stringInsideIntegral, uniqueRIDStringArray);
+        let newString = EvaluateStringInsideIntegralAndReturnNerdamerString(stringInsideIntegral, uniqueRIDStringArray);
+        if(newString != null){
+          newLs += `(${newString})`;
+        }
+        else{
+          return ls;
+        }
       }
       else{
         //if we can't figure out where the parentheses is then a latex inegral expression won't be parsed and for this reason there is not reason to continue parsing so we will just return the original string we astarted with
@@ -1181,54 +1187,55 @@ function FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls,
 
 function EvaluateStringInsideIntegralAndReturnNerdamerString(ls, uniqueRIDStringArray){
   //first we need to check if there is an integral latex string inside of this one
-  if(ls.indexOf("\\int  \\left(") == -1){
-    let differentialVariableIndexes = [];//this holds the indexes of the variables of the variables whose differential form is being used in this current "ls"
-    let i = 0;
-    while(i < uniqueRIDStringArray.length){
-      //unqiueRIDStringArray holds all the variables that are relevant to this ls and we are grabbing the information it has on all the differentialVariables that might exist in the string
-      if(ls.indexOf(uniqueRIDStringArray[i].differentialVariable) != -1){
-        differentialVariableIndexes.push(i);
-      }
-      i++;
-    }
-    //we need to check if there were any differential variables detected. if there none then we return null because we cant convert this this latex integral string into a nerdamer integral string
-    if(differentialVariableIndexes.length > 0){
-      //so the next thing we need to do is change the latex variables to RIDStrings so that nerdamer doesn't try to do stuff with them. it should just see these complex latex variables as just a variable.
-      //For example \\vec{x} if we don't convert that to an unique ridString nerdamer will think it is the variable vec*x which is wrong
-      let str = ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray);
-      //so now that we have converted variables into something that nerdamer can understand and wont try to change we need to convert the string to a nerdamer string
-      let expression = {//this object keeps track of which parts of the expression are going to be in the integral and which parts arent
-        integral: "",
-        other: nerdamer.convertFromLaTeX(str).toString(),//initally nothing is in an integral unitl we can parse through the this string in the other property and slowly understand which parts are actaully apart of the integral
-      }
-      //after we have the nerdamer string we need to divide the nerdamer string by each differential variable found in the latex string to figure out which expressions are multiplied by which differential variables so if we need to we can split the integral into different integrals
-      let c = 0;
-      let dividedString;
-      while(c < differentialVariableIndexes.length){
-        //we are using the differentalRidString bevause this string was converted to a string where the variables were replaced with their uniqueRidString
-        dividedString = nerdamer(expression.other).divide(uniqueRIDStringArray[differentialVariableIndexes[c]].differentialRidString).expand().toString();
-        //now that we have divided the expressions by a specific differnetial variable and have expanded it we need to look at each expressions seperated by a "+" or "-" to see which expression are divided by the differential variable
-        //Such expression means that they were not multiplied by the differential variable to begin with and for this reason they will not be apart of the integral we are going to make with this differential variable
-        //the line below returns an object that holds the nerdamer integral string and an object that holds all other strings not divided by the differental variable (so back to normal)
-        let expr = ReturnIntegralExpressionAndOtherExpression(dividedString, uniqueRIDStringArray[differentialVariableIndexes[c]].differentialRidString, uniqueRIDStringArray[differentialVariableIndexes[c]].ridString);
-        expression.other = expr.other;//expr.other is a string that holds an expression which has the expressiosn that couldn't be put in the integral because they were not multiplied by the correct differential variable
-        expression.integral += `+${expr.integral}`;//adding the calculation of the integral to expression.integral which keeps track of all the values of the integrals added up
-
-        c++;
-      }
-
-      //we do it in this order because expression.integral always has "+" starting out the string because of how the integrate functions are being added to the integral property of expressions.
-      return ReplaceUniqueRIDStringWithVariableLs(nerdamer(expression.other + expression.integral).toString(), uniqueRIDStringArray);
-    }
-    else{
+  let indexOfAnotherIntegral = ls.indexOf("\\int");
+  if(indexOfAnotherIntegral != -1){
+    //if we find an integral inside of this one we will see if we can evaluate it and take the latex function "\\int" out of it
+    ls = ls.substring(0, indexOfAnotherIntegral) + FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls.substring(indexOfAnotherIntegral), uniqueRIDStringArray);
+    if(ls.indexOf("\\int") != -1){//so we tried to evaluate the integral inside of this one and if it still has the latex function "\\int" that means we can't take it out for some reason
       return null;
     }
   }
-  else{
-    let ls2 = FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls.substring(ls.indexOf("\\int  \\left(")));
-    if(ls2 == ls){//this emasn we couldn't convert the latex strings \\int to a nerdamer string
-      return null;
+
+  let differentialVariableIndexes = [];//this holds the indexes of the variables of the variables whose differential form is being used in this current "ls"
+  let i = 0;
+  while(i < uniqueRIDStringArray.length){
+    //unqiueRIDStringArray holds all the variables that are relevant to this ls and we are grabbing the information it has on all the differentialVariables that might exist in the string
+    if(ls.indexOf(uniqueRIDStringArray[i].differentialVariable) != -1){
+      differentialVariableIndexes.push(i);
     }
+    i++;
+  }
+  //we need to check if there were any differential variables detected. if there none then we return null because we cant convert this this latex integral string into a nerdamer integral string
+  if(differentialVariableIndexes.length > 0){
+    //so the next thing we need to do is change the latex variables to RIDStrings so that nerdamer doesn't try to do stuff with them. it should just see these complex latex variables as just a variable.
+    //For example \\vec{x} if we don't convert that to an unique ridString nerdamer will think it is the variable vec*x which is wrong
+    let str = ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray);
+    //so now that we have converted variables into something that nerdamer can understand and wont try to change we need to convert the string to a nerdamer string
+    let expression = {//this object keeps track of which parts of the expression are going to be in the integral and which parts arent
+      integral: "",
+      other: nerdamer.convertFromLaTeX(str).toString(),//initally nothing is in an integral unitl we can parse through the this string in the other property and slowly understand which parts are actaully apart of the integral
+    }
+    //after we have the nerdamer string we need to divide the nerdamer string by each differential variable found in the latex string to figure out which expressions are multiplied by which differential variables so if we need to we can split the integral into different integrals
+    let c = 0;
+    let dividedString;
+    while(c < differentialVariableIndexes.length){
+      //we are using the differentalRidString bevause this string was converted to a string where the variables were replaced with their uniqueRidString
+      dividedString = nerdamer(expression.other).divide(uniqueRIDStringArray[differentialVariableIndexes[c]].differentialRidString).expand().toString();
+      //now that we have divided the expressions by a specific differnetial variable and have expanded it we need to look at each expressions seperated by a "+" or "-" to see which expression are divided by the differential variable
+      //Such expression means that they were not multiplied by the differential variable to begin with and for this reason they will not be apart of the integral we are going to make with this differential variable
+      //the line below returns an object that holds the nerdamer integral string and an object that holds all other strings not divided by the differental variable (so back to normal)
+      let expr = ReturnIntegralExpressionAndOtherExpression(dividedString, uniqueRIDStringArray[differentialVariableIndexes[c]].differentialRidString, uniqueRIDStringArray[differentialVariableIndexes[c]].ridString);
+      expression.other = expr.other;//expr.other is a string that holds an expression which has the expressiosn that couldn't be put in the integral because they were not multiplied by the correct differential variable
+      expression.integral += `+${expr.integral}`;//adding the calculation of the integral to expression.integral which keeps track of all the values of the integrals added up
+
+      c++;
+    }
+
+    //we do it in this order because expression.integral always has "+" starting out the string because of how the integrate functions are being added to the integral property of expressions.
+    return ReplaceUniqueRIDStringWithVariableLs(nerdamer(expression.other + expression.integral).toString(), uniqueRIDStringArray);
+  }
+  else{
+    return null;
   }
 
 }
