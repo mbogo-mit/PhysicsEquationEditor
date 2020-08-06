@@ -64,9 +64,8 @@ function EditorLogger(){
       //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
       let ls = FormatNablaSquared(MathFields[id].mf.latex());
       ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
-      ls = RemoveDifferentialOperatorDFromLatexString(ls);
       if(ls.length > 0){//there is something to evaluate
-        let undefinedVars = GetUndefinedVariables(ls);
+        let undefinedVars = GetUndefinedVariables(RemoveDifferentialOperatorDFromLatexString(ls));
         this.recordUndefinedVariables(undefinedVars);
         CheckForErrorsInExpression(ls, lineNumber, id);
       }
@@ -110,9 +109,8 @@ function EditorLogger(){
         //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
         let ls = FormatNablaSquared(MathFields[id].mf.latex());
         ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
-        ls = RemoveDifferentialOperatorDFromLatexString(ls);
         if(ls.length > 0){//there is something to evaluate
-          let undefinedVars = GetUndefinedVariables(ls);
+          let undefinedVars = GetUndefinedVariables(RemoveDifferentialOperatorDFromLatexString(ls));
           this.recordUndefinedVariables(undefinedVars);
           CheckForErrorsInExpression(ls, lineNumber, id);
         }
@@ -140,7 +138,8 @@ function EditorLogger(){
             c++;
           }
         }
-        console.log("expressionsThatDontEqualEachOtherOnThisLine", expressionsThatDontEqualEachOtherOnThisLine);
+
+        //console.log("expressionsThatDontEqualEachOtherOnThisLine", expressionsThatDontEqualEachOtherOnThisLine);
         if(expressionsThatDontEqualEachOtherOnThisLine.length > 0){
           this.addLog({error: [{
             error: EL.createLoggerErrorFromMathJsError("Expressions are not equivalent"),

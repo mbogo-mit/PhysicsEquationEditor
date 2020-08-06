@@ -656,8 +656,8 @@ function PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls){
     i++;
   }
 
-  ls = ls.replace(/_\{(\s|\\)*}/g,"");//remnoving all empty subscripts from latex string
-  ls = ls.replace(/\^\{(\s|\\)*}/g,"");//remnoving all empty superscripts from latex string
+  ls = ls.replace(/_\{(\s|\\)*}/g," ");//remnoving all empty subscripts from latex string
+  ls = ls.replace(/\^\{(\s|\\)*}/g," ");//remnoving all empty superscripts from latex string
   return ls;
 }
 
