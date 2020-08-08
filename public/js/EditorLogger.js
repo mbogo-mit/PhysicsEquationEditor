@@ -1,6 +1,7 @@
 function EditorLogger(){
 
   this.rawExpressionData = {};
+  this.linesToCheckForSelfConsistency = [];
 
   this.undefinedVars = {
     undefined: {},
@@ -29,6 +30,18 @@ function EditorLogger(){
       description: "You have expressions that are set equal to each other that don't have the same units, or they have the same units but one is a vector and the other is a scalar.",
       example: "",
     },
+    "Expressions are not equivalent": {
+      description: "You have expressions on this line that are set equal to each other but are not equivalent",
+      example: "",
+    },
+    "Expressions found inside integral without differential variable": {
+      description: "All expressions inside the parentheses of an integral must be multiplied by a differential variable, for exmaple: dx,dy,dt,etc",
+      example: "",
+    },
+    "Integral bounds not formatted properly": {
+      description: "There is an integral on this line that has a lower bound defined but not an upper bound defined or vise versa",
+      example: "",
+    },
     "Value expected": {
       description: "An equation on this line is formatted incorrectly",
       example: "",
@@ -52,18 +65,23 @@ function EditorLogger(){
     this.clearLog();//clearing log befor adding to it
     this.saveUndefinedVariablesData();
     this.clearUndefinedVariables();
+    this.clearRawExpressionData();
+    this.clearLinesToCheckForSelfConsistency();
 
     for(const [lineNumber, id] of Object.entries(orderedIds)){
       //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
       let ls = FormatNablaSquared(MathFields[id].mf.latex());
       ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
-      ls = RemoveDifferentialOperatorDFromLatexString(ls);
       if(ls.length > 0){//there is something to evaluate
-        let undefinedVars = GetUndefinedVariables(ls);
+        let undefinedVars = GetUndefinedVariables(RemoveDifferentialOperatorDFromLatexString(ls));
         this.recordUndefinedVariables(undefinedVars);
         CheckForErrorsInExpression(ls, lineNumber, id);
       }
     }
+
+    //after we have gone through all the lines and parsed everything we will have a list of lines that we can check for selfConsistency so lets do that
+
+    this.CheckLinesForSelfConsistency();
 
     this.UpdateKnownUnknownVariables();
 
@@ -99,15 +117,64 @@ function EditorLogger(){
         //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
         let ls = FormatNablaSquared(MathFields[id].mf.latex());
         ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
-        ls = RemoveDifferentialOperatorDFromLatexString(ls);
         if(ls.length > 0){//there is something to evaluate
-          let undefinedVars = GetUndefinedVariables(ls);
+          let undefinedVars = GetUndefinedVariables(RemoveDifferentialOperatorDFromLatexString(ls));
           this.recordUndefinedVariables(undefinedVars);
           CheckForErrorsInExpression(ls, lineNumber, id);
         }
       }
 
     }
+  }
+
+  this.CheckLinesForSelfConsistency = function(){
+    let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
+    let lineNumber;
+    let mfID;
+    //this function will go through the "this.linesToCheckForSelfConsistency" array and do a high level check for self consistency
+    //this makes sures that there are no duplicate values in the array
+    this.linesToCheckForSelfConsistency = this.linesToCheckForSelfConsistency.filter((value, index, self)=>{
+      return self.indexOf(value) === index
+    });
+    for(let i = 0; i < this.linesToCheckForSelfConsistency.length; i++){
+      lineNumber = this.linesToCheckForSelfConsistency[i];
+      mfID = orderedIds[this.linesToCheckForSelfConsistency[i]];
+      for(let j = 0; j < this.rawExpressionData[this.linesToCheckForSelfConsistency[i]].length; j++){
+        let expressionsThatDontEqualEachOtherOnThisLine = [];
+        let a = [];
+        let c = 0;
+        if(this.rawExpressionData[this.linesToCheckForSelfConsistency[i]][j].length >= 2){//you can only do a self consistency check if there at least two expressions set equal to each other
+          //before we do a high level self consistency check we need to make sure that integrals are formatted properly and have the correct information. specifically if a lower bound is defined then an upperbound should also be defined and vise versa
+          if(AreIntegralBoundsFormattedProperly(this.rawExpressionData[this.linesToCheckForSelfConsistency[i]][j])){
+            a = DoHighLevelSelfConsistencyCheck(this.rawExpressionData[this.linesToCheckForSelfConsistency[i]][j], lineNumber, mfID);
+            while(c < a.length){
+              expressionsThatDontEqualEachOtherOnThisLine.push(a[c]);
+              c++;
+            }
+          }
+          else{
+            this.addLog({error: [{
+              error: this.createLoggerErrorFromMathJsError("Integral bounds not formatted properly"),
+              info: "",
+              lineNumber: lineNumber,
+              mfID: mfID,
+            }]});
+          }
+
+        }
+
+        //console.log("expressionsThatDontEqualEachOtherOnThisLine", expressionsThatDontEqualEachOtherOnThisLine);
+        if(expressionsThatDontEqualEachOtherOnThisLine.length > 0){
+          this.addLog({error: [{
+            error: this.createLoggerErrorFromMathJsError("Expressions are not equivalent"),
+            info: "",
+            lineNumber: lineNumber,
+            mfID: mfID,
+          }]});
+        }
+      }
+    }
+
   }
 
   this.UpdateKnownUnknownVariables = function(reset = true){
@@ -192,6 +259,11 @@ function EditorLogger(){
 
   this.clearRawExpressionData = function(){
     this.rawExpressionData = {};
+  }
+
+
+  this.clearLinesToCheckForSelfConsistency = function(){
+    this.linesToCheckForSelfConsistency = [];
   }
 
   this.clearUndefinedVariables = function(clearUndefined = true, clearDefined = true){

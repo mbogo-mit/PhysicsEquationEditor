@@ -656,8 +656,8 @@ function PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls){
     i++;
   }
 
-  ls = ls.replace(/_\{(\s|\\)*}/g,"");//remnoving all empty subscripts from latex string
-  ls = ls.replace(/\^\{(\s|\\)*}/g,"");//remnoving all empty superscripts from latex string
+  ls = ls.replace(/_\{(\s|\\)*}/g," ");//remnoving all empty subscripts from latex string
+  ls = ls.replace(/\^\{(\s|\\)*}/g," ");//remnoving all empty superscripts from latex string
   return ls;
 }
 
@@ -806,6 +806,9 @@ function OrderCompileAndRenderMyVariablesCollection(){
   }
 
   //RENDER
+  if(html == ""){//if there are no variables defined we will just show a nice message to the user so they know whats up
+    html = ejs.render(Templates["no-variables-defined"]);
+  }
   $("#my_variables-collection-container .collection").html(html);//rendering new collection
   //Add event listeners and initialize static math fields
   $("#my_variables .collection span").each(function(){

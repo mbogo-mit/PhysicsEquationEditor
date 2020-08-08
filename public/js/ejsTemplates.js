@@ -221,4 +221,8 @@ let Templates = {
     </table>
   </div>
   `,
+  "no-variables-defined":
+  `
+  <div id="no-variables-defined" class="center">The physics constants you import and variables you use in the editor will appear in this tab</div>
+  `,
 };
