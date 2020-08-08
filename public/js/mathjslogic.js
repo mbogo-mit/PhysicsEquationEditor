@@ -277,6 +277,7 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
 
     let equationUnits = "";
     if(successes.length > 1){
+
       //check if units match for success equations
       let equationUnitsMatch = false;
 
@@ -290,7 +291,7 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
           //removing rad and steradian from equations to see if they will equal each other because the editor can't recorgnize the arc formula  s=r\theta cuz units wise you are saying 1m=1m*rad
           let editedSuccesses = [];
           for(var i = 0; i < successes.length; i++){
-            editedSuccesses.push(successes[i].replace(/rad/g,"(m / m)").replace(/sr/g,"(m^2 / m^2)"));
+            editedSuccesses.push(successes[i].replace(/rad/g,"").replace(/sr/g,""));
           }
           equationUnits = math.evaluate(editedSuccesses.join(" + ")).toString();
           equationUnitsMatch = true;
@@ -1095,7 +1096,70 @@ function SimplifyFunctionDefinitionToJustFunctionVariable(ls){
 
 }
 
-function DoHighLevelSelfConsistencyCheck(expressionArray){
+function AreIntegralBoundsFormattedProperly(expressionArray){
+  let c = 0;
+  let ls;
+  while(c < expressionArray.length){
+    ls = expressionArray[c].str;//checking each latex string to see if there is badly formatted integrals
+    //this function takes in an expression array of latex strings and checks if the "\int" latex string and its bounds are formatted properly.
+    //when no bounds are explicitly defined by the user the integral will have a latex string of "\\int" becayse earlier the Editor Logger "EL" takes out all empty Subscripts and superscripts so "\\int_{ }^{ }" would turn into this "\\int"
+    //if an upperbound is explicitly defined but a lower bound is not the integral will look like this "\\int^{...}"
+    if(ls.indexOf("\\int^{") == -1){
+      //the next thing we need to check is if a lower bound is defined but an upper bound is not. In this case the integral will look like this "\\int_{...}". But this is how an integral with both bounds look like in the beginning so we can't just do a simple indexOf("\\int_{"). because that will catch a properly formated integral like "\\int_{...}^{...}"
+      let i = 0;
+      let i2;
+      let delta = 1;
+      let s;
+      while(i < ls.length){
+        delta += 1;
+        s = ls.substring(i);
+        if(s.indexOf("\\int_{") == 0){
+          i2 = FindIndexOfClosingBracket(s.substring("\\int_{".length));
+          if(i2 != null){
+            i2 += "\\int_{".length;//this accounts for the shift that occurs because of using a substring
+            if(s[i2 + 1] != "^"){//if it doesnt equal "^" that means that this is an integral with lower bound defined but not upper bound
+              return false;
+            }
+            else{//this is an integral with both bounds defined
+              delta = i2 + 1;//so now on the next loop through i will start on the character write after the first closing bracket
+            }
+          }
+          else{
+            console.log("trouble finding closing bracket for integral");
+            return false;
+          }
+        }
+        i += delta;
+      }
+    }
+    else{
+      return false;
+    }
+
+    c++;
+  }
+  //if we haven't returned false by this point, meaning we didn't find anything wrong as we parsed through all the latex strings using the while loops, then the string must be formatted properly
+  return true;
+}
+
+function GetRidStringVariablesFromString(str, uniqueRIDStringArray){
+  //this function gets all the ridStrings used in the string and returns an array
+  let i = 0;
+  let ridStringsUsedInString = [];
+  while(i < uniqueRIDStringArray.length){
+    if(str.indexOf(uniqueRIDStringArray[i].ridString) != -1){
+      ridStringsUsedInString.push(uniqueRIDStringArray[i].ridString);
+    }
+    if(str.indexOf(uniqueRIDStringArray[i].differentialRidString) != -1){
+      ridStringsUsedInString.push(uniqueRIDStringArray[i].differentialRidString);
+    }
+    i++;
+  }
+
+  return ridStringsUsedInString;
+}
+
+function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
   let expressionThatDontEqualEachOther = [];
   //first we need to get a list of all the variables used in each expression and pair up all the expressions that use the same variables
   let expressionVariablesArray = expressionArray.map(function(value){
@@ -1105,92 +1169,185 @@ function DoHighLevelSelfConsistencyCheck(expressionArray){
     //variable \\pi which the right side doesn't but in reality nerdamer can handle this case
   });
   //so now we need to check if there is even a possiblity that we can do a high level check between these expressions
-  for(let i = 0; i < expressionVariablesArray.length; i++){
-    for(let j = i + 1; j < expressionVariablesArray.length; j++){
-      if(expressionVariablesArray[i].length == expressionVariablesArray[j].length){//if the number of variables in the expression don't equal then we definetly know that they don't use the same variables. so the lengths must equal
-
-        let x = 0;
-        let doHighLevelCheck = true;
-        while(x < expressionVariablesArray[i].length){
-          //this if statement is saying that if the 2nd expression doesn't contain a variable that the first expression uses than we cannot do a high level check to see if they are equal
-          if(!expressionVariablesArray[j].includes(expressionVariablesArray[i][x])){
-            doHighLevelCheck = false;
-            break;
-          }
-          x++;
-        }
-
-        if(doHighLevelCheck){
-
-          //before we do the high level consistency check we need to make sure that the expressions we are parsing dont container functions and characters we dont support yet
-          //mainly for right now we don't support integrals, gradient, and [] that could be used to denote a vector
-
+  for(let i = 0; i < expressionArray.length; i++){
+    for(let j = i + 1; j < expressionArray.length; j++){
           //we need to do an exact conversion from latex to a string that nerdamer can understand. they have a convertFromLatex function but it is very limited so we will use it sparingly
           //this line of code converts the two expressions we were analyzing into nerdeamer readable string then we use nerdamers .eq() function to check if they are equal. if they arent then we add these two expression to the "expressionThatDontEqualEachOther" array
-          let uniqueRIDStringArray = GenerateUniqueRIDStringForVariables(expressionArray[i].str);
-          let expression1 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[i].str, uniqueRIDStringArray);
-          let expression2 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[j].str, uniqueRIDStringArray)
-          console.log(expression1 + " ?= " +  expression2);
+          let uniqueRIDStringArray = GenerateUniqueRIDStringForVariables(`${expressionArray[i].str} + ${expressionArray[j].str}`);//passing both string and putting a plus inbetween them so that we generate a uniqueRIDStringArray that accounts for all the variables and differential variables used in both expressions
+          //console.log(uniqueRIDStringArray);
+          let expression1 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[i].str, uniqueRIDStringArray, lineNumber, mfID);
+          let expression2 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[j].str, uniqueRIDStringArray, lineNumber, mfID)
+          //console.log(expression1 + " ?= " +  expression2);
           if(expression1 != null && expression2 != null){
-            if(!nerdamer(expression1).eq(expression2)){
-              //console.log("not equal");
-              expressionThatDontEqualEachOther.push([expressionArray[i].str, expressionArray[j].str]);
+            //because this is a high level check we need to make sure that both expressions use the same variables and if not we cannot be sure that the equations don't equal each other so we will not actaully do any check
+            let expression1Variables = GetRidStringVariablesFromString(expression1, uniqueRIDStringArray);
+            let expression2Variables = GetRidStringVariablesFromString(expression2, uniqueRIDStringArray);
+            //console.log(expression1Variables, expression2Variables);
+            if(expression1Variables.length == expression2Variables.length){//the arrays have to bee the same length
+              //we are now going to filter expression1Variables array using values from expression2Variables array and if there are any variables left in expression1Variable array we know that these two arrays don't hold the exact same variables as each other and therefore we can't do a high level check
+              if(expression1Variables.filter((v) => {return !expression2Variables.includes(v)}).length == 0){
+                if(!nerdamer(expression1).eq(expression2)){
+                  //console.log("not equal");
+                  expressionThatDontEqualEachOther.push([expressionArray[i].str, expressionArray[j].str]);
+                }
+              }
             }
           }
-
-        }
-
-      }
     }
   }
   return expressionThatDontEqualEachOther;
 }
 
-function FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls, uniqueRIDStringArray){
+function FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls, uniqueRIDStringArray, lineNumber, mfID){
   //this function takes a string and tries to find all the intsances of \\int_{}^{}(...) and converter them to a nerdamer string like integarte(x,x)
   let newLs = "";
   let s;
   let i = 0;
   let i2 = 0;
+  let i3 = 0;
+  let i4 = 0;
   let delta = 0;
+  let foundMatch = false;
   while(i < ls.length){
+    foundMatch = false;
     delta = 1;
     s = ls.substring(i);
-    if(s.indexOf("\\int  \\left(") == 0){
+    if(s.indexOf("\\int  \\left(") == 0){//checking for
       i2 = FindIndexOfClosingParenthesis(s.substring("\\int  \\left(".length));
       if(i2 != null){
         i2 += "\\int  \\left(".length;
         delta = i2 + 1;
         let stringInsideIntegral = s.substring("\\int  \\left(".length, i2 - "\\right".length);
         //console.log(stringInsideIntegral);
-        let newString = EvaluateStringInsideIntegralAndReturnNerdamerString(stringInsideIntegral, uniqueRIDStringArray);
+        let newString = EvaluateStringInsideIntegralAndReturnNerdamerString(stringInsideIntegral, uniqueRIDStringArray, lineNumber, mfID);
         if(newString != null){
+          foundMatch = true;
           newLs += `(${newString})`;
         }
         else{
+          console.log("couldn't evaluate string inside integral");
           return ls;
         }
       }
       else{
         //if we can't figure out where the parentheses is then a latex inegral expression won't be parsed and for this reason there is not reason to continue parsing so we will just return the original string we astarted with
+        console.log("trouble finding closing paraenthesis");
         return ls;
       }
     }
-    else{
-      newLs += s[0];
+
+    if(!foundMatch && s.indexOf("\\int_{") == 0){
+      let lowerbound;
+      let upperbound;
+      //we need to check if there is a definite integral
+      i2 = FindIndexOfClosingBracket(s.substring("\\int_{".length));
+      if(i2 != null){
+        i2 += "\\int_{".length;
+        lowerbound = s.substring("\\int_{".length, i2);
+        //console.log("substring:" + s.substring(i2+1));
+        if(s.substring(i2+1).indexOf("^{") == 0){//checking if there is an uppeerbound to this integral
+          i3 = FindIndexOfClosingBracket(s.substring(i2 + 3));//adding 3 because if the integral looks like this "\\int_{...}^{..}" you need to add 3 to get inside the next set of brackets
+          if(i3 != null){
+            i3 += i2 + 3;//this accounts for the shift created by using a substring. i3 holds the index of the second closing bracket in a defined integral
+            upperbound = s.substring(i2 + 3, i3);
+            if(s.substring(i3 + 1).indexOf("\\left(") == 0){//we need to have a opening parathensis
+              //console.log("lowerbound", lowerbound);
+              //console.log("upperbound", upperbound);
+              lowerbound = ExactConversionFromLatexStringToNerdamerReadableString(lowerbound, uniqueRIDStringArray, lineNumber, mfID);
+              upperbound = ExactConversionFromLatexStringToNerdamerReadableString(upperbound, uniqueRIDStringArray, lineNumber, mfID);
+              if(lowerbound != null && upperbound != null){
+                i4 = FindIndexOfClosingParenthesis(s.substring(i3 + 1 + "\\left(".length));
+                if(i4 != null){
+                  i4 += i3 + 1 + "\\left(".length;
+                  delta = i4 + 1;
+                  let stringInsideDefiniteIntegral = s.substring(i3 + 1 + "\\left(".length, i4 - "\\right".length);
+                  //console.log("stringInsideDefiniteIntegral:" + stringInsideDefiniteIntegral);
+                  let newString = EvaluateStringInsideDefiniteIntegralAndReturnNerdamerString(stringInsideDefiniteIntegral, uniqueRIDStringArray, lowerbound, upperbound, lineNumber, mfID);
+                  if(newString != null){
+                    foundMatch = true;
+                    newLs += `(${newString})`;
+                  }
+                  else{
+                    console.log("couldn't evaluate string inside integral");
+                    return ls;
+                  }
+                }
+                else{
+                  console.log("trouble finding closing paraenthesis");
+                  return ls;
+                }
+              }
+              else{
+                return ls;
+              }
+
+
+            }
+            else{
+              return ls;
+            }
+          }
+          else{
+            console.log("trouble finding closing bracket");
+            return ls;
+          }
+        }
+        else{
+          console.log("couldn't find upperbound");
+          return ls;
+        }
+      }
+      else{
+        console.log("trouble finding closing bracket");
+        return ls;
+      }
     }
+
+    if(!foundMatch && s[0] == "\\"){
+      //it is possible that it is an operator or a greek letter
+      for(var c = 0; c < ListOfOperators.length; c++){
+        if(s.indexOf(ListOfOperators[c]) == 0){
+          foundMatch = true;
+          newLs += ListOfOperators[c];
+          if(["\\cdot","\\times"].includes(ListOfOperators[c])){
+            newLs += " ";//mathquill for some reason doesn't put a space after \\cdot or \\times
+          }
+          delta = ListOfOperators[c].length;
+          break;
+        }
+      }
+
+      if(!foundMatch){
+        for(var c = 0; c < LatexGreekLetters.length; c++){
+          if(s.indexOf(LatexGreekLetters[c]) == 0){
+            foundMatch = true;
+            newLs += LatexGreekLetters[c];
+            delta = LatexGreekLetters[c].length;
+            break;
+          }
+        }
+      }
+
+    }
+
+    if(!foundMatch){
+      delta = 1;
+      newLs += s[0];//just pass the value directly to the new latex string
+    }
+
+
     i += delta;
   }
 
   return newLs;
 }
 
-function EvaluateStringInsideIntegralAndReturnNerdamerString(ls, uniqueRIDStringArray){
+function EvaluateStringInsideIntegralAndReturnNerdamerString(ls, uniqueRIDStringArray, lineNumber, mfID){
   //first we need to check if there is an integral latex string inside of this one
   let indexOfAnotherIntegral = ls.indexOf("\\int");
   if(indexOfAnotherIntegral != -1){
     //if we find an integral inside of this one we will see if we can evaluate it and take the latex function "\\int" out of it
-    ls = ls.substring(0, indexOfAnotherIntegral) + FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls.substring(indexOfAnotherIntegral), uniqueRIDStringArray);
+    ls = ls.substring(0, indexOfAnotherIntegral) + FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls.substring(indexOfAnotherIntegral), uniqueRIDStringArray, lineNumber, mfID);
     if(ls.indexOf("\\int") != -1){//so we tried to evaluate the integral inside of this one and if it still has the latex function "\\int" that means we can't take it out for some reason
       return null;
     }
@@ -1231,21 +1388,111 @@ function EvaluateStringInsideIntegralAndReturnNerdamerString(ls, uniqueRIDString
       c++;
     }
 
+    if(expression.other != "0"){
+      //if there is other stuff in the integral that was not able to be integrated then we need to throw an error
+      EL.addLog({error: [{
+        error: EL.createLoggerErrorFromMathJsError("Expressions found inside integral without differential variable"),
+        info: "",
+        lineNumber: lineNumber,
+        mfID: mfID,
+      }]});
+
+      return null;
+    }
+
     //we do it in this order because expression.integral always has "+" starting out the string because of how the integrate functions are being added to the integral property of expressions.
     return ReplaceUniqueRIDStringWithVariableLs(nerdamer(expression.other + expression.integral).toString(), uniqueRIDStringArray);
   }
   else{
+    //if we couldn't find any differential variables and the user has typed out an integral we need to throw an error
+    EL.addLog({error: [{
+      error: EL.createLoggerErrorFromMathJsError("Expressions found inside integral without differential variable"),
+      info: "",
+      lineNumber: lineNumber,
+      mfID: mfID,
+    }]});
     return null;
   }
 
 }
 
-function ExactConversionFromLatexStringToNerdamerReadableString(ls, uniqueRIDStringArray){
-  //we need to see if we can parse \int into a nerdamer string like integrate(x,x). and if we can't convert all of them then the if statement below will not allow us to check if the strings are equal
-  //console.log('ls given', ls);
-  ls = FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls, uniqueRIDStringArray);
-  //console.log("FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals", ls);
+function EvaluateStringInsideDefiniteIntegralAndReturnNerdamerString(ls, uniqueRIDStringArray, lowerbound, upperbound, lineNumber, mfID){
+  //first we need to check if there is an integral latex string inside of this one
+  let indexOfAnotherIntegral = ls.indexOf("\\int");
+  if(indexOfAnotherIntegral != -1){
+    //if we find an integral inside of this one we will see if we can evaluate it and take the latex function "\\int" out of it
+    ls = ls.substring(0, indexOfAnotherIntegral) + FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls.substring(indexOfAnotherIntegral), uniqueRIDStringArray, lineNumber, mfID);
+    if(ls.indexOf("\\int") != -1){//so we tried to evaluate the integral inside of this one and if it still has the latex function "\\int" that means we can't take it out for some reason
+      return null;
+    }
+  }
 
+  let differentialVariableIndexes = [];//this holds the indexes of the variables of the variables whose differential form is being used in this current "ls"
+  let i = 0;
+  while(i < uniqueRIDStringArray.length){
+    //unqiueRIDStringArray holds all the variables that are relevant to this ls and we are grabbing the information it has on all the differentialVariables that might exist in the string
+    if(ls.indexOf(uniqueRIDStringArray[i].differentialVariable) != -1){
+      differentialVariableIndexes.push(i);
+    }
+    i++;
+  }
+  //we need to check if there were any differential variables detected. if there none then we return null because we cant convert this this latex integral string into a nerdamer integral string
+  if(differentialVariableIndexes.length > 0){
+    //so the next thing we need to do is change the latex variables to RIDStrings so that nerdamer doesn't try to do stuff with them. it should just see these complex latex variables as just a variable.
+    //For example \\vec{x} if we don't convert that to an unique ridString nerdamer will think it is the variable vec*x which is wrong
+    let str = ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray);
+    //so now that we have converted variables into something that nerdamer can understand and wont try to change we need to convert the string to a nerdamer string
+    let expression = {//this object keeps track of which parts of the expression are going to be in the integral and which parts arent
+      integral: "",
+      other: nerdamer.convertFromLaTeX(str).toString(),//initally nothing is in an integral unitl we can parse through the this string in the other property and slowly understand which parts are actaully apart of the integral
+    }
+    //after we have the nerdamer string we need to divide the nerdamer string by each differential variable found in the latex string to figure out which expressions are multiplied by which differential variables so if we need to we can split the integral into different integrals
+    let c = 0;
+    let dividedString;
+    while(c < differentialVariableIndexes.length){
+      //we are using the differentalRidString bevause this string was converted to a string where the variables were replaced with their uniqueRidString
+      dividedString = nerdamer(expression.other).divide(uniqueRIDStringArray[differentialVariableIndexes[c]].differentialRidString).expand().toString();
+      //now that we have divided the expressions by a specific differnetial variable and have expanded it we need to look at each expressions seperated by a "+" or "-" to see which expression are divided by the differential variable
+      //Such expression means that they were not multiplied by the differential variable to begin with and for this reason they will not be apart of the integral we are going to make with this differential variable
+      //the line below returns an object that holds the nerdamer integral string and an object that holds all other strings not divided by the differental variable (so back to normal)
+      let expr = ReturnDefiniteIntegralExpressionAndOtherExpression(dividedString, uniqueRIDStringArray[differentialVariableIndexes[c]].differentialRidString, uniqueRIDStringArray[differentialVariableIndexes[c]].ridString, lowerbound, upperbound);
+      expression.other = expr.other;//expr.other is a string that holds an expression which has the expressiosn that couldn't be put in the integral because they were not multiplied by the correct differential variable
+      expression.integral += `+${expr.integral}`;//adding the calculation of the integral to expression.integral which keeps track of all the values of the integrals added up
+
+      c++;
+    }
+
+    if(expression.other != "0"){
+      //if there is other stuff in the integral that was not able to be integrated then we need to throw an error
+      EL.addLog({error: [{
+        error: EL.createLoggerErrorFromMathJsError("Expressions found inside integral without differential variable"),
+        info: "",
+        lineNumber: lineNumber,
+        mfID: mfID,
+      }]});
+
+      return null;
+    }
+
+    //we do it in this order because expression.integral always has "+" starting out the string because of how the integrate functions are being added to the integral property of expressions.
+    return ReplaceUniqueRIDStringWithVariableLs(nerdamer(expression.other + expression.integral).toString(), uniqueRIDStringArray);
+  }
+  else{
+    //if we couldn't find any differential variables and the user has typed out an integral we need to throw an error
+    EL.addLog({error: [{
+      error: EL.createLoggerErrorFromMathJsError("Expressions found inside integral without differential variable"),
+      info: "",
+      lineNumber: lineNumber,
+      mfID: mfID,
+    }]});
+    return null;
+  }
+
+}
+
+function ExactConversionFromLatexStringToNerdamerReadableString(ls, uniqueRIDStringArray, lineNumber, mfID){
+  //we need to see if we can parse \int into a nerdamer string like integrate(x,x). and if we can't convert all of them then the if statement below will not allow us to check if the strings are equal
+  ls = FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls, uniqueRIDStringArray, lineNumber, mfID);
   //this line is temporary. We will soon be able to support parsing and using these operators and notations
   if(ls.indexOf("\\int") == -1 && ls.indexOf("\\nabla") == -1 && ls.indexOf("[") == -1 && ls.indexOf("]") == -1){
     ls = ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray);
@@ -1281,6 +1528,35 @@ function ReturnIntegralExpressionAndOtherExpression(dividedString, differentialV
 
   return {
     integral: nerdamer(`integrate(${expression.integral},${variableRidString})`).toString(),//now that we have gathered the information we need for the integral, we need to format the information properly so nerdamer can understand
+    other: nerdamer(expression.other).multiply(differentialVariableRidString).expand().toString(),//we need to multiply everything that was left over by the differntial variable so that it goes back to how it was before it was part of the "dividedString"
+  };
+}
+
+function ReturnDefiniteIntegralExpressionAndOtherExpression(dividedString, differentialVariableRidString, variableRidString, lowerbound, upperbound){
+  //the first thing we need to do to generate an integral using some of the expressions given to us in the dividedString is split the dividedString up by pluses and minus
+  let expressionArray = SplitExpandedExpressionByPlusesAndMinuses(dividedString);
+  let expression = {
+    integral: "",
+    other: "",
+  }
+  let i = 0;
+  let r = new RegExp(`(${differentialVariableRidString}\\^\\(\\-[\\d]*\\))`,'g');//if differentVariable = dx, this regex statement would match with strings like dx^(-1) or dx^(-2) which is what we want
+  while(i < expressionArray.length){
+    //so now that we have the expression array we need to figure out which expression in this array should be part of the integral and which should not be.
+    //the way we will determine that is looking at which expressions are being multiplied by the differential variable to a negative power. If that be -1 or -2 or so on
+    //we will use a simple regex statement to do this because we know how the information is formatted.
+    if(expressionArray[i].search(r) == -1){
+      //if this string is not be divided by the differential variable in any way then it should be apart of the integral
+      expression.integral += expressionArray[i];
+    }
+    else{//if it is being divided by the differential variable is some way it shouldn't be apart of of the integral
+      expression.other += expressionArray[i];
+    }
+    i++;
+  }
+
+  return {
+    integral: nerdamer(`defint(${expression.integral},${lowerbound},${upperbound},${variableRidString})`).toString(),//now that we have gathered the information we need for the integral, we need to format the information properly so nerdamer can understand
     other: nerdamer(expression.other).multiply(differentialVariableRidString).expand().toString(),//we need to multiply everything that was left over by the differntial variable so that it goes back to how it was before it was part of the "dividedString"
   };
 }
