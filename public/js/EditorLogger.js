@@ -22,6 +22,10 @@ function EditorLogger(){
       description: "An equation on this line is ending in an operation",
       example: "",
     },
+    "Unexpected type of argument in function cross": {
+      description: "You are crossing a vector with a scalar",
+      example: "",
+    },
     "Units do not match": {
       description: "You are adding or substracting expressions that don't have the same units, or you are adding two expressions with the same units but one is a vector and the other is a scalar",
       example: "",

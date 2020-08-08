@@ -11,34 +11,24 @@ math.createUnit('undefinedunit');
 
 math.import({
   myDotProduct: function (v1, v2) {
-    //converting math js object to string
-    v1 = v1.toString();
-    v2 = v2.toString();
-    //v1 = [1 unit, 1 unit, 1 unit], v2 = [1 unit, 1 unit, 1 unit]
-    //format vector strings into arrays so we can multiply and add their components
-    v1 = v1.substring(v1.indexOf("[") + 1,v1.indexOf("]"));//removing brackets from begining and end
-    v1 = v1.split(",");//making v1 into an array
-    v2 = v2.substring(v2.indexOf("[") + 1,v2.indexOf("]"));//removing brackets from begining and end
-    v2 = v2.split(",");//making v2 into an array
-
-    let expr = `(${v1[0]} * ${v2[0]} + ${v1[1]} * ${v2[1]} + ${v1[2]} * ${v2[2]}) / 1 vector^2`;
-    return math.evaluate(expr);
-
+    if(math.typeOf(v1) == "Matrix" && math.typeOf(v2) == "Matrix"){
+      if(v1._data.length == v2._data.length){//vector have to be the same size to dot product
+        let i = 0;
+        let expr = [];
+        while(i < v1._data.length){
+          expr.push(`${v1._data[i]} * ${v2._data[i]}`);
+          i++;
+        }
+        expr = expr.join(" + ");
+        return math.evaluate(`(${expr}) / 1 vector ^ 2`);
+      }
+    }
+    else{
+      return math.evaluate(`${v1.toString()} * ${v2.toString()}`);
+    }
   },
   myCrossProduct: function (v1, v2) {
-    //converting math js object to string
-    v1 = v1.toString();
-    v2 = v2.toString();
-    //v1 = [1 unit, 1 unit, 1 unit], v2 = [1 unit, 1 unit, 1 unit]
-    //format vector strings into arrays so we can multiply and add their components
-    v1 = v1.substring(v1.indexOf("[") + 1,v1.indexOf("]"));//removing brackets from begining and end
-    v1 = v1.split(",");//making v1 into an array
-    v2 = v2.substring(v2.indexOf("[") + 1,v2.indexOf("]"));//removing brackets from begining and end
-    v2 = v2.split(",");//making v2 into an array
-    //a x b = <a2 * b3 - a3 * b2, a3 * b1 - a1 * b3, a1 * b2 - a2 * b1>
-    let expr = `[${v1[1]} * ${v2[2]} - ${v1[2]} * ${v2[1]}, ${v1[2]} * ${v2[0]} - ${v1[0]} * ${v2[2]}, ${v1[0]} * ${v2[1]} - ${v1[1]} * ${v2[0]}]/ 1 vector`;
-    return math.evaluate(expr);
-
+    return math.evaluate(math.cross(v1 , v2).toString() + "/ 1 vector");
   },
   absoluteValue: function(v){
     if(v == undefined){
@@ -898,10 +888,52 @@ function ReplaceSpecialLatexCharacterWithBasicCharacterCounterpart(ls, types){
   return ls;
 }
 
+
 function FindAndWrapVectorsThatAreBeingMultiplied(ls){
-  while(ls.lastIndexOf('\\times') != -1 || ls.lastIndexOf("\\cdot") != -1){
-    let crossProductIndex = ls.lastIndexOf('\\times');
-    let dotProductIndex = ls.lastIndexOf("\\cdot");
+
+  //before we start finding "\\times" and "\\cdot" operator we need to go through the string and parse everything in parentheses that has these operators first
+  let i = 0;
+  let i2 = 0;
+  let i3 = 0;
+  let delta = 0;
+  let s;
+  let newLs = "";
+  while(i < ls.length){
+    delta = 1;
+    s = ls.substring(i);
+    i2 = s.indexOf("(");//we are finding the next index of a paretheses to see if what it incloses has a "\\times" or "\\cdot" operator
+    if(i2 != -1){
+      newLs += s.substring(0, i2 + 1);//adding everything before the parentheses
+      i3 = FindIndexOfClosingParenthesis(s.substring(i2 + 1));
+      if(i3 != null){
+        i3 += i2 + 1;//accounts for shift because we used a substring of "s"
+        //now that we know the closing parentheses and opening we are going to check if there is a "\\times" or "\\cdot" operator in it
+        let stringInsideParentheses = s.substring(i2+1, i3);
+        if(stringInsideParentheses.indexOf("\\times") != -1 || stringInsideParentheses.indexOf("\\cdot") != -1){
+          stringInsideParentheses = FindAndWrapVectorsThatAreBeingMultiplied(stringInsideParentheses);
+          //console.log("stringInsideParentheses", stringInsideParentheses);
+        }
+        newLs += stringInsideParentheses;//adding everything inside the parentheses
+        delta = i3;
+      }
+      else{
+        console.log("error couldn't find closing parentheses");
+        return ls;
+      }
+      i += delta
+    }
+    else{
+      //if we couldn't find another parentheses we need to make sure to add the rest of the string to "newLs"
+      newLs += s;
+      break;
+    }
+
+  }
+
+  //now that we have parsed the string and did parentheses first using recursion we can finish up by taking this parsed string and actually wrapping the vectors in there proper functions
+  while(newLs.lastIndexOf('\\times') != -1 || newLs.lastIndexOf("\\cdot") != -1){
+    let crossProductIndex = newLs.lastIndexOf('\\times');
+    let dotProductIndex = newLs.lastIndexOf("\\cdot");
     //the default is to do cross product first because when two vectors are crossed the resulting vector can still  be dotted  with another vector. But once two vectors are dotted, the resulting vector can't then be crossed with another vector
     let multiply = {
       index: (crossProductIndex != -1) ? crossProductIndex: dotProductIndex,
@@ -911,23 +943,22 @@ function FindAndWrapVectorsThatAreBeingMultiplied(ls){
 
      //console.log(multiply);
 
-    let v1StartIndex = FindFirstVectorStartIndex(ls, multiply.index);
-    let v2EndIndex = FindSecondVectorEndIndex(ls, multiply.index + multiply.type.length + 1);//we want to start parsing everything after the multiplication operator
+    let v1StartIndex = FindFirstVectorStartIndex(newLs, multiply.index);
+    let v2EndIndex = FindSecondVectorEndIndex(newLs, multiply.index + multiply.type.length);//we want to start parsing everything after the multiplication operator
 
     //console.log(v1StartIndex, v2EndIndex);
 
     if(v1StartIndex != null && v2EndIndex != null){
       //this string removes the multiplication operator and wraps the vectors in a function and uses each vector as a parameter for the function
-      ls = ls.substring(0,v1StartIndex) + (multiply.func) + "(" + ls.substring(v1StartIndex, multiply.index) + ", " + ls.substring(multiply.index + multiply.type.length + 1, v2EndIndex + 1) + ")" + ls.substring(v2EndIndex + 1);
+      newLs = newLs.substring(0,v1StartIndex) + (multiply.func) + "(" + newLs.substring(v1StartIndex, multiply.index) + ", " + newLs.substring(multiply.index + multiply.type.length, v2EndIndex + 1) + ")" + newLs.substring(v2EndIndex + 1);
     }
     else{
       //if it broke once then it will just keep breaking so we just got to end it
-      return ls;
+      return newLs;
     }
 
   }
-
-  return ls;
+  return newLs;
 }
 
 function FindFirstVectorStartIndex(ls, endIndex){
@@ -1491,6 +1522,10 @@ function EvaluateStringInsideDefiniteIntegralAndReturnNerdamerString(ls, uniqueR
 }
 
 function ExactConversionFromLatexStringToNerdamerReadableString(ls, uniqueRIDStringArray, lineNumber, mfID){
+  if(ls.indexOf("\\times") != -1){
+    return null;//right now we don't support cross product calculations because we don't know the difference between a scalar and a vector so if someone wrote \vec{v} \times \vec{v} = 0, we know this is true but my program right now would just multiply v*v and say it should equal v^2
+  }
+  ls = ls.replace(/\\left\|/g,"abs(").replace(/\\right\|/g,")");//this converts all absolute value signs into nerdamer function "abs(......)"
   //we need to see if we can parse \int into a nerdamer string like integrate(x,x). and if we can't convert all of them then the if statement below will not allow us to check if the strings are equal
   ls = FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls, uniqueRIDStringArray, lineNumber, mfID);
   //this line is temporary. We will soon be able to support parsing and using these operators and notations
