@@ -1211,18 +1211,16 @@ function GetRidStringVariablesFromString(str, uniqueRIDStringArray){
 }
 
 function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
-  console.log("expressionArray", expressionArray);
   let expressionThatAreNotCorrect = [];
   //so now we need to check if there is even a possiblity that we can do a high level check between these expressions
   for(let i = 0; i + 1 < expressionArray.length; i++){
-    console.log("i", i);
     //we need to do an exact conversion from latex to a string that nerdamer can understand. they have a convertFromLatex function but it is very limited so we will use it sparingly
     //this line of code converts the two expressions we were analyzing into nerdeamer readable string then we use nerdamers .eq() function to check if they are equal. if they arent then we add these two expression to the "expressionThatDontEqualEachOther" array
     let uniqueRIDStringArray = GenerateUniqueRIDStringForVariables(`${expressionArray[i].rawStr} + ${expressionArray[i+1].rawStr}`);//passing both string and putting a plus inbetween them so that we generate a uniqueRIDStringArray that accounts for all the variables and differential variables used in both expressions
     //console.log(uniqueRIDStringArray);
     let expression1 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[i].rawStr, uniqueRIDStringArray, lineNumber, mfID);
     let expression2 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[i+1].rawStr, uniqueRIDStringArray, lineNumber, mfID)
-    console.log(expression1 + " ?= " +  expression2);
+    //console.log(expression1 + " ?= " +  expression2);
     if(expression1 != null && expression2 != null){
       //because this is a high level check we need to make sure that both expressions use the same variables and if not we cannot be sure that the equations don't equal each other so we will not actaully do any check
       let expression1Variables = GetRidStringVariablesFromString(expression1, uniqueRIDStringArray);
@@ -1286,8 +1284,6 @@ function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
       }
     }
   }
-
-  console.log("expressionThatAreNotCorrect", expressionThatAreNotCorrect);
   return expressionThatAreNotCorrect;
 }
 
