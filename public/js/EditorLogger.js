@@ -396,7 +396,7 @@ function EditorLogger(){
 
     //initialize static math fields that are used in the log
     $(".log-static-latex").each(function(){
-      MQ.StaticMath($(this)[0]);
+      MQ.StaticMath($(this)[0]).latex($(this).attr("latex"));
     });
 
     //we need to first clear all the messages from every mathfield and set them to the default state before we populate them with information and render

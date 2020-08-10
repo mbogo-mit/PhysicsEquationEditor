@@ -87,7 +87,7 @@ let Templates = {
                   <div><%= log.error[i].error.description %></div>
                   <% if(log.error[i].latexExpressions != undefined){%>
                   <%for(let latexExpression of log.error[i].latexExpressions){%>
-                    <div style="display:block;" class="log-static-latex" latex="<%= latexExpression %>"><%= latexExpression %></div>
+                    <div style="display:block;" class="log-static-latex" latex="<%= latexExpression %>"></div>
                   <%}}%>
                 </div>
               </li>

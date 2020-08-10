@@ -684,3 +684,7 @@ body {
   background-color: #b2dfdb !important;
   cursor: pointer;
 }
+
+.error-log .log-static-latex .mq-scaled.mq-paren {
+  transform: scale(0.8, 1.3) !important;/*this fixes brackets for static math fields in the editor logger*/
+}
