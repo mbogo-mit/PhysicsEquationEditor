@@ -27,11 +27,19 @@ function EditorLogger(){
       example: "",
     },
     "Units do not match": {
-      description: "You are adding or substracting expressions that don't have the same units, or you are adding two expressions with the same units but one is a vector and the other is a scalar",
+      description: "You are adding or substracting expressions that don't have the same units",
+      example: "",
+    },
+    "Adding a scalar with a vector": {
+      description: "Units match, but your adding a scalar with a vector",
+      example: "",
+    },
+    "Setting a vector equal to scalar": {
+      description: "Units match, but you are setting a vector quantity equal to a scalar quantity",
       example: "",
     },
     "Units do not equal each other": {
-      description: "You have expressions that are set equal to each other that don't have the same units, or they have the same units but one is a vector and the other is a scalar.",
+      description: "You have expressions that are set equal to each other that don't have the same units",
       example: "",
     },
     "Incorrect equations": {

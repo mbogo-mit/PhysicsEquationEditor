@@ -235,7 +235,15 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
             results[i].push({success: str});
           }
           catch(err2){
-            results[i].push({error: err2.message});
+            try{
+              //by removing the vector unit we can figure out if the units don't match because the user is adding a scalar with a vector
+              math.evaluate(exprs[i][j].str.replace(/rad/g,"(m / m)").replace(/sr/g,"(m^2 / m^2)").replace(/vector/g,"")).toString();
+              results[i].push({error: "Adding a scalar with a vector"});
+            }
+            catch(err3){
+              results[i].push({error: err2.message});
+            }
+            
           }
         }
 
@@ -291,6 +299,7 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
 
       //check if units match for success equations
       let equationUnitsMatch = false;
+      let settingScalarToVector = false;
 
       try {
         //trying to add the units of each equation and see if they add if they don't then they are not the same unit so an error will occur
@@ -298,9 +307,9 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
         equationUnitsMatch = true;
       }
       catch(err){
+        let editedSuccesses = [];
         try{
           //removing rad and steradian from equations to see if they will equal each other because the editor can't recorgnize the arc formula  s=r\theta cuz units wise you are saying 1m=1m*rad
-          let editedSuccesses = [];
           for(var i = 0; i < successes.length; i++){
             editedSuccesses.push(successes[i].replace(/rad/g,"").replace(/sr/g,""));
           }
@@ -309,17 +318,38 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
         }
         catch(err2){
           equationUnitsMatch = false;
+          try{
+            for(var i = 0; i < editedSuccesses.length; i++){
+              editedSuccesses[i] = editedSuccesses[i].replace(/vector/g,"");
+            }
+            math.evaluate(editedSuccesses.join(" + ")).toString();
+            settingScalarToVector = true;
+          }
+          catch(err3){
+            settingScalarToVector = false;
+          }
         }
 
       }
 
       if(!equationUnitsMatch){
-        log.error.push({
-          error: EL.createLoggerErrorFromMathJsError("Units do not equal each other"),
-          info: successes,
-          lineNumber: lineNumber,
-          mfID: mfID,
-        });
+        if(settingScalarToVector){
+          log.error.push({
+            error: EL.createLoggerErrorFromMathJsError("Setting a vector equal to scalar"),
+            info: successes,
+            lineNumber: lineNumber,
+            mfID: mfID,
+          });
+        }
+        else{
+          log.error.push({
+            error: EL.createLoggerErrorFromMathJsError("Units do not equal each other"),
+            info: successes,
+            lineNumber: lineNumber,
+            mfID: mfID,
+          });
+        }
+        
       }
       else{
         //if the units match then we should do a high level self consistency check
