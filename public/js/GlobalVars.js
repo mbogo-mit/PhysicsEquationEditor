@@ -11,7 +11,7 @@ function RID(){
 }
 
 let SqrtLoop = 0;
-
+let LastVariableRIDChangedToGiven = null;
 let EditingMathFields = false;
 let UnitsDropdownMenuOpen = false
 let ListOfPhysicsConstants;
@@ -71,70 +71,70 @@ let SimilarVectorMagnitudeVariables = {};
 
 let PreDefinedVariables = {
   "\\hat{x}": {
-    state: "knonwn",
+    state: "given",
     type: "vector",
     units: "unitless",
     value: undefined,
     unitsMathjs: "1",
   },
   "\\hat{y}": {
-    state: "knonwn",
+    state: "given",
     type: "vector",
     units: "unitless",
     value: undefined,
     unitsMathjs: "1",
   },
   "\\hat{z}": {
-    state: "knonwn",
+    state: "given",
     type: "vector",
     units: "unitless",
     value: undefined,
     unitsMathjs: "1",
   },
   "\\hat{r}": {
-    state: "knonwn",
+    state: "given",
     type: "vector",
     units: "unitless",
     value: undefined,
     unitsMathjs: "1",
   },
   "\\hat{\\theta}": {
-    state: "knonwn",
+    state: "given",
     type: "vector",
     units: "unitless",
     value: undefined,
     unitsMathjs: "1",
   },
   "\\hat{\\phi}": {
-    state: "knonwn",
+    state: "given",
     type: "vector",
     units: "unitless",
     value: undefined,
     unitsMathjs: "1",
   },
   "\\nabla": {
-    state: "knonwn",
+    state: "given",
     type: "vector",
     units: "wave number (m^(-1))",
     value: undefined,
     unitsMathjs: "1/m",
   },
   "\\pi": {
-    state: "knonwn",
+    state: "given",
     type: "constant",
     units: "unitless",
     value: Math.PI.toFixed(5),
     unitsMathjs: "1",
   },
   "e": {
-    state: "known",
+    state: "given",
     type: "constant",
     units: "unitless",
     value: Math.exp(1).toFixed(5),
     unitsMathjs: "1",
   },
   "i": {
-    state: "known",
+    state: "given",
     type: "constant",
     units: "unitless",
     value: "i",
@@ -163,9 +163,9 @@ let MessageBoxMathFields = {
 let ParsedHoverRequest = false;
 let MOUSEDOWN = false;
 let VariableRightClicked = false;
-
 let MathFields = {};
 let FocusedMathFieldId = "first_math_field";
+let VariableValueMathFields = {};
 
 let HoveredOutOfTaggedVariable = true;
 let HoveringOverVariableDescriptionMenu = false;
