@@ -1,3 +1,5 @@
+<!---------------------------------->
+
 <!-- editorLogger -->
 <div class="row my-row">
   <div class="my-col col s12">
@@ -105,7 +107,7 @@
     <% if(opts.variable.state == "unknown" && opts.variable.currentState == "known"){%>
       <span onclick="ToggleVariableState('<%= opts.variable.rid %>')" class="variable-tag known tooltipped" data-position="bottom" data-tooltip="This variable is defined using all known or given variables in your equations">known</span>
       <% if(opts.variable.value != undefined){%>
-        <span class="variable-value static-mathfield" rid="<%= opts.variable.rid %>" latex="<%= opts.variable.value %>"></span>
+        <span class="variable-value static-mathfield tooltipped" data-position="bottom" data-tooltip="This value was calculated and can not be edited" rid="<%= opts.variable.rid %>" latex="<%= opts.variable.value %>"></span>
       <%}%>  
     <%}else if(opts.variable.state == "unknown"){%>
       <span onclick="ToggleVariableState('<%= opts.variable.rid %>')" class="variable-tag unknown tooltipped" data-position="bottom" data-tooltip="This variable is an unknown variable">unknown</span>
@@ -138,7 +140,7 @@
     <% if(opts.variable.state == "unknown" && opts.variable.currentState == "known"){%>
       <span onclick="ToggleVariableState('<%= opts.variable.rid %>')" class="variable-tag known tooltipped" data-position="bottom" data-tooltip="This variable is defined using all known or given variables in your equations">known</span>
       <% if(opts.variable.value != undefined){%>
-        <span class="variable-value static-mathfield" rid="<%= opts.variable.rid %>" latex="<%= opts.variable.value %>"></span>
+        <span class="variable-value static-mathfield tooltipped" data-position="bottom" data-tooltip="This value was calculated and can not be edited" rid="<%= opts.variable.rid %>" latex="<%= opts.variable.value %>"></span>
       <%}%>  
     <%}else if(opts.variable.state == "unknown"){%>
       <span onclick="ToggleVariableState('<%= opts.variable.rid %>')" class="variable-tag unknown tooltipped" data-position="bottom" data-tooltip="This variable is an unknown variable">unknown</span>

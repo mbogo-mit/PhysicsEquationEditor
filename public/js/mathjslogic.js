@@ -162,7 +162,16 @@ function IdentifyAllKnownVariablesAndTheirValues(exprs){
               let solution = nerdamer(`${expression1} = ${expression2}`).solveFor(unknownVariableRIDString);
               //console.log("solution",solution.toString());
               if(solution.length > 0){//that means we found a solution
-                let knownVariableValue = solution[0].toString();
+                //we are going to gather every non-zero solution but if all solution are zero then we will send the zerio as the solution
+                let allNonZeroSolutions = solution.filter((s) => {return s.toString() != "0"});
+                console.log("allNonZeroSolutions", allNonZeroSolutions);
+                let knownVariableValue;
+                if(allNonZeroSolutions.length == 0){
+                  knownVariableValue = solution[0].toString();
+                }
+                else{
+                  knownVariableValue = allNonZeroSolutions[0].toString();//grab the first non zero solution
+                }
                 //now that we have solved for this variable, we need to see if we can calculate its actual value
                 if(Object.keys(exprsCopy[index].variableValues.unknown).length + Object.keys(exprsCopy[index + 1].variableValues.unknown).length == 1){
                   //this means that the only unknown variable value in these two expression set equal to each other is the variable we are trying to calculate its value
@@ -190,12 +199,12 @@ function IdentifyAllKnownVariablesAndTheirValues(exprs){
                       knownVariableValue = math.evaluate(knownVariableValue).toString();
                     }catch(err2){
                       knownVariableValue = undefined;
-                      console.log(err2);
+                      //console.log(err2);
                     }
                   }
                   catch(err){
                     knownVariableValue = undefined;
-                    console.log(err);
+                    //console.log(err);
 
                   }
                   
@@ -208,17 +217,17 @@ function IdentifyAllKnownVariablesAndTheirValues(exprs){
                 let foundMatchAndChangedVariableValueOrState = false
                 if(DefinedVariables[unknownVariable] != undefined){
                   DefinedVariables[unknownVariable].currentState = "known";
-                  DefinedVariables[unknownVariable].value = (knownVariableValue) ? knownVariableValue : undefined;
+                  DefinedVariables[unknownVariable].value = (knownVariableValue) ? ConvertStringToScientificNotation(knownVariableValue) : undefined;
                   foundMatchAndChangedVariableValueOrState = true;
                 }
                 else if(EL.undefinedVars.undefined[unknownVariable] != undefined){
                   EL.undefinedVars.undefined[unknownVariable].currentState = "known";
-                  EL.undefinedVars.undefined[unknownVariable].value = (knownVariableValue) ? knownVariableValue : undefined;
+                  EL.undefinedVars.undefined[unknownVariable].value = (knownVariableValue) ? ConvertStringToScientificNotation(knownVariableValue) : undefined;
                   foundMatchAndChangedVariableValueOrState = true;
                 }
                 else if(EL.undefinedVars.defined[unknownVariable] != undefined){
                   EL.undefinedVars.defined[unknownVariable].currentState = "known";
-                  EL.undefinedVars.defined[unknownVariable].value = (knownVariableValue) ? knownVariableValue : undefined;
+                  EL.undefinedVars.defined[unknownVariable].value = (knownVariableValue) ? ConvertStringToScientificNotation(knownVariableValue) : undefined;
                   foundMatchAndChangedVariableValueOrState = true;
                 }
 
@@ -239,8 +248,15 @@ function IdentifyAllKnownVariablesAndTheirValues(exprs){
   }
 }
 
-function TryToGetKnownValue(variable, exprs){
-  //this function takes in a variable that was just identified to be a known and it sees if it can calculate this known value using the expression
+function ConvertStringToScientificNotation(str){
+  let scientificNotation = Number(str).toExponential().split("e");
+  scientificNotation[0] = Number(scientificNotation[0]).toFixed(6).toString()
+  if(scientificNotation[1] == "+0"){
+    scientificNotation[1] = "";
+  }else{
+    scientificNotation[1] = `\\cdot 10^{${scientificNotation[1].replace("+","")}}`;
+  }
+  return scientificNotation.join("");
 }
 
 function CheckForErrorsInExpression(ls, lineNumber, mfID){
@@ -1796,7 +1812,7 @@ function ExactConversionFromLatexStringToNerdamerReadableString(ls, uniqueRIDStr
     try{
       return nerdamer.convertFromLaTeX(ls).expand().toString();//this is just a place holder for the actual value we will return
     }catch(err){
-      console.log(err);
+      //console.log(err);
       return null;
     }
   }

@@ -928,7 +928,6 @@ function FindFormattingErrorInVariableValueMathField(ls){
     return undefined;//no error was found
   }
   catch(err){
-    console.log(err);
     return "Formatting error detected";
   }
   
