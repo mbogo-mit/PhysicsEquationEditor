@@ -186,7 +186,7 @@
 <div class="row">
   <div class="col m12">
     <label>
-      <input id="import-all-mechanics-variables" type="checkbox" />
+      <input id="import-all-variables" type="checkbox" />
       <span>Import All Variables</span>
     </label>
   </div>
@@ -210,7 +210,7 @@
           <% if(value.disabled){%>
           <label>
             <input class="variable-checkbox" type="checkbox" rid="<%= value.rid %>" latex="<%= key %>" disabled="disabled"/>
-            <span class=""></span>
+            <span class="already-imported-variable tooltipped" data-position="bottom" data-tooltip="This variable is already imported with possibly a different definition"></span>
           </label>
           <%}else if(value.checked){%>
             <label>
@@ -229,4 +229,28 @@
     </tbody>
   </table>
 </div>
+<!---------------------------------->
+
+<!-- MathField Warning Inline Html -->
+<%for(let i = 0; i < warnings.length; i++){%>
+  <div>
+    <span class="warning-header"><%= warnings[i].warning %>:</span> <%= warnings[i].variables.join(",") %>
+  </div>
+<%}%>  
+<!---------------------------------->
+
+<!-- MathField Error Inline Html -->
+<%for(let i = 0; i < errors.length; i++){%>
+  <div>
+    <div class="error-header"><span class="left"><%= errors[i].error.type %>:</span></div>
+    <div><span class="left"><%= errors[i].error.description %></span></div>
+  </div>
+  <%if(errors[i].latexExpressions != undefined){%>
+    <div class="left">
+      <%for(let j = 0; j < errors[i].latexExpressions.length; j++){%>
+        <div><span class="log-static-latex" latex="<%= errors[i].latexExpressions[j] %>"></span></div>
+      <%}%>  
+    </div>
+  <%}%>  
+<%}%>  
 <!---------------------------------->

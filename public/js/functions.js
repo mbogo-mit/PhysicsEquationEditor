@@ -56,10 +56,11 @@ function RenderImportedVariablesTable(key){
     MQ.StaticMath($(this)[0]).latex($(this).attr("latex"));
   });
   //add event listeners for checkboxes
-  $("#import-all-mechanics-variables").change(function(){
+  $("#import-all-variables").change(function(){
     $("#btn-update-imported-variables").removeClass("disabled");
     if($(this).prop("checked")){
-      $(".variable-checkbox").prop("checked",true);
+      //making sure to only check variables that are not disabled
+      $(".variable-checkbox:not([disabled='disabled']").prop("checked",true);
     }
     else{
       $(".variable-checkbox").prop("checked",false);
@@ -71,6 +72,8 @@ function RenderImportedVariablesTable(key){
   });
   //now open the modal
   $("#modal_import_variable_definition").modal("open");
+
+  $(".already-imported-variable.tooltipped").tooltip();
 }
 
 function UpdateImportedVariables(){
@@ -114,17 +117,20 @@ function UpdateImportedVariables(){
       }
     }
     else{
-      //if it is not checked we need to remove it
-      UpdateSimilarDefinedVariables({
-        type: "remove",
-        ls: ls,
-      });
-      //if the variable is a vector we need to try to remove its magnitude as well
-      if(IsVariableLatexStringVector(ls)){
+      //if it wasn't checked it could have been disabled because it is already imported so we need to make sure that it wasn't disabled and if it was don't do anything don't remove anything
+      if($(this).attr("disabled") != "disabled"){
+        //if it is not checked we need to remove it
         UpdateSimilarDefinedVariables({
           type: "remove",
-          ls: RemoveVectorLatexString(ls),
+          ls: ls,
         });
+        //if the variable is a vector we need to try to remove its magnitude as well
+        if(IsVariableLatexStringVector(ls)){
+          UpdateSimilarDefinedVariables({
+            type: "remove",
+            ls: RemoveVectorLatexString(ls),
+          });
+        }
       }
     }
   });
@@ -547,14 +553,16 @@ function DeleteCurrentMathFieldAndCopyContentIntoPreviousMathField(id){
 }
 
 function ToggleKeyboard(){
-  if($("#toggle-dir").hasClass("fa-caret-down")){
-    $("#toggle-dir").removeClass("fa-caret-down");
-    $("#toggle-dir").addClass("fa-caret-up");
+  if($("#toggle-dir").hasClass("down-arrow")){
+    $("#toggle-dir").removeClass("down-arrow");
+    $("#toggle-dir").addClass("up-arrow");
+    $("#toggle-dir").html("keyboard_arrow_up");
     $("#keyboard-container").css("bottom","-150px");
   }
   else{
-    $("#toggle-dir").removeClass("fa-caret-up");
-    $("#toggle-dir").addClass("fa-caret-down");
+    $("#toggle-dir").removeClass("up-arrow");
+    $("#toggle-dir").addClass("down-arrow");
+    $("#toggle-dir").html("keyboard_arrow_down");
     $("#keyboard-container").css("bottom","0px");
   }
 }
@@ -576,6 +584,45 @@ function RenderMessageUI(id){
   else{
     elmnt.find(".line_label span.line-number").addClass('active');
   }
+}
+
+function RenderAllMathFieldLogs(){
+  for(const [key, value] of Object.entries(MathFields)){
+    $(`.line_label > [mf='${key}']`).removeClass('active');
+    //removing old tooltips if they exist
+    try{
+      $(`.line_label > .line-warning[mf='${key}']`).tooltip("destroy");
+    }catch(err){
+      //they didn't have this specific line and warning tooltipped yet
+    }
+    try{
+      $(`.line_label > .line-error[mf='${key}']`).tooltip("destroy");
+    }catch(err){
+      //they didn't have this specific line and error tooltipped yet
+    }
+
+    if(MathFields[key].log.warning.length > 0){
+      $(`.line_label > .line-warning[mf='${key}']`).addClass('active');
+      //after we figure what meassage to send we need tooltip the icon with information
+      $(`.line_label > .line-warning[mf='${key}']`).tooltip({html: ejs.render(Templates["mathfield-warning"], {warnings: MathFields[key].log.warning})});
+    }
+    else if(MathFields[key].log.error.length > 0){
+      $(`.line_label > .line-error[mf='${key}']`).addClass('active');
+      //after we figure what meassage to send we need tooltip the icon with information
+      $(`.line_label > .line-error[mf='${key}']`).tooltip({html: ejs.render(Templates["mathfield-error"], {errors: MathFields[key].log.error})});
+      $(`.line_label > .line-error[mf='${key}']`).hover(function(){
+        $(this).tooltip("open");
+        $(".log-static-latex").each(function(){
+          MQ.StaticMath($(this)[0]).latex($(this).attr("latex"));
+        });
+      });
+    }
+    else{
+      $(`.line_label > .line-number[mf='${key}']`).addClass('active');
+    }
+  }
+
+  
 }
 
 function GetUndefinedVariables(ls){
@@ -826,7 +873,9 @@ function OrderCompileAndRenderMyVariablesCollection(){
     html = ejs.render(Templates["no-variables-defined"]);
   }
   //we need to remove all tooltips in the collection before we create new ones
-  $('.material-tooltip').remove();
+  try{
+    $('#my_variables-collection-container .tooltipped').tooltip("destroy");
+  }catch(err){console.log(err);}
   $("#my_variables-collection-container .my-collection").html(html);//rendering new collection
   //Add event listeners and initialize static math fields
   $("#my_variables .my-collection span").each(function(){
@@ -1087,6 +1136,7 @@ function CloseEditorLog(){
 }
 
 function OpenEditorLog(type){
+  /*
   $('#editor-log-container .collapsible.log-container').collapsible('close', 0);
   $('#editor-log-container .collapsible.log-container').collapsible('close', 1);
   $('#editor-log-container .collapsible.log-container').collapsible('close', 2);
@@ -1111,6 +1161,7 @@ function OpenEditorLog(type){
   $("#editor-log-container").animate({
     right: 0,
   },250);
+  */
 }
 
 function GetLineNumberFromMathFieldId(mfId){
