@@ -839,7 +839,7 @@ ListOfEquations = {
       info: {},
       equations: [
         "\\Delta U=\\frac{3}{2}nR\\Delta T",
-        "\\Delta U=\\frac{3}{2}NK\\Delta T"
+        "\\Delta U=\\frac{3}{2}Nk\\Delta T"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {},
@@ -1737,7 +1737,7 @@ ListOfPhysicsConstants = [
   {
     quantity: "Boltzmann constant",
     quantityDescription: "Boltzmann constant",
-    symbol: "k",
+    symbol: "K_b",
     value: "1.380658\\times 10^{-23}",
     unit: "\\frac{J}{K}",
     unitString: "J/K",

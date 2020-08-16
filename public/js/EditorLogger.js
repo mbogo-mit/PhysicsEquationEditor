@@ -26,6 +26,10 @@ function EditorLogger(){
       description: "You are crossing a vector with a scalar",
       example: "",
     },
+    "Cannot read property 'toString' of undefined": {
+      description: "You have an empty expression or no expression on this line",
+      example: "",
+    },
     "Units do not match": {
       description: "You are adding or substracting expressions that don't have the same units",
       example: "",
@@ -171,6 +175,11 @@ function EditorLogger(){
               lineNumber: lineNumber,
               mfID: mfID,
             }]});
+
+            //we are going to add this information to the correct mathfield that has this error
+            MathFields[mfID].log.error.push({
+              error: this.createLoggerErrorFromMathJsError("Integral bounds not formatted properly"),
+            });
           }
 
         }
@@ -195,6 +204,12 @@ function EditorLogger(){
             lineNumber: lineNumber,
             mfID: mfID,
           }]});
+
+          //we are going to add this information to the correct mathfield that has this error
+          MathFields[mfID].log.error.push({
+            error: this.createLoggerErrorFromMathJsError("Incorrect equations"),
+            latexExpressions: latexExpressions,
+          });
         }
       }
     }
@@ -277,6 +292,10 @@ function EditorLogger(){
     this.log.error = this.log.error.concat((log.error) ? log.error : []);
   }
 
+  this.addToMathFieldsLog = function(log){
+
+  }
+
   this.clearLog = function(){
     this.log = {
       success: [],
@@ -284,6 +303,12 @@ function EditorLogger(){
       warning: [],
       error: [],
     };
+    for (const [key, value] of Object.entries(MathFields)) {
+      MathFields[key].log = {
+        warning: [],//variable undefined,
+        error: [], //units don't match
+      };
+    }
   }
 
   this.clearRawExpressionData = function(){
@@ -392,7 +417,7 @@ function EditorLogger(){
   }
 
   this.display = function(opts = {}){
-    let log = Object.assign({}, this.log);//copying so we don't accidentally change the real log
+    let log = JSON.parse(JSON.stringify(this.log));//copying so we don't accidentally change the real log
     //changing html of logger
     let html = ejs.render(Templates["editorLogger"],{log: log});
     $("#editor-log-container").html(html);
@@ -405,11 +430,14 @@ function EditorLogger(){
     $("#btn-log-warning-indicator .indicator-count").html(log.warning.length);
     $("#btn-log-error-indicator .indicator-count").html(log.error.length);
 
+    RenderAllMathFieldLogs();
+
     //initialize static math fields that are used in the log
     $(".log-static-latex").each(function(){
       MQ.StaticMath($(this)[0]).latex($(this).attr("latex"));
     });
 
+    /*
     //we need to first clear all the messages from every mathfield and set them to the default state before we populate them with information and render
     for (const [key, value] of Object.entries(MathFields)) {
       MathFields[key].message = {
@@ -433,7 +461,7 @@ function EditorLogger(){
         vars: log.warning[i].variables,
       }
       RenderMessageUI(log.warning[i].mfID);//takes the messages for a specific math field and renders it
-    }
+    }*/
 
     if(!opts.dontRenderMyVariablesCollection){
       //after generating errors and defined undefined and defined undefined variables we need to rerender my variable collection

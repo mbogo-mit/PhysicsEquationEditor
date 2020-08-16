@@ -103,7 +103,7 @@ let Templates = {
   `
   <div class="editor_line row">
     <div class="line_label col m1">
-      <span class="active line-number">1</span>
+      <span class="active line-number" mf="<%= rid %>">1</span>
       <span onclick="OpenEditorLog('warning')" class="line-warning" mf="<%= rid %>">
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="amber-text text-lighten-2 bi bi-exclamation-triangle-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
           <path fill-rule="evenodd" d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 5zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
@@ -210,7 +210,7 @@ let Templates = {
   <div class="row">
     <div class="col m12">
       <label>
-        <input id="import-all-mechanics-variables" type="checkbox" />
+        <input id="import-all-variables" type="checkbox" />
         <span>Import All Variables</span>
       </label>
     </div>
@@ -234,7 +234,7 @@ let Templates = {
             <% if(value.disabled){%>
             <label>
               <input class="variable-checkbox" type="checkbox" rid="<%= value.rid %>" latex="<%= key %>" disabled="disabled"/>
-              <span class=""></span>
+              <span class="already-imported-variable tooltipped" data-position="bottom" data-tooltip="This variable is already imported with possibly a different definition"></span>
             </label>
             <%}else if(value.checked){%>
               <label>
@@ -257,5 +257,29 @@ let Templates = {
   "no-variables-defined":
   `
   <div id="no-variables-defined" class="center">The physics constants you import and variables you use in the editor will appear in this tab</div>
+  `,
+  "mathfield-warning":
+  `
+  <%for(let i = 0; i < warnings.length; i++){%>
+    <div>
+      <span class="warning-header"><%= warnings[i].warning %>:</span> <%= warnings[i].variables.join(",") %>
+    </div>
+  <%}%> 
+  `,
+  "mathfield-error":
+  `
+  <%for(let i = 0; i < errors.length; i++){%>
+    <div>
+      <div class="error-header"><span class="left"><%= errors[i].error.type %>:</span></div>
+      <div><span class="left"><%= errors[i].error.description %></span></div>
+    </div>
+    <%if(errors[i].latexExpressions != undefined){%>
+      <div class="left">
+        <%for(let j = 0; j < errors[i].latexExpressions.length; j++){%>
+          <div><span class="log-static-latex" latex="<%= errors[i].latexExpressions[j] %>"></span></div>
+        <%}%>  
+      </div>
+    <%}%>  
+  <%}%>    
   `,
 };

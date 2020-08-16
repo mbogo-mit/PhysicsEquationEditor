@@ -164,7 +164,7 @@ function IdentifyAllKnownVariablesAndTheirValues(exprs){
               if(solution.length > 0){//that means we found a solution
                 //we are going to gather every non-zero solution but if all solution are zero then we will send the zerio as the solution
                 let allNonZeroSolutions = solution.filter((s) => {return s.toString() != "0"});
-                console.log("allNonZeroSolutions", allNonZeroSolutions);
+                //console.log("allNonZeroSolutions", allNonZeroSolutions);
                 let knownVariableValue;
                 if(allNonZeroSolutions.length == 0){
                   knownVariableValue = solution[0].toString();
@@ -460,6 +460,13 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
             lineNumber: lineNumber,
             mfID: mfID,
           });
+
+          //we are going to add this information to the correct mathfield that has this error
+          MathFields[mfID].log.error.push({
+            error: EL.createLoggerErrorFromMathJsError("Setting a vector equal to scalar"),
+            info: successes,
+          });
+          
         }
         else{
           log.error.push({
@@ -468,6 +475,13 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
             lineNumber: lineNumber,
             mfID: mfID,
           });
+
+          //we are going to add this information to the correct mathfield that has this error
+          MathFields[mfID].log.error.push({
+            error: EL.createLoggerErrorFromMathJsError("Units do not equal each other"),
+            info: successes,
+          });
+
         }
         
       }
@@ -540,6 +554,13 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
         lineNumber: lineNumber,
         mfID: mfID,
       }});
+
+      //we are going to add this information to the correct mathfield that has this error
+      MathFields[mfID].log.warning.push({
+        warning: "Undefined Variables",
+        variables: trulyUndefinedVars,
+      });
+
     }
 
 
@@ -550,6 +571,11 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
           info: "",
           lineNumber: lineNumber,
           mfID: mfID,
+        });
+
+        //we are going to add this information to the correct mathfield that has this error
+        MathFields[mfID].log.error.push({
+          error: EL.createLoggerErrorFromMathJsError(error),
         });
       });
     }
@@ -1423,7 +1449,8 @@ function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
     //console.log(uniqueRIDStringArray);
     let expression1 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[i].rawStr, uniqueRIDStringArray, lineNumber, mfID);
     let expression2 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[i+1].rawStr, uniqueRIDStringArray, lineNumber, mfID)
-    //console.log(expression1 + " ?= " +  expression2);
+    console.log("uniqueRIDStringArray", uniqueRIDStringArray);
+    console.log(expression1 + " ?= " +  expression2);
     if(expression1 != null && expression2 != null){
       //because this is a high level check we need to make sure that both expressions use the same variables and if not we cannot be sure that the equations don't equal each other so we will not actaully do any check
       let expression1Variables = GetRidStringVariablesFromString(expression1, uniqueRIDStringArray);
@@ -1705,6 +1732,11 @@ function EvaluateStringInsideIntegralAndReturnNerdamerString(ls, uniqueRIDString
         mfID: mfID,
       }]});
 
+      //we are going to add this information to the correct mathfield that has this error
+      MathFields[mfID].log.error.push({
+        error: EL.createLoggerErrorFromMathJsError("Expressions found inside integral without differential variable"),
+      });
+
       return null;
     }
 
@@ -1719,6 +1751,12 @@ function EvaluateStringInsideIntegralAndReturnNerdamerString(ls, uniqueRIDString
       lineNumber: lineNumber,
       mfID: mfID,
     }]});
+
+    //we are going to add this information to the correct mathfield that has this error
+    MathFields[mfID].log.error.push({
+      error: EL.createLoggerErrorFromMathJsError("Expressions found inside integral without differential variable"),
+    });
+
     return null;
   }
 
@@ -1779,6 +1817,11 @@ function EvaluateStringInsideDefiniteIntegralAndReturnNerdamerString(ls, uniqueR
         mfID: mfID,
       }]});
 
+      //we are going to add this information to the correct mathfield that has this error
+      MathFields[mfID].log.error.push({
+        error: EL.createLoggerErrorFromMathJsError("Expressions found inside integral without differential variable"),
+      });
+
       return null;
     }
 
@@ -1793,6 +1836,12 @@ function EvaluateStringInsideDefiniteIntegralAndReturnNerdamerString(ls, uniqueR
       lineNumber: lineNumber,
       mfID: mfID,
     }]});
+
+    //we are going to add this information to the correct mathfield that has this error
+    MathFields[mfID].log.error.push({
+      error: EL.createLoggerErrorFromMathJsError("Expressions found inside integral without differential variable"),
+    });
+
     return null;
   }
 
@@ -1812,11 +1861,12 @@ function ExactConversionFromLatexStringToNerdamerReadableString(ls, uniqueRIDStr
     try{
       return nerdamer.convertFromLaTeX(ls).expand().toString();//this is just a place holder for the actual value we will return
     }catch(err){
-      //console.log(err);
+      console.log(err);
       return null;
     }
   }
   else{
+    console.log("unparsable characters")
     return null;
   }
 }
@@ -1876,6 +1926,8 @@ function ReturnDefiniteIntegralExpressionAndOtherExpression(dividedString, diffe
     }
     i++;
   }
+
+  console.log(`defint(${expression.integral},${lowerbound},${upperbound},${variableRidString})`);
 
   return {
     integral: nerdamer(`defint(${expression.integral},${lowerbound},${upperbound},${variableRidString})`).toString(),//now that we have gathered the information we need for the integral, we need to format the information properly so nerdamer can understand

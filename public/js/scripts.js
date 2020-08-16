@@ -100,16 +100,6 @@ $(document).ready(function(){
 
   $("#main-screen").click(function(e){
     MainScreenClicked(e);
-  })
-
-  $("#import-all-mechanics-variables").change(function(){
-    $("#btn-update-imported-variables").removeClass("disabled");
-    if($(this).prop("checked")){
-      $(".variable-checkbox").prop("checked",true);
-    }
-    else{
-      $(".variable-checkbox").prop("checked",false);
-    }
   });
 
   $(".variable-checkbox").change(function(){

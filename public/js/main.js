@@ -11,7 +11,7 @@ function CreateNewMathField(id){
     restrictMismatchedBrackets: true,
     sumStartsWithNEquals: true,
     supSubsRequireOperand: true,
-    autoCommands: `sqrt sum int hat ${LatexGreekLetters.join(' ').replace(/\\/g,"")}`,
+    autoCommands: `sqrt sum int hat ${LatexGreekLetters.join(' ').replace(/\s\\psi/g,"").replace(/\\/g,"")}`,
     autoOperatorNames: 'sin cos csc sec tan arcsin arccos cot sinh cosh tanh log ln',
     charsThatBreakOutOfSupSub: '+-=<>',
     handlers: {
@@ -53,7 +53,10 @@ function CreateNewMathField(id){
     question: null,//is this variable a physics constant
     warning: null,//variable undefined,
     error: null, //units don't match
-  }};
+  }, log: {
+    warning: [], error: []
+  }
+  };
 
   BlurMathFields();
   MathFields[id].mf.focus();
@@ -63,6 +66,6 @@ function CreateNewMathField(id){
   FocusedMathFieldId = id;
   SetMathFieldsUI();
 
-  AddLineLabelHoverEvent(id);
+  //AddLineLabelHoverEvent(id);
 
 }
