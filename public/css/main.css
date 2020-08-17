@@ -1,5 +1,6 @@
 #determinate-loader {
   transition: width 2s;
+  background-color: #8860d0;
 }
 #loading-screen {
   width: 100%;
@@ -12,8 +13,17 @@
   padding-right: 10%;
 }
 
+#loading-screen .progress {
+  background-color: rgba(135, 96, 208, 0.2);
+}
+
 [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
   visibility: hidden !important;
+}
+
+[type="checkbox"]:checked+span:not(.lever):before {
+  border-right: 2px solid #8860d0 !important;
+  border-bottom: 2px solid #8860d0 !important;
 }
 
 body {
@@ -21,12 +31,20 @@ body {
   overflow-x: hidden;
 }
 
+#my-navbar {
+  padding: 12px 0px;
+  font-size: 16px;
+  font-weight: bold;
+  background-image: linear-gradient(to bottom right, #5680e9, #8860d0);
+  color: white;
+}
+
 .static-physics-equation.tooltipped {
   cursor: pointer;
 }
 
-.static-physics-equation.tooltipped:hover {
-  color: #0097a7;
+.static-physics-equation.tooltipped:hover, .physics-equation-headers:hover, .static-physics-equation-header:hover {
+  color: #5680e9;
 }
 
 
@@ -45,10 +63,6 @@ body {
 
 .static-physics-equation-header i {
   visibility: hidden;
-}
-
-.static-physics-equation-header:hover {
-  color: #0097a7;
 }
 
 .static-physics-equation-header:hover i {
@@ -92,14 +106,14 @@ body {
   padding: 5px 0px 5px 5px !important;
   width: calc(100% - 26px) !important;
   border: 1px solid transparent;
-  border-bottom: 1px solid #e1f5fe;
+  border-bottom: 1px solid #f5f5f5;
 }
 
 .my_math_field_col.active {
-  -webkit-box-shadow: 0px 0px 8px 0px rgba(132,225,235,0.5);
-  -moz-box-shadow: 0px 0px 8px 0px rgba(132,225,235,0.5);
-  box-shadow: 0px 0px 8px 0px rgba(132,225,235,0.5);
-  border: 1px rgba(132,225,235,0.5) solid;
+  -webkit-box-shadow: 0px 0px 8px 0px #84ceeb;
+  -moz-box-shadow: 0px 0px 8px 0px #84ceeb;
+  box-shadow: 0px 0px 8px 0px #84ceeb;
+  border: 1px rgba(132, 206, 235,0.5) solid;
 }
 
 .line-error svg, .line-warning svg {
@@ -115,11 +129,11 @@ body {
   display: inline-block !important;
   height: 23.64px;
   width: 25px !important;
-  background-color: #eeeeee;
+  background-color: #fafafa;
 }
 
 .line_label.active {
-  background-color: rgba(132,225,235,1);
+  background-color: rgba(132, 206, 235,1);
 }
 .line_label span {
   display: none;
@@ -150,21 +164,20 @@ body {
   background-color: #ec407a;
 }
 
-
 #equations_container .tabs .tab a:focus, #equations_container .tabs .tab a:focus.active {
-  background-color: rgba(48, 79, 254, 0.2);
+  background-color: #5680e9;
 }
 
 #equations_container .tabs .tab a:hover, #equations_container .tabs .tab a.active {
-  color: rgba(48, 79, 254, 1.0);
+  color: rgba(132, 206, 235, 1.0);
 }
 
 #equations_container .tabs .indicator {
-  background-color: rgba(48, 79, 254, 1.0) !important;
+  background-color: #5680e9 !important;
 }
 
 #equations_container .tabs .tab a {
-  color: rgba(48, 79, 254, 0.7);
+  color: rgba(132, 206, 235, 0.7);
 }
 
 #physics-equation-a-tag {
@@ -176,7 +189,7 @@ body {
 }
 
 .relevant-equations-badge {
-  background-color: #f0f4c3 !important;
+  background-color: #c1c8e4 !important;
   color: #424242 !important;
   visibility: hidden;
 }
@@ -186,7 +199,7 @@ body {
 }
 
 .relevant-equation {
-  background-color: #f0f4c3 !important;
+  background-color: #c1c8e4 !important;
 }
 
 #my_variables .my-collection.no-variables-defined {
@@ -391,12 +404,12 @@ body {
 }
 
 #physics_equations .collapsible-header:hover{
-  background-color: #e1f5fe;
-  transition: background-color 0.5s;
+  background-image: linear-gradient(to bottom right, #84ceeb, #ffffff);
+  /*transition: background-color 0.5s;*/
 }
 
 #physics_equations li.active .collapsible-header{
-  background-color: #80deea;
+  background-image: linear-gradient(to bottom right, #84ceeb, #ffffff);
   transition: background-color 0.5s;
 }
 
@@ -658,7 +671,7 @@ body {
 
 #relevant-physics-equations-total-count > span {
   padding: 3px;
-  background-color: #f0f4c3;
+  background-color: #c1c8e4;
   border-radius: 5px;
   color: #424242;
 }
@@ -741,4 +754,8 @@ body {
 
 .error-header {
   color: #E57373;
+}
+
+#btn-update-imported-variables:not(.disabled), #btn-cancel-imported-variables {
+  background-color: #5680e9 !important;
 }

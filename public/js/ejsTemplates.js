@@ -209,6 +209,11 @@ let Templates = {
   </div>
   <div class="row">
     <div class="col m12">
+      <span style="color: #616161; font-size: 14px;">By importing variables, the editor can understand what units a variable is which makes it easier to write equations and get them checked. For example, if you import the variable 't' as time whenever you use the variable 't' or 't' with any subscript the editor will understand that the variable has units of time</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col m12">
       <label>
         <input id="import-all-variables" type="checkbox" />
         <span>Import All Variables</span>

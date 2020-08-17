@@ -204,6 +204,7 @@ let UnitReference = {};
 
 
 let ListOfSIUnits = {
+  "unitless" : {name: "unitless variable", symbol: "none", unitsMathjs: "1", canBeVector: true,},
   "length" : {name: "meter", symbol: "m", unitsMathjs: "1 m", canBeVector: true,},
   "mass" : {name: "kilogram", symbol: "kg", unitsMathjs: "1 kg", canBeVector: false, },//kilogram will be represented with a g
   "time" : {name: "second", symbol: "s", unitsMathjs: "1 s", canBeVector: false,},
@@ -280,7 +281,6 @@ let ListOfSIUnits = {
   "radiance" : {name: "watt per square meter steradian", symbol: "W/(m^2*sr)",   unitsMathjs: "1 W/(m^2 sr)", canBeVector: false, },
   "catalytic concentration" : {name: "katal per cubic meter", symbol: "kat/m^3",   unitsMathjs: "1 kat/m^3", canBeVector: false, },
   "unknown" : {name: "unknown units", symbol: "?", unitsMathjs: "1", canBeVector: true,},
-  "unitless" : {name: "unitless variable", symbol: "none", unitsMathjs: "1", canBeVector: true,},
   "coefficient of friction" : {name: "unitless variable", symbol: "none", unitsMathjs: "1", canBeVector: false,},
   "energy efficiency" : {name: "unitless variable", symbol: "none", unitsMathjs: "1", canBeVector: false,},
   "coefficient of thermal expansion" : {name: "inverse kelvin", symbol: "1/K", unitsMathjs: "1 / K", canBeVector: false,},
