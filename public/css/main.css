@@ -459,7 +459,9 @@ body {
   box-shadow: 24px -17px 49px -32px rgba(156,156,156,1);
 }
 
-
+#insert-comment-button {
+  background-image: linear-gradient(to bottom right, #84ceeb, #ffffff);
+}
 
 #keyboard-button .fa-keyboard {
   font-size: 1.6rem !important;
