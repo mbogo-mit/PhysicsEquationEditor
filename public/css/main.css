@@ -133,7 +133,8 @@ body {
 }
 
 .line_label.active {
-  background-color: rgba(132, 206, 235,1);
+  background-image: linear-gradient(to bottom right, #5680e9, #84ceeb);
+  color: white;
 }
 .line_label span {
   display: none;

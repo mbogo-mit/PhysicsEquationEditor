@@ -117,7 +117,7 @@ let Templates = {
       <span class="line-question" mf="<%= rid %>"><i class="fas fa-question-circle"></i></span>
     </div>
     <div class="col m11 my_math_field_col">
-      <div id="<%= rid %>" class="my_math_field" onkeydown="KeyLogger()" onkeyup="KeyLogger()" onmousedown="FocusOnThisMathField('<%= rid %>')"></div>
+      <div id="<%= rid %>" class="my_math_field" onkeydown="KeyLogger()" onkeyup="KeyLogger()" onmousedown="FocusOnThisMathField('<%= rid %>')" onfocusout="UnfocusOnThisMathField()"></div>
     </div>
   </div>
   `,

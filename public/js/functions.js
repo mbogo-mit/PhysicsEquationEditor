@@ -255,6 +255,15 @@ function UpdateDefinedVariables(opts){
     else{
       PreDefinedVariables[opts.ls] = opts.props;
       PreDefinedVariables[opts.ls].rid = opts.rid;
+      //after we add a new variable as a predefined variable we need to make sure to remove any defined variable that uses that same ls
+      if(DefinedVariables[opts.ls] != undefined){
+        UpdateDefinedVariables({
+          type: "remove",
+          rid: DefinedVariables[opts.ls].rid,
+          editable: true,
+        });
+      }
+      
     }
   }
   else if(opts.type == "remove"){
@@ -423,9 +432,16 @@ function MathFieldKeyPressEnter(el, enterClicked = false){
 
 }
 
-function FocusOnThisMathField(rid){
-  FocusedMathFieldId = rid;
+function UnfocusOnThisMathField(){
+  FocusedMathFieldId = "none";
   SetMathFieldsUI();
+}
+
+function FocusOnThisMathField(rid){
+  setTimeout(function(r){
+    FocusedMathFieldId = r;
+    SetMathFieldsUI();
+  },100, rid);
 }
 
 function MoveCursor1Line(id, move = "down", direction = "right"){
@@ -1493,26 +1509,20 @@ function UpdateVariableUnits(el){
     let rid = $("#units-search-results").attr("rid");
     let fullUnitsString = el.attr("fullUnitssString");
 
-    let foundVariable = false;
-    let ls = "";
-    let props = {};
-
-    for(const [key, value] of Object.entries(DefinedVariables)){
-      if(value.rid == rid){
-        foundVariable = true;
-        ls = key;
-        //copying over data
-        props.type = value.type;
-        props.state = value.state;
-        props.value = value.value;
-        props.valueFormattingError = value.valueFormattingError;
-        
-        break;
-      }
+    if(fullUnitsString.indexOf("undefined") != -1){//the user is setting the variable back to undefined
+      UpdateDefinedVariables({
+        type: "remove",
+        rid: rid,
+        editable: true,
+      });
     }
+    else{
 
-    if(!foundVariable){
-      for(const [key, value] of Object.entries(EL.undefinedVars.undefined)){
+      let foundVariable = false;
+      let ls = "";
+      let props = {};
+
+      for(const [key, value] of Object.entries(DefinedVariables)){
         if(value.rid == rid){
           foundVariable = true;
           ls = key;
@@ -1521,38 +1531,55 @@ function UpdateVariableUnits(el){
           props.state = value.state;
           props.value = value.value;
           props.valueFormattingError = value.valueFormattingError;
+          
           break;
         }
       }
-    }
 
-    if(!foundVariable){
-      for(const [key, value] of Object.entries(EL.undefinedVars.defined)){
-        if(value.rid == rid){
-          foundVariable = true;
-          ls = key;
-          //copying over data
-          props.type = value.type;
-          props.state = value.state;
-          props.value = value.value;
-          props.valueFormattingError = value.valueFormattingError;
-          break;
+      if(!foundVariable){
+        for(const [key, value] of Object.entries(EL.undefinedVars.undefined)){
+          if(value.rid == rid){
+            foundVariable = true;
+            ls = key;
+            //copying over data
+            props.type = value.type;
+            props.state = value.state;
+            props.value = value.value;
+            props.valueFormattingError = value.valueFormattingError;
+            break;
+          }
         }
       }
+
+      if(!foundVariable){
+        for(const [key, value] of Object.entries(EL.undefinedVars.defined)){
+          if(value.rid == rid){
+            foundVariable = true;
+            ls = key;
+            //copying over data
+            props.type = value.type;
+            props.state = value.state;
+            props.value = value.value;
+            props.valueFormattingError = value.valueFormattingError;
+            break;
+          }
+        }
+      }
+
+      props.fullUnitsString = fullUnitsString;
+      props.units = TrimUnitInputValue(fullUnitsString);
+      props.unitsMathjs = UnitReference[fullUnitsString].unitsMathjs;
+      props.quantity = UnitReference[fullUnitsString].quantity;
+      props.canBeVector = UnitReference[fullUnitsString].canBeVector;
+
+      UpdateDefinedVariables({
+        type: "update",
+        ls: ls,
+        editable: true,
+        props: props,
+      });
+
     }
-
-    props.fullUnitsString = fullUnitsString;
-    props.units = TrimUnitInputValue(fullUnitsString);
-    props.unitsMathjs = UnitReference[fullUnitsString].unitsMathjs;
-    props.quantity = UnitReference[fullUnitsString].quantity;
-    props.canBeVector = UnitReference[fullUnitsString].canBeVector;
-
-    UpdateDefinedVariables({
-      type: "update",
-      ls: ls,
-      editable: true,
-      props: props,
-    });
 
     CloseUnitDropdownSearchMenu();
 
