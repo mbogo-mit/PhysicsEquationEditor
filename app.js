@@ -12,8 +12,12 @@ app.set('view engine', 'ejs');
 
 app.listen(PORT, () => console.log(`listening at http://localhost:${PORT}`));
 
+app.get('/editor', (req, res, next)=>{
+  res.render('pages/editor',{loe: ListOfEquations, lopc: ListOfPhysicsConstants});
+});
+
 app.get('/', (req, res, next)=>{
-  res.render('pages/index',{loe: ListOfEquations, lopc: ListOfPhysicsConstants});
+  res.render('pages/index');
 });
 
 ListOfEquations = {

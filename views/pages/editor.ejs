@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <%- include('../partials/head.ejs');%>
+  </head>
+  <body>
+
+    <%- include("../partials/loading-screen.ejs");%>
+    <div id="main-screen" lopc="<%= JSON.stringify(lopc)%>">
+      <%- include("../partials/nav.ejs");%>
+
+      <%- include("../partials/modal-physics-equation-more-information.ejs");%>
+      <%- include("../partials/modal-import-variable-definition.ejs");%>
+      <%- include("../partials/my-container.ejs",{loe:loe, lopc: lopc});%>
+      <%- include('../partials/line-message-box.ejs');%>
+      <%- include('../partials/keyboard-container.ejs');%>
+      <%- include('../partials/units-dropdown-menu.ejs');%>
+    </div>
+
+
+    <!-- Custtom Js Script -->
+    <script type="text/javascript" src="js/GlobalVars.js"></script>
+    <script type="text/javascript" src="js/ejsTemplates.js"></script>
+    <script type="text/javascript" src="js/EditorLogger.js"></script>
+    <script type="text/javascript" src="js/keyboardScripts.js"></script>
+    <script type="text/javascript" src="js/mathjslogic.js"></script>
+    <script type="text/javascript" src="js/mathLogicFunctions.js"></script>
+    <script type="text/javascript" src="js/functions.js"></script>
+    <script type="text/javascript" src="js/scripts.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+
+  </body>
+</html>

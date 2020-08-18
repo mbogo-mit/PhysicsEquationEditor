@@ -1,33 +1,168 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-      <%- include('../partials/head.ejs');%>
-  </head>
-  <body>
+<!DOCTYPE HTML>
+<!--
+	Hyperspace by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Hyperspace by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
 
-    <%- include("../partials/loading-screen.ejs");%>
-    <div id="main-screen" lopc="<%= JSON.stringify(lopc)%>">
-      <%- include("../partials/nav.ejs");%>
+		<!-- Sidebar -->
+			<section id="sidebar">
+				<div class="inner">
+					<nav>
+						<ul>
+							<li><a href="#intro">Welcome</a></li>
+							<li><a href="#one">What we do</a></li>
+							<li><a href="#two">Our mission</a></li>
+							<li><a href="#three">Get in touch</a></li>
+						</ul>
+					</nav>
+				</div>
+			</section>
 
-      <%- include("../partials/modal-physics-equation-more-information.ejs");%>
-      <%- include("../partials/modal-import-variable-definition.ejs");%>
-      <%- include("../partials/my-container.ejs",{loe:loe, lopc: lopc});%>
-      <%- include('../partials/line-message-box.ejs');%>
-      <%- include('../partials/keyboard-container.ejs');%>
-      <%- include('../partials/units-dropdown-menu.ejs');%>
-    </div>
+		<!-- Wrapper -->
+			<div id="wrapper">
 
+				<!-- Intro -->
+					<section id="intro" class="wrapper style1 fullscreen fade-up">
+						<div class="inner">
+                            <h1>Physics.io</h1>
+                            <h3>version 1.0.0-beta</h3>
+							<p>We provide an easy to use editor to get your physics homework written and checked for correctness. Getting help with physics has never been this easy!</p>
+							<ul class="actions">
+                                <li><a href="#one" class="button scrolly">Learn more</a></li>
+                                <li><a href="/editor" class="button primary">Open Editor</a></li>
+							</ul>
+						</div>
+					</section>
 
-    <!-- Custtom Js Script -->
-    <script type="text/javascript" src="js/GlobalVars.js"></script>
-    <script type="text/javascript" src="js/ejsTemplates.js"></script>
-    <script type="text/javascript" src="js/EditorLogger.js"></script>
-    <script type="text/javascript" src="js/keyboardScripts.js"></script>
-    <script type="text/javascript" src="js/mathjslogic.js"></script>
-    <script type="text/javascript" src="js/mathLogicFunctions.js"></script>
-    <script type="text/javascript" src="js/functions.js"></script>
-    <script type="text/javascript" src="js/scripts.js"></script>
-    <script type="text/javascript" src="js/main.js"></script>
+                <!-- Two -->
+					<section id="one" class="wrapper fullscreen style3 fade-up">
+						<div class="inner">
+							<h2>What we do</h2>
+							<p>We use cutting edge web technologies to create an easy to use web application that helps students write and solve physics problems using high level checks for correctness and robust error hanlding systems that notifies the student which part of their work is incorrect</p>
+                            <div class="features">
+								<section>
+									<span class="icon solid major fa-code"></span>
+									<h3>Robust error handling</h3>
+									<p>We use powerful code bases to parse through each expression written by the user and return potential errors in their work</p>
+								</section>
+								<section>
+									<span class="icon solid major fa-gem"></span>
+									<h3>Beautiful Expressions</h3>
+									<p>We use a robust LaTex rendering library to create beautiful looking expressions that are easy to read and manipulate.</p>
+								</section>
+								<section>
+									<span class="icon solid major fa-link"></span>
+									<h3>Access to supplemental resources</h3>
+									<p>We provide supplemental information on a list of physics topics and equations commonly encountered by students which allows students to gain a deeper understanding of physics concepts</p>
+								</section>
+								<section>
+									<span class="icon solid major fa-desktop"></span>
+									<h3>Streamlined web design</h3>
+									<p>Our website design is crafted to make the process of finishing a physics problem as streamlined as possible with an elegant and intuitive design.</p>
+								</section>
+                            </div>
+						</div>
+                    </section>
+                        
+				<!-- One -->
+					<section id="two" class="wrapper fullscreen style2 spotlights">
+						<section>
+							<div class="content">
+								<div class="inner">
+									<h2>Our Misssion</h2>
+									<p>
+                                        Our mission at Physics.io is to create a space where students can solve physics equations and gain a deeper understanding of how the many different physical quantities interact with each other. We want to give students access to the kind of help a teacher or TA gives inside the simplicity and convience of a web application.
+                                    </p>
+                                    <ul class="actions">
+                                        <li><a href="/editor" class="button primary">Open Editor</a></li>
+                                    </ul>
+								</div>
+							</div>
+						</section>
+					</section>
 
-  </body>
+				<!-- Three -->
+					<section id="three" class="wrapper style1 fade-up">
+						<div class="inner">
+							<h2>Get in touch</h2>
+							<p>If you have any questions, concerns, or comments about our service please feel free to contact us. We love to hear from the very people who we are servicing and strive to continually make our product better server our users.</p>
+							<div class="split style1">
+								<section>
+									<form method="post" action="#">
+										<div class="fields">
+											<div class="field half">
+												<label for="name">Name</label>
+												<input type="text" name="name" id="name" />
+											</div>
+											<div class="field half">
+												<label for="email">Email</label>
+												<input type="text" name="email" id="email" />
+											</div>
+											<div class="field">
+												<label for="message">Message</label>
+												<textarea name="message" id="message" rows="5"></textarea>
+											</div>
+										</div>
+										<ul class="actions">
+											<li><a href="" class="button submit">Send Message</a></li>
+										</ul>
+									</form>
+								</section>
+								<section>
+									<ul class="contact">
+										<li>
+											<h3>Email</h3>
+											<a href="#">physicseditor.io@gmail.com</a>
+										</li>
+										<li>
+											<h3>Phone</h3>
+											<span>(000) 000-0000</span>
+										</li>
+										<li>
+											<h3>Social</h3>
+											<ul class="icons">
+												<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+												<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+												<li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+												<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+												<li><a href="#" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+											</ul>
+										</li>
+									</ul>
+								</section>
+							</div>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Footer -->
+			<footer id="footer" class="wrapper style1-alt">
+				<div class="inner">
+					<ul class="menu">
+						<li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
 </html>
