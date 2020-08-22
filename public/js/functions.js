@@ -26,7 +26,7 @@ function SelectedStringDefined(str){
   return str in DefinedVariables;
 }
 
-function RenderImportedVariablesTable(key){
+function RenderImportedVariablesTable(key, index){
   let headers = {
     mechanics: "Import Mechanics Variables Definitions",
     thermal: "Import Thermal Variables Definitions",
@@ -34,6 +34,7 @@ function RenderImportedVariablesTable(key){
     em: "Import Electricity & Magnetism Variables Definitions",
     modern: "Import Modern Physics Variables Definitions",
   }
+  
   let vars = Object.assign({}, ImportVariableDefinitions[key]);
   //we are going to go through vars and add information to it so that we know if a checkbox should be check, unchecked, or disabled
   for(const [key, value] of Object.entries(vars)){
@@ -74,6 +75,18 @@ function RenderImportedVariablesTable(key){
   $("#modal_import_variable_definition").modal("open");
 
   $(".already-imported-variable.tooltipped").tooltip();
+  
+}
+
+function OpenCollapsibleSection(index){
+  /*
+  $("#physics_equations .collapsible").collapsible("close",0);
+  $("#physics_equations .collapsible").collapsible("close",1);
+  $("#physics_equations .collapsible").collapsible("close",2);
+  $("#physics_equations .collapsible").collapsible("close",3);
+  $("#physics_equations .collapsible").collapsible("close",4);
+  $("#physics_equations .collapsible").collapsible("open",index);
+  */
 }
 
 function UpdateImportedVariables(){

@@ -44,6 +44,7 @@ $(document).ready(function(){
       });
     }
   });
+
   $('.tooltipped').tooltip();
   $('#side-nav-editor-log').sidenav({
     edge: 'right',
