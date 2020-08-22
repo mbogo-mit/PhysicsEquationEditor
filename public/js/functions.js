@@ -1745,3 +1745,12 @@ function CheckHotKeys(){
     }
   }
 }
+
+function AnimateTyping(id,text){
+  if(text.length > 0){
+    MathFields[id].mf.typedText(text[0]);
+    setTimeout(function(id,t){
+      AnimateTyping(id,t)
+    }, 500, id, text.substring(1));
+  }
+}

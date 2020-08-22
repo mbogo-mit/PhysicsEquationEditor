@@ -1,3 +1,45 @@
-<div id="my-navbar" class="center" onclick="UnfocusMathFields()"><a href="/">Physics.io</a></div>
-
-<%- include('editor-log-container.ejs');%>
+<div id="my-navbar" class="center" onclick="UnfocusMathFields()">
+    <a href="/">Physics.io</a>
+    <a class="waves-effect waves-light btn right" href="#">Report an error</a>
+    <a class="waves-effect waves-light btn modal-trigger right" href="#modal-user-guide">User Guide</a>
+</div>
+<div id="modal-user-guide" class="modal">
+    <div class="modal-content">
+        <div class="row">
+            <div class="col m12 center">
+                <h4>User Guide</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col m12">
+                <h5>Writing Equations</h5>
+                <p>Physics.io uses a robust latex rendering library that allows users to write beautiful looking physics equations, just start typing and we do the rest! For complex characters such as integrals or square root symbols you can use the keyboard that sits at the bottom of the page and if you hover over each key it displays what you could alternatively type directly into the editor to generate the desired character. For example if you hover over the key for the greek letter “θ” a tooltip will popup that shows that you could alternatively type “theta” into the editor and the character “θ” will be rendered.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col m12">
+                <h5>Defining Variables</h5>
+                <p>
+                    There are three ways to define a variable in this editor. Let’s start out with variables that are physics constants. Take the variable “c” for example which represents the speed of light. When first used in the editor it will be undefined so to define it click on the “Physics Constants” tab on the right handside of the editor and a list of physics constants will appear that you can select. Select the physics constants you want to be defined by selecting the checkbox in the row that corresponds to the specific physics constant. In this case it is the first checkbox. Once it's selected the editor will automatically define the variable “c” as the speed of light and save it in the “My Variables” tab which holds all of the variables that are defined or being used in the editor.
+                </p>
+                <p>
+                    If a variable is not a physics constant the second way to define it is to click on the two tags that appear beside the variable when it is added to the “My Variables” tab. The first tag allows you to identify the variable as a given or unknown variable, and the second tag allows you to define the variable’s units.
+                </p>
+                <p>
+                    The third and most convenient way of defining variables is to import their variable definitions. To do this go to the “Physics Equations” tab and hover over any of the 5 headers and click on “Import Variables Definition” button that pops up. This will open a popup that allows you to define multiple variables all at once so when you use them in the editor, you don’t have to continually define them yourself. And these variables are divided into their respective physics topics (mechanical, thermal, wave & optics, Electricity & magnetism, and modern physics) because a variable may have a different units depending on what area of physics the variable is used in. For example, in mechanical physics “V” may stand for a volume while in electromagnetics it may stand for voltage.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col m12">
+                <h5>Using Physics Equations</h5>
+                <p>
+                    Each physics equation displayed under the “Physics Equations” tab can be easily used in the editor by simply clicking it which copies the equation to your clipboard and then pasting it into the editor. Additionally, if you have imported all the variables definitions for a specific area of physics (mechanical, thermal, wave & optics, Electricity & magnetism, and modern physics) whenever you paste the equation into the editor, the editor will immediately understand what each of the variables units are in the equation.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Exit</a>
+    </div>
+</div>
