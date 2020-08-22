@@ -27,7 +27,7 @@
         <span class="keyboard-latex">+\ -\ \sqrt{x}</span>
       </a>
       <a id="functions-tab" class="keyboard-tabs waves-effect waves-light btn" onclick="SetKeyboardKeys('functions')">
-        <span class="keyboard-latex">\sin \log \vec{a}</span>
+        <span class="keyboard-latex">\sin \log</span>
       </a>
       <a id="advanced-operators-tab" class="keyboard-tabs waves-effect waves-light btn" onclick="SetKeyboardKeys('advanced')">
         <span class="">Advanced</span>
@@ -110,8 +110,7 @@
           <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="equal (=)" onclick="KeyboardClicked('=')"><span class="keyboard-latex">=</span></a></div>
           <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="less than (<)" onclick="KeyboardClicked('<',)"><span class="keyboard-latex"><</span></a></div>
           <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="greater than (>)" onclick="KeyboardClicked('>',)"><span class="keyboard-latex">></span></a></div>
-          <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="derivative" onclick="KeyboardClicked('\\frac{\\mathrm{d} }{\\mathrm{d} x}')"><span class="keyboard-latex">\frac{\mathrm{d} }{\mathrm{d} x}</span></a></div>
-          <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="integral (int)" onclick="KeyboardClicked('\\int')"><span class="keyboard-latex">\int</span></a></div>
+          <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="derivative" onclick="KeyboardClicked('\\frac{d}{dx}')"><span class="keyboard-latex">\int</span></a></div>
         </div>
         <div class="row">
           <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="Cross Product (\times)" onclick="KeyboardClicked('\\times')"><span class="keyboard-latex">\times</span></a></div>
@@ -120,57 +119,62 @@
           <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="subscript (_)" onclick="KeyboardClicked('_{}')"><span class="keyboard-latex">a_x</span></a></div>
           <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="less than or equal (\leq)" onclick="KeyboardClicked('\\leq')"><span class="keyboard-latex">\leq</span></a></div>
           <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="greater than or equal (\geq)" onclick="KeyboardClicked('\\geq')"><span class="keyboard-latex">\geq</span></a></div>
-          <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="(\coprod)" onclick="KeyboardClicked('\\coprod')"><span class="keyboard-latex">\coprod</span></a></div>
-          <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="(\oint)" onclick="KeyboardClicked('\\oint')"><span class="keyboard-latex">\oint</span></a></div>
+          <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="(\coprod)" onclick="KeyboardClicked('\\coprod')"><span class="keyboard-latex">\sum</span></a></div>
         </div>
         <div class="row">
-          <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="absolute value (|)" onclick="KeyboardClicked('','|')"><span class="keyboard-latex">\left | a \right |</span></a></div>
+          <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="absolute value (|)" onclick="KeyboardClicked('','|')"><span class="keyboard-latex">\left| a \right|</span></a></div>
           <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="square root (sqrt)" onclick="KeyboardClicked('\\sqrt{}')"><span class="keyboard-latex">\sqrt{a}</span></a></div>
-          <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="power" onclick="KeyboardClicked('\\sqrt[n]{}')"><span class="keyboard-latex">\sqrt[n]{a}</span></a></div>
+          <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="power" onclick="KeyboardClicked('\\sqrt[n]{}')"><span class="keyboard-latex">\vec{a}</span></a></div>
           <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="superscript (^)" onclick="KeyboardClicked('','^')"><span class="keyboard-latex">a^x</span></a></div>
           <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="not equal (\neq)" onclick="KeyboardClicked('\\neq')"><span class="keyboard-latex">\neq</span></a></div>
           <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="approximate (\approx)" onclick="KeyboardClicked('\\approx')"><span class="keyboard-latex">\approx</span></a></div>
           <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="(\prod)" onclick="KeyboardClicked('\\prod')"><span class="keyboard-latex">\prod</span></a></div>
-          <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="sumation (sum)" onclick="KeyboardClicked('\\sum')"><span class="keyboard-latex">\sum</span></a></div>
         </div>
       </div>
       <div id="functions-keyboard" class="row my-row">
           <div class="row">
             <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="sin" onclick="KeyboardClicked('\\sin')"><span class="keyboard-latex">\sin(x)</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="cos" onclick="KeyboardClicked('\\cos')"><span class="keyboard-latex">\cos(x)</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="tan" onclick="KeyboardClicked('\\tan')"><span class="keyboard-latex">\tan(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arcsin" onclick="KeyboardClicked('\\arcsin')"><span class="keyboard-latex">\arcsin(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="sinh" onclick="KeyboardClicked('\\sinh')"><span class="keyboard-latex">\sinh(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arcsinh" onclick="KeyboardClicked('\\arcsinh')"><span class="keyboard-latex">\arcsinh(x)</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="sec" onclick="KeyboardClicked('\\sec')"><span class="keyboard-latex">\sec(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arcsec" onclick="KeyboardClicked('\\arcsec')"><span class="keyboard-latex">\arcsec(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="sech" onclick="KeyboardClicked('\\sech')"><span class="keyboard-latex">\sech(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arcsech" onclick="KeyboardClicked('\\arcsech')"><span class="keyboard-latex">\arcsech(x)</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="ln" onclick="KeyboardClicked('\\ln')"><span class="keyboard-latex">\ln(x)</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="vector (crtl+b)" onclick="KeyboardClicked('\\vec{}')"><span class="keyboard-latex">\vec{a}</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="derivative" onclick="KeyboardClicked('')"><span class="keyboard-latex">{a}'</span></a></div>
           </div>
           <div class="row">
-            <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arcsin" onclick="KeyboardClicked('\\arcsin')"><span class="keyboard-latex">\arcsin(x)</span></a></div>
+            <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="cos" onclick="KeyboardClicked('\\cos')"><span class="keyboard-latex">\cos(x)</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arccos" onclick="KeyboardClicked('\\arccos')"><span class="keyboard-latex">\arccos(x)</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arctan" onclick="KeyboardClicked('\\arctan')"><span class="keyboard-latex">\arctan(x)</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="cot" onclick="KeyboardClicked('\\cot')"><span class="keyboard-latex">\cot(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="cosh" onclick="KeyboardClicked('\\cosh')"><span class="keyboard-latex">\cosh(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arccosh" onclick="KeyboardClicked('\\arccosh')"><span class="keyboard-latex">\arccosh(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="csc" onclick="KeyboardClicked('\\csc')"><span class="keyboard-latex">\csc(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arccsc" onclick="KeyboardClicked('\\arccsc')"><span class="keyboard-latex">\arccsc(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="csch" onclick="KeyboardClicked('\\csch')"><span class="keyboard-latex">\csch(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arccsch" onclick="KeyboardClicked('\\arccsch')"><span class="keyboard-latex">\arccsch(x)</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="log" onclick="KeyboardClicked('\\log')"><span class="keyboard-latex">\log(x)</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="unit vector (hat)" onclick="KeyboardClicked('\\hat{}')"><span class="keyboard-latex">\hat{a}</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="second derivative" onclick="KeyboardClicked('')"><span class="keyboard-latex">{a}''</span></a></div>
           </div>
           <div class="row">
-            <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="sinh" onclick="KeyboardClicked('\\sinh')"><span class="keyboard-latex">\sinh(x)</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="cosh" onclick="KeyboardClicked('\\cosh')"><span class="keyboard-latex">\cosh(x)</span></a></div>
+            <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="tan" onclick="KeyboardClicked('\\tan')"><span class="keyboard-latex">\tan(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arctan" onclick="KeyboardClicked('\\arctan')"><span class="keyboard-latex">\arctan(x)</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="tanh" onclick="KeyboardClicked('\\tanh')"><span class="keyboard-latex">\tanh(x)</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="csc" onclick="KeyboardClicked('\\csc')"><span class="keyboard-latex">\csc(x)</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="log_{10}" onclick="KeyboardClicked('\\log_{10}')"><span class="keyboard-latex">\log_{10}(x)</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="average (bar)" onclick="KeyboardClicked('\\bar{}')"><span class="keyboard-latex">\bar{a}</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="time derivative (\dot)" onclick="KeyboardClicked('\\dot{}')"><span class="keyboard-latex">\dot{a}</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arctanh" onclick="KeyboardClicked('\\arctanh')"><span class="keyboard-latex">\arctanh(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="cot" onclick="KeyboardClicked('\\cot')"><span class="keyboard-latex">\cot(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arccot" onclick="KeyboardClicked('\\arccot')"><span class="keyboard-latex">\arccot(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="coth" onclick="KeyboardClicked('\\coth')"><span class="keyboard-latex">\coth(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="arccoth" onclick="KeyboardClicked('\\arccoth')"><span class="keyboard-latex">\arccoth(x)</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="log_a" onclick="KeyboardClicked('\\log_{a}')"><span class="keyboard-latex">\log_{a}(x)</span></a></div>
           </div>
       </div>
       <div id="advanced-keyboard" class="row my-row">
           <div class="row">
             <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="partial derivatve" onclick="KeyboardClicked('\\frac{\\partial }{\\partial x}')"><span class="keyboard-latex">\frac{\partial }{\partial x}</span></a></div>
-            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="second derivative" onclick="KeyboardClicked('\\frac{\\mathrm{d^2} }{\\mathrm{d} x^2}')"><span class="keyboard-latex">\frac{\mathrm{d^2} }{\mathrm{d} x^2}</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="second derivative" onclick="KeyboardClicked('\\frac{d^2}{dx^2}')"><span class="keyboard-latex">\frac{d^2}{dx^2}</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="limit (\lim_{x\to 0})" onclick="KeyboardClicked('\\lim_{x\\to 0}')"><span class="keyboard-latex">\lim_{x\to 0}</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat i" onclick="KeyboardClicked('\\hat{i}')"><span class="keyboard-latex">\hat{i}</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat j" onclick="KeyboardClicked('\\hat{j}')"><span class="keyboard-latex">\hat{j}</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat k" onclick="KeyboardClicked('\\hat{k}')"><span class="keyboard-latex">\hat{k}</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat k" onclick="KeyboardClicked('\\hat{k}')"><span class="keyboard-latex">\oint</span></a></div>
           </div>
           <div class="row">
             <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="second derivative" onclick="KeyboardClicked('\\frac{\\partial^2 }{\\partial x^2}')"><span class="keyboard-latex">\frac{\partial^2 }{\partial x^2}</span></a></div>
@@ -179,14 +183,16 @@
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat x" onclick="KeyboardClicked('\\hat{x}')"><span class="keyboard-latex">\hat{x}</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat y" onclick="KeyboardClicked('\\hat{y}')"><span class="keyboard-latex">\hat{y}</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat z" onclick="KeyboardClicked('\\hat{z}')"><span class="keyboard-latex">\hat{z}</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat k" onclick="KeyboardClicked('\\hat{k}')"><span class="keyboard-latex">\dot{a}</span></a></div>
           </div>
           <div class="row">
-            <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="derivative" onclick="KeyboardClicked('\\frac{\\mathrm{d} }{\\mathrm{d} x}')"><span class="keyboard-latex">\frac{\mathrm{d} }{\mathrm{d} x}</span></a></div>
+            <div class="col m1 offset-m2"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="derivative" onclick="KeyboardClicked('\\frac{d}{dx}')"><span class="keyboard-latex">\frac{d}{dx}</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="proportional (\propto)" onclick="KeyboardClicked('\\propto')"><span class="keyboard-latex">\propto</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="infinity (\infty)" onclick="KeyboardClicked('\\infty')"><span class="keyboard-latex">\infty</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat r" onclick="KeyboardClicked('\\hat{r}')"><span class="keyboard-latex">\hat{r}</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat theta" onclick="KeyboardClicked('\\hat{\\theta}')"><span class="keyboard-latex">\hat{\theta}</span></a></div>
             <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat phi" onclick="KeyboardClicked('\\hat{\\phi}')"><span class="keyboard-latex">\hat{\phi}</span></a></div>
+            <div class="col m1"><a class="waves-effect waves-light btn tooltipped" data-position="top" data-tooltip="hat k" onclick="KeyboardClicked('\\hat{k}')"><span class="keyboard-latex">\bar{a}</span></a></div>
           </div>
       </div>
     </div>

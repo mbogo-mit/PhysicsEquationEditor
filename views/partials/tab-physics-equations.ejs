@@ -21,7 +21,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.mechanics[i].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.mechanics[i].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.mechanics[i].equations[eq]%>"></span>
                     </div>
@@ -39,7 +39,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.mechanics[i+1].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.mechanics[i+1].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.mechanics[i+1].equations[eq]%>"></span>
                     </div>
@@ -57,7 +57,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.mechanics[i+2].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.mechanics[i+2].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.mechanics[i+2].equations[eq]%>"></span>
                     </div>
@@ -90,7 +90,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.thermal[i].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.thermal[i].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.thermal[i].equations[eq]%>"></span>
                     </div>
@@ -108,7 +108,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.thermal[i+1].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.thermal[i+1].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.thermal[i+1].equations[eq]%>"></span>
                     </div>
@@ -126,7 +126,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.thermal[i+2].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.thermal[i+2].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.thermal[i+2].equations[eq]%>"></span>
                     </div>
@@ -159,7 +159,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.waveOptics[i].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.waveOptics[i].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.waveOptics[i].equations[eq]%>"></span>
                     </div>
@@ -177,7 +177,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.waveOptics[i+1].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.waveOptics[i+1].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.waveOptics[i+1].equations[eq]%>"></span>
                     </div>
@@ -195,7 +195,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.waveOptics[i+2].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.waveOptics[i+2].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.waveOptics[i+2].equations[eq]%>"></span>
                     </div>
@@ -228,7 +228,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.em[i].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.em[i].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.em[i].equations[eq]%>"></span>
                     </div>
@@ -246,7 +246,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.em[i+1].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.em[i+1].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.em[i+1].equations[eq]%>"></span>
                     </div>
@@ -264,7 +264,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.em[i+2].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.em[i+2].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.em[i+2].equations[eq]%>"></span>
                     </div>
@@ -297,7 +297,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.modern[i].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.modern[i].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.modern[i].equations[eq]%>"></span>
                     </div>
@@ -315,7 +315,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.modern[i+1].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.modern[i+1].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.modern[i+1].equations[eq]%>"></span>
                     </div>
@@ -333,7 +333,7 @@
                   </div>
                 </div>
                 <% for(let eq in loe.modern[i+2].equations){ %>
-                  <div class="row my-row">
+                  <div class="row my-row-2">
                     <div class="col m12 center">
                       <span class="static-physics-equation tooltipped" quantities="<%= JSON.stringify(loe.modern[i+2].quantities[eq])%>" data-position="left" data-tooltip="Copy" onclick="CopyPhysicsEquationToClipboard($(this))" latex="<%=loe.modern[i+2].equations[eq]%>"></span>
                     </div>

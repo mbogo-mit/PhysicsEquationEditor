@@ -52,8 +52,8 @@ ListOfEquations = {
       equations: [
         "v=v_{0}+at",
         "s=s_{0}+v_{0}t+\\frac{1}{2}at^{2}",
-        "v^{2}=v_{0}^{2} + 2a(s-s_{0})",
-        "\\bar{v}=\\frac{1}{2}(v+v_{0})"
+        "v^{2}=v_{0}^{2} + 2a\\left(s-s_{0}\\right)",
+        "\\bar{v}=\\frac{1}{2}\\left(v+v_{0}\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"velocity": 2,"time": 1,"acceleration": 1},
@@ -123,7 +123,7 @@ ListOfEquations = {
       info: {},
       equations: [
         "\\vec{J}=\\bar{F}\\Delta t",
-        "\\vec{J}=\\int\\vec{F}dt"
+        "\\vec{J}=\\int\\left(\\vec{F}dt\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"time": 2,"force": 1,"impulse": 1},
@@ -135,7 +135,7 @@ ListOfEquations = {
       info: {},
       equations: [
         "\\bar{F}\\Delta t=m\\Delta\\vec{v}",
-        "\\int\\vec{F}dt=\\Delta\\vec{p}"
+        "\\int\\left(\\vec{F}dt\\right)=\\Delta\\vec{p}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"velocity": 2,"time": 2,"mass": 1,"force": 1},
@@ -146,8 +146,8 @@ ListOfEquations = {
       name: "Work",
       info: {},
       equations: [
-        "W=\\bar{F}\\Delta s \\cos\\theta",
-        "W=\\int\\vec{F}\\cdot d\\vec{s}"
+        "W=\\bar{F}\\Delta s \\cos\\left(\\theta\\right)",
+        "W=\\int\\left(\\vec{F}\\cdot d\\vec{s}\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"length": 2,"energy/work": 1,"plane angle": 1},
@@ -158,8 +158,8 @@ ListOfEquations = {
       name: "Work-Energy",
       info: {},
       equations: [
-        "\\bar{F}\\Delta s\\cos\\theta=\\Delta E",
-        "\\int\\vec{F}\\cdot d\\vec{s}=\\Delta E"
+        "\\bar{F}\\Delta s\\cos\\left(\\theta\\right)=\\Delta E",
+        "\\int\\left(\\vec{F}\\cdot d\\vec{s}\\right)=\\Delta E"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"length": 2,"energy/work": 2,"plane angle": 1,"force": 1},
@@ -182,8 +182,8 @@ ListOfEquations = {
       name: "General P.E.",
       info: {},
       equations: [
-        "\\Delta U=-\\int\\vec{F}\\cdot d\\vec{s}",
-        "F=-\\nabla(U)"
+        "\\Delta U=-\\int\\left(\\vec{F}\\cdot d\\vec{s}\\right)",
+        "F=-\\nabla\\left(U\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"length": 1,"energy/work": 2,"force": 1},
@@ -226,7 +226,7 @@ ListOfEquations = {
       name: "Power-Velocity",
       info: {},
       equations: [
-        "P=Fv\\cos\\theta",
+        "P=Fv\\cos\\left(\\theta\\right)",
         "P=\\vec{F}\\cdot\\vec{v}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
@@ -259,7 +259,7 @@ ListOfEquations = {
       quantities: [//describes the quantities that are being related in the respective equations
         {"time": 2,"angular acceleration": 1,"angular velocity": 2},
         {"angular acceleration": 1,"angular velocity": 1, "time": 1},
-        {"acceleration": 1,"angular acceleration": 1,"length": 1,},
+        {"acceleration": 1,"angular acceleration": 1,"length": 1, "angular velocity": 1},
       ],
     },
     {
@@ -282,7 +282,7 @@ ListOfEquations = {
       name: "Torque",
       info: {},
       equations: [
-        "\\tau=rF\\sin\\theta",
+        "\\tau=rF\\sin\\left(\\theta\\right)",
         "\\vec{\\tau}=\\vec{r}\\times\\vec{F}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
@@ -307,7 +307,7 @@ ListOfEquations = {
       info: {},
       equations: [
         "I=\\sum mr^{2}",
-        "I=\\int r^{2}dm"
+        "I=\\int\\left(r^{2}dm\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"moment of inertia": 1, "mass": 1, "length": 1},
@@ -319,7 +319,7 @@ ListOfEquations = {
       info: {},
       equations: [
         "W=\\bar{\\tau}\\theta",
-        "W=\\int\\tau\\cdot d\\theta"
+        "W=\\int\\left(\\tau\\cdot d\\theta\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"energy/work": 1, "torque/moment of force": 1, "plane angle": 1},
@@ -330,7 +330,7 @@ ListOfEquations = {
       name: "Rotational Power",
       info: {},
       equations: [
-        "P=\\tau\\omega\\cos\\theta",
+        "P=\\tau\\omega\\cos\\left(\\theta\\right)",
         "P=\\vec{\\tau}\\cdot\\vec{\\omega}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
@@ -352,14 +352,14 @@ ListOfEquations = {
       name: "Angular Momentum",
       info: {},
       equations: [
-        "L=mrv\\sin\\theta",
+        "L=mrv\\sin\\left(\\theta\\right)",
         "\\vec{L}=\\vec{r}\\times\\vec{p}",
         "\\vec{L}=I\\vec{\\omega}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"velocity": 1,"length": 1,"mass": 1,"plane angle": 1,"angular momentum": 1},
         {"moment of inertia": 1,"angular velocity": 1,"angular momentum": 1},
-        [],
+        {"angular momentum": 1, "moment of inertia": 1, "angular velocity": 1},
       ],
     },
     {
@@ -367,7 +367,7 @@ ListOfEquations = {
       info: {},
       equations: [
         "\\vec{H}=\\vec{\\tau}\\Delta t",
-        "\\vec{H}=\\int\\tau dt"
+        "\\vec{H}=\\int\\left(\\tau dt\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"time": 2, "angular impulse": 1, "torque/moment of force": 1},
@@ -596,58 +596,58 @@ ListOfEquations = {
         "\\frac{F}{A}=\\eta\\frac{dv_{x}}{dz}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
-        {"velocity": 1},
+        {"velocity": 1, "force": 1, "area": 1, "dynamic viscosity": 1, "length": 1},
+        {"velocity": 1, "force": 1, "area": 1, "dynamic viscosity": 1, "length": 1},
       ],
     },
     {
       name: "Kinematic Viscosity",
       info: {},
       equations: [
-        "v=\\frac{\\eta}{\\rho}",
+        "\\nu=\\frac{\\eta}{\\rho}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1, "mass density": 1, "dynamic viscosity": 1},
+        {"kinematic viscosity": 1, "mass density": 1, "dynamic viscosity": 1},
       ],
     },
     {
       name: "Drag",
       info: {},
       equations: [
-        "R=\\frac{1}{2}\\rho CAv^{2}",
+        "F_{drag}=\\frac{1}{2}\\rho CAv^{2}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1, "mass density": 1, "area": 1},
+        {"velocity": 1, "mass density": 1, "area": 1, "force": 1, "unitless": 1},
       ],
     },
     {
       name: "Mach Number",
       info: {},
       equations: [
-        "Ma=\\frac{v}{c}",
+        "M=\\frac{v}{c}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1, "speed of light in vacuum": 1},
+        {"velocity": 1, "speed of light in vacuum": 1, "unitless": 1},
       ],
     },
     {
       name: "Reynolds Number",
       info: {},
       equations: [
-        "Re=\\frac{\\rho vD}{\\eta}",
+        "R_e=\\frac{\\rho vD}{\\eta}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1, "mass density": 1},
+        {"velocity": 1, "mass density": 1, "dynamic viscosity": 1, "length": 1},
       ],
     },
     {
       name: "Froude Number",
       info: {},
       equations: [
-        "Fr=\\frac{v}{\\sqrt{gl}}",
+        "F_r=\\frac{v}{\\sqrt{gl}}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1,"length": 1},
+        {"velocity": 1,"length": 1, "unitless": 1, "acceleration": 1},
       ],
     },
     {
@@ -655,11 +655,11 @@ ListOfEquations = {
       info: {},
       equations: [
         "\\frac{F}{A}=E\\frac{\\Delta l}{l_{0}}",
-        "\\sigma=E\\varepsilon"
+        "\\sigma=E\\epsilon"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
-        [],
+        {"length": 2, "dynamic viscosity": 1, "elasticity": 1, "force": 1, "area": 1},
+        {"elasticity": 1, "stress": 1, "strain": 1},
       ],
     },
     {
@@ -670,20 +670,20 @@ ListOfEquations = {
         "\\tau=G\\gamma"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
-        [],
+        {"length": 2, "pressure": 1, "force": 1, "area": 1},
+        {"pressure": 1, "strain": 1, "stress": 1,},
       ],
     },
     {
       name: "Bulk Modulus",
       info: {},
       equations: [
-        "\\frac{F}{A}=K\\frac{Delta V}{V_{0}}",
-        "P=K\\theta"
+        "\\frac{F}{A}=B\\frac{\\Delta V}{V_{0}}",
+        "P=B\\theta"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
+        {"force": 1, "area": 1, "volume": 2, "pressure": 1},
+        {"pressure": 2, "plane angle": 1},
       ],
     },
     {
@@ -693,7 +693,7 @@ ListOfEquations = {
         "\\gamma=\\frac{F}{l}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"force": 1, "length": 1},
+        {"force": 1, "length": 1, "surface tension": 1},
       ],
     },
   ],
@@ -707,9 +707,9 @@ ListOfEquations = {
         "\\Delta V=3\\alpha V_{0}\\Delta T"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
-        {},
-        {},
+        {"length": 2, "coefficient of thermal expansion": 1, "thermodynamic temperature": 1},
+        {"area": 2, "coefficient of thermal expansion": 1, "thermodynamic temperature": 1},
+        {"volume": 2, "coefficient of thermal expansion": 1, "thermodynamic temperature": 1},
       ],
     },
     {
@@ -719,7 +719,7 @@ ListOfEquations = {
         "\\Delta V=\\beta V_{0}\\Delta T",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"volume": 2, "thermodynamic temperature": 1, "coefficient of thermal expansion": 1},
       ],
     },
     {
@@ -729,7 +729,7 @@ ListOfEquations = {
         "Q=mc\\Delta T",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"energy/work": 1, "mass": 1, "specific heat capacity": 1, "thermodynamic temperature": 1},
       ],
     },
     {
@@ -739,7 +739,7 @@ ListOfEquations = {
         "Q=mL",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"energy/work": 1, "mass": 1, "specific latent heat": 1},
       ],
     },
     {
@@ -756,44 +756,44 @@ ListOfEquations = {
       name: "Molecular Constants",
       info: {},
       equations: [
-        "nR=Nk",
+        "nR=Nk_b",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"unitless": 1, "molar gas constant": 1, "amount of substance": 1, "Boltzmann constant": 1,},
       ],
     },
     {
       name: "Maxwell-Boltzmann",
       info: {},
       equations: [
-        "p(v)=\\frac{4v_{2}}{\\sqrt{\\pi}}(\\frac{m}{2kT})^{\\frac{3}{2}}e^{\\frac{-mv^{2}}{2kT}}",
+        "p\\left(v\\right)=\\frac{4v^{2}}{\\sqrt{\\pi}}\\left(\\frac{m}{2k_bT}\\right)^{\\frac{3}{2}}e^{\\frac{-mv^{2}}{2k_bT}}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
+        {"velocity": 1, "mass": 1, "Boltzmann constant": 1, "thermodynamic temperature": 1, "momentum": 1},
       ],
     },
     {
       name: "Molecular K.E.",
       info: {},
       equations: [
-        "<K>=\\frac{3}{2}kT",
+        "\\bar{K}=\\frac{3}{2}k_bT",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"energy/work": 1, "Boltzmann constant": 1, "thermodynamic temperature": 1},
       ],
     },
     {
       name: "Molecular Speed",
       info: {},
       equations: [
-        "v_{p}=\\sqrt{\\frac{2kT}{m}}",
-        "<v>=\\sqrt{\\frac{8kT}{\\pi m}}",
-        "v_{rms}=\\sqrt{\\frac{3kT}{m}}"
+        "v_{p}=\\sqrt{\\frac{2k_bT}{m}}",
+        "\\bar{v}=\\sqrt{\\frac{8k_bT}{\\pi m}}",
+        "v_{rms}=\\sqrt{\\frac{3k_bT}{m}}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
-        {"velocity": 1},
-        {"velocity": 1},
+        {"velocity": 1, "mass": 1, "Boltzmann constant": 1, "thermodynamic temperature": 1},
+        {"velocity": 1, "mass": 1, "Boltzmann constant": 1, "thermodynamic temperature": 1},
+        {"velocity": 1, "mass": 1, "Boltzmann constant": 1, "thermodynamic temperature": 1},
       ],
     },
     {
@@ -804,28 +804,28 @@ ListOfEquations = {
         "P=\\frac{dQ}{dt}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"time": 1},
-        {"time": 1},
+        {"time": 1, "power": 1, "energy/work": 1, },
+        {"time": 1, "power": 1, "energy/work": 1, },
       ],
     },
     {
       name: "Thermal Conduction",
       info: {},
       equations: [
-        "P=\\frac{kA\\Delta T}{l}",
+        "P=\\frac{\\kappa A\\Delta T}{l}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"power": 1, "area": 1, "thermodynamic temperature": 1, "length": 1, "thermal conductivity": 1},
       ],
     },
     {
       name: "Stefan-Boltzmann Law",
       info: {},
       equations: [
-        "P=\\varepsilon\\sigma A(T^{4}-T_{0}^{4})",
+        "P=\\epsilon\\sigma A\\left(T^{4}-T_{0}^{4}\\right)",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"power": 1, "area": 1, "thermodynamic temperature": 2, "Stefan-Boltzmann constant": 1, "unitless": 1},
       ],
     },
     {
@@ -835,7 +835,7 @@ ListOfEquations = {
         "\\lambda_{max}=\\frac{b}{T}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"length": 1, "thermodynamic temperature": 1, "Wien displacement constant": 1},
       ],
     },
     {
@@ -843,21 +843,21 @@ ListOfEquations = {
       info: {},
       equations: [
         "\\Delta U=\\frac{3}{2}nR\\Delta T",
-        "\\Delta U=\\frac{3}{2}Nk\\Delta T"
+        "\\Delta U=\\frac{3}{2}Nk_b\\Delta T"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
+        {"energy/work": 1, "amount of substance": 1, "molar gas constant": 1, "thermodynamic temperature": 1, },
+        {"energy/work": 1, "unitless": 1, "Boltzmann constant": 1, "thermodynamic temperature": 1, },
       ],
     },
     {
       name: "Thermodynamic Work",
       info: {},
       equations: [
-        "W=-\\int PdV",
+        "W=-\\int\\left(PdV\\right)",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"energy/work": 1, "pressure": 1, "volume": 1,},
       ],
     },
     {
@@ -867,7 +867,7 @@ ListOfEquations = {
         "\\Delta U=Q+W",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"energy/work": 3},
       ],
     },
     {
@@ -875,11 +875,11 @@ ListOfEquations = {
       info: {},
       equations: [
         "\\Delta S=\\frac{\\Delta Q}{T}",
-        "S=klog(w)"
+        "S=k_blog\\left(w\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
+        {"entropy": 1, "energy/work": 1, "thermodynamic temperature": 1},
+        {"entropy": 1, "unitless": 1, "Boltzmann constant": 1},
       ],
     },
     {
@@ -890,20 +890,8 @@ ListOfEquations = {
         "\\eta_{ideal}=1-\\frac{T_{C}}{T_{H}}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        [],
-      ],
-    },
-    {
-      name: "C.O.P.",
-      info: {},
-      equations: [
-        "COP_{real}=\\frac{Q_{C}}{Q_{H}-Q_{C}}",
-        "COP_{ideal}=\\frac{T_{C}}{T_{H}-T_{C}}"
-      ],
-      quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
+        {"energy efficiency": 1, "energy/work": 2},
+        {"energy efficiency": 1, "thermodynamic temperature": 2},
       ],
     },
   ],
@@ -913,11 +901,11 @@ ListOfEquations = {
       info: {},
       equations: [
         "v=f\\lambda",
-        "f(x,t)=A\\sin(2\\pi(ft-\\frac{x}{\\lambda}+\\phi))"
+        "y\\left(x,t\\right)=A\\sin\\left(2\\pi\\left(ft-\\frac{x}{\\lambda}+\\phi\\right)\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1,"length": 1},
-        [],
+        {"velocity": 1,"length": 1, "frequency": 1},
+        {"length": 3, "velocity": 1, "time": 1, "plane angle": 1, "frequency": 1},
       ],
     },
     {
@@ -927,7 +915,7 @@ ListOfEquations = {
         "f=\\frac{1}{T}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"frequency": 1, "time": 1},
       ],
     },
     {
@@ -937,81 +925,85 @@ ListOfEquations = {
         "f_{beat}=f_{high}-f_{low}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"frequency": 3},
       ],
     },
     {
       name: "Intensity",
       info: {},
       equations: [
-        "I=\\frac{<P>}{A}",
+        "I=\\frac{\\bar{P}}{A}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"intensity of radiant energy": 1, "power": 1, "area": 1},
       ],
     },
     {
       name: "Intensity Level",
       info: {},
       equations: [
-        "L_{I}=10 log(\\frac{I}{I_{0}})",
+        "L_{I}=10 log\\left(\\frac{I}{I_{0}}\\right)",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"unitless": 1, "intensity of radiant energy": 2},
       ],
     },
     {
       name: "Pressure Level",
       info: {},
       equations: [
-        "L_{p}=20 log(\\frac{\\Delta P}{\\Delta P_{0}})",
+        "L_{p}=20 log\\left(\\frac{\\Delta P}{\\Delta P_{0}}\\right)",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"unitless": 1, "pressure": 2},
       ],
     },
     {
       name: "Doppler Effect",
       info: {},
       equations: [
-        "\\frac{f_{0}}{f_{s}}=\\frac{\\lambda_{s}}{\\lambda_{0}}=\\frac{c\\pm v_{0}}{c\\mp v_{s}}",
-        "\\frac{\\Delta f}{f}\\approx\\frac{\\Delta\\lambda}{\\lambda}\\approx\\frac{\\Delta v}{c}"
+        "\\frac{f_{0}}{f_{s}}=\\frac{\\lambda_{s}}{\\lambda_{0}}",
+        "\\frac{f_{0}}{f_{s}}=\\frac{c\\pm v_{0}}{c\\mp v_{s}}",
+        "\\frac{\\Delta f}{f}\\approx\\frac{\\Delta\\lambda}{\\lambda}",
+        "\\frac{\\Delta f}{f}\\approx\\frac{\\Delta v}{c}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1,"length": 1},
-        {"velocity": 1,"length": 1},
+        {"length": 2, "frequency": 2},
+        {"velocity": 2,"frequency": 2, "speed of light in vacuum": 1},
+        {"length": 2, "frequency": 2},
+        {"velocity": 2,"frequency": 2, "speed of light in vacuum": 1},
       ],
     },
     {
       name: "Mach Angle",
       info: {},
       equations: [
-        "\\sin\\mu=\\frac{c}{v}",
+        "\\sin\\left(\\mu\\right)=\\frac{c}{v}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1, "speed of light in vacuum": 1},
+        {"velocity": 1, "speed of light in vacuum": 1, "plane angle": 1},
       ],
     },
     {
       name: "Cerenkov Angle",
       info: {},
       equations: [
-        "\\cos\\theta=\\frac{c}{nv}",
+        "\\cos\\left(\\theta\\right)=\\frac{c}{nv}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
+        {"velocity": 1, "plane angle": 1, "speed of light in vacuum": 1, "index of refraction": 1},
       ],
     },
     {
       name: "Interference Fringes",
       info: {},
       equations: [
-        "n\\lambda=d\\sin\\theta",
-        "\\frac{n\\lambda}{d}\\approx\\frac{x}{L}"
+        "n\\lambda=d\\sin\\left(\\theta\\right)",
+        "\\frac{n\\lambda}{d}\\approx\\frac{x}{l}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
-        {"length": 1},
+        {"length": 1, "unitless": 1, "plane angle": 1},
+        {"length": 3, "unitless": 1,},
       ],
     },
     {
@@ -1021,37 +1013,37 @@ ListOfEquations = {
         "n=\\frac{c}{v}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
+        {"velocity": 1, "index of refraction": 1, "speed of light in vacuum": 1},
       ],
     },
     {
       name: "Snell's Law",
       info: {},
       equations: [
-        "n_{1}\\sin\\theta_{1}=n_{2}\\sin\\theta_{2}",
+        "n_{1}\\sin\\left(\\theta_{1}\\right)=n_{2}\\sin\\left(\\theta_{2}\\right)",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"plane angle": 2, "index of refraction": 2},
       ],
     },
     {
       name: "Critical Angle",
       info: {},
       equations: [
-        "\\sin\\theta_c=\\frac{n_{2}}{n_{1}}",
+        "\\sin\\left(\\theta_c\\right)=\\frac{n_{2}}{n_{1}}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"plane angle": 1, "index of refraction": 2},
       ],
     },
     {
       name: "Image Location",
       info: {},
       equations: [
-        "\\frac{1}{f}=\\frac{1}{d_{0}}+\\frac{1}{d_{1}}",
+        "\\frac{1}{d_{focal}}=\\frac{1}{d_{0}}+\\frac{1}{d_{1}}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
+        {"length": 3},
       ],
     },
     {
@@ -1061,17 +1053,17 @@ ListOfEquations = {
         "M=\\frac{h_{i}}{h_{0}}=\\frac{d_{i}}{d_{0}}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
+        {"length": 2, "unitless": 1},
       ],
     },
     {
       name: "Spherical Mirrors",
       info: {},
       equations: [
-        "f\\approx\\frac{r}{2}",
+        "r_{focal}\\approx\\frac{r}{2}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
+        {"length": 2},
       ],
     },
   ],
@@ -1081,25 +1073,25 @@ ListOfEquations = {
       info: {},
       equations: [
         "F=k\\frac{q_{1}q_{2}}{r^{2}}",
-        "\\vec{F}=\\frac{1}{4\\pi\\varepsilon_{0}}\\frac{q_{1}q_{2}}{r^{2}}\\hat{r}"
+        "\\vec{F}=\\frac{1}{4\\pi\\epsilon_{0}}\\frac{q_{1}q_{2}}{r^{2}}\\hat{r}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
-        {"length": 1},
+        {"length": 1, "electric charge": 2, "Coulomb constant": 1},
+        {"length": 1, "Permittivity of vacuum": 1,},
       ],
     },
     {
       name: "Electric Field",
       info: {},
       equations: [
-        "\\vec{E}=\\vec{F_{E}}{q}",
+        "\\vec{E}=\\frac{\\vec{F_{E}}}{{q}}",
         "\\vec{E}=k\\sum\\frac{q}{r^{2}}\\hat{r}",
-        "\\vec{E}=k\\int\\frac{dq}{r^{2}}\\hat{r}"
+        "\\vec{E}=k\\int\\left(\\frac{dq}{r^{2}}\\hat{r}\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        [],
-        {"length": 1},
-        {"length": 1},
+        {"electric field strength": 1, "force": 1, "electric charge": 1},
+        {"length": 1, "electric field strength": 1, "electric charge": 1, "Coulomb constant": 1},
+        {"length": 1, "electric field strength": 1, "Coulomb constant": 1, "electric charge": 1},
       ],
     },
     {
@@ -1108,12 +1100,12 @@ ListOfEquations = {
       equations: [
         "\\Delta V=\\frac{\\Delta U_{E}}{q}",
         "V=k\\sum\\frac{q}{r}",
-        "V=k\\int\\frac{dq}{r}"
+        "V=k\\int\\left(\\frac{dq}{r}\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {"length": 1},
-        {"length": 1},
+        {"electric potential": 1, "energy/work": 1, "electric charge": 1},
+        {"length": 1, "electric potential": 1, "Coulomb constant": 1, "electric charge": 1},
+        {"length": 1, "electric potential": 1, "Coulomb constant": 1, "electric charge": 1},
       ],
     },
     {
@@ -1122,12 +1114,12 @@ ListOfEquations = {
       equations: [
         "\\bar{E}=\\frac{\\Delta V}{d}",
         "\\vec{E}=-\\nabla V",
-        "-\\int E\\cdot d\\vec{r}=\\Delta V"
+        "-\\int\\left(E\\cdot d\\vec{r}\\right)=\\Delta V"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
-        {},
-        {"length": 1},
+        {"length": 1, "electric field strength": 1, "electric potential": 1},
+        {"electric field strength": 1, "electric potential": 1},
+        {"length": 1, "electric field strength": 1, "electric potential": 1},
       ],
     },
     {
@@ -1137,47 +1129,51 @@ ListOfEquations = {
         "C=\\frac{Q}{V}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"capacitance": 1, "electric charge": 1, "electric potential": 1},
       ],
     },
     {
       name: "Plate Capacitor",
       info: {},
       equations: [
-        "C=\\frac{\\kappa\\varepsilon_{0}A}{d}",
+        "C=\\frac{\\kappa\\epsilon_{0}A}{d}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
+        {"length": 1, "Permittivity of vacuum": 1,"area": 1,"capacitance": 1, "unitless": 1},
       ],
     },
     {
       name: "Cylindrical Capacitor",
       info: {},
       equations: [
-        "C=\\frac{2\\pi\\kappa\\varepsilon_{0}l}{ln(\\frac{r_{2}}{r_{1}})}",
+        "C=\\frac{2\\pi\\kappa\\epsilon_{0}l}{ln\\left(\\frac{r_{2}}{r_{1}}\\right)}",
       ],
       quantities: [
-        {"length": 1},
+        {"length": 3,"Permittivity of vacuum": 1, "capacitance": 1, "unitless": 1},
       ],
     },
     {
       name: "Spherical Capacitor",
       info: {},
       equations: [
-        "C=\\frac{4\\pi\\kappa\\varepsilon_{0}}{(\\frac{1}{r_{1}})-(\\frac{1}{r^{2}})}",
+        "C=\\frac{4\\pi\\kappa\\epsilon_{0}}{\\left(\\frac{1}{r_{1}}\\right)-\\left(\\frac{1}{r_{2}}\\right)}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
+        {"length": 2, "Permittivity of vacuum": 1,"capacitance": 1, "unitless": 1, },
       ],
     },
     {
       name: "Capacitor P.E.",
       info: {},
       equations: [
-        "U_{c}=\\frac{1}{2}QV=\\frac{1}{2}CV^{2}=\\frac{1}{2}\\frac{Q^{2}}{C}",
+        "U_{c}=\\frac{1}{2}QV",
+        "U_{c}=\\frac{1}{2}CV^{2}",
+        "U_{c}=\\frac{1}{2}\\frac{Q^{2}}{C}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"energy/work": 1, "electric charge": 1, "electric potential": 1},
+        {"energy/work": 1, "capacitance": 1, "electric potential": 1},
+        {"energy/work": 1, "capacitance": 1, "electric charge": 1},
       ],
     },
     {
@@ -1188,8 +1184,8 @@ ListOfEquations = {
         "I=\\frac{dq}{dt}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"time": 1},
-        {"time": 1},
+        {"electric current": 1, "electric charge": 1, "time": 1},
+        {"electric current": 1, "electric charge": 1, "time": 1},
       ],
     },
     {
@@ -1199,7 +1195,7 @@ ListOfEquations = {
         "\\rho=\\frac{Q}{V}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"electric charge density": 1, "electrci charge": 1, "volume": 1},
       ],
     },
     {
@@ -1210,8 +1206,8 @@ ListOfEquations = {
         "\\vec{J}=\\rho\\vec{v}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {"velocity": 1},
+        {"current density": 1, "electric current": 1, "area": 1},
+        {"velocity": 1, "electric charge density": 1, "current density": 1},
       ],
     },
     {
@@ -1223,9 +1219,9 @@ ListOfEquations = {
         "\\vec{J}=\\sigma\\vec{E}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
-        {},
+        {"electric potential": 1, "electric current": 1, "electric resistance": 1},
+        {"electric field strength": 1, "electric charge density": 1, "current density": 1},
+        {"current density": 1, "electric field strength": 1, "conductivity": 1},
       ],
     },
     {
@@ -1235,7 +1231,7 @@ ListOfEquations = {
         "\\rho=\\frac{1}{\\sigma}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"conductivity": 1, "resistivity": 1},
       ],
     },
     {
@@ -1245,17 +1241,21 @@ ListOfEquations = {
         "R=\\frac{\\rho l}{A}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
+        {"length": 1, "electric resistance": 1, "resistivity": 1, "area": 1},
       ],
     },
     {
       name: "Electric Power",
       info: {},
       equations: [
-        "P=VI=I^{2}R=\\frac{V^{2}}{R}",
+        "P=VI=",
+        "P=I^{2}R",
+        "P=\\frac{V^{2}}{R}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"power": 1, "electric potential": 1, "electric current": 1},
+        {"power": 1, "electric resistance": 1, "electric current": 1},
+        {"power": 1, "electric potential": 1, "electric resistance": 1},
       ],
     },
     {
@@ -1265,7 +1265,7 @@ ListOfEquations = {
         "R_{s}=\\sum R_{i}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"electric resistance": 2},
       ],
     },
     {
@@ -1275,7 +1275,7 @@ ListOfEquations = {
         "\\frac{1}{R_{p}}=\\sum\\frac{1}{R_{i}}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"electric resistance": 2},
       ],
     },
     {
@@ -1285,7 +1285,7 @@ ListOfEquations = {
         "\\frac{1}{C_{s}}=\\sum\\frac{1}{C_{i}}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"capacitance": 2},
       ],
     },
     {
@@ -1295,41 +1295,41 @@ ListOfEquations = {
         "C_{p}=\\sum C_{i}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"capacitance": 2},
       ],
     },
     {
       name: "Magnetic force, charge",
       info: {},
       equations: [
-        "F_{B}=qvB\\sin\\theta",
+        "F_{B}=qvB\\sin\\left(\\theta\\right)",
         "\\vec{F_{B}}=q\\vec{v}\\times\\vec{B}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1,"length": 1},
-        {"velocity": 1,"length": 1},
+        {"velocity": 1,"force": 1, "electric charge": 1, "plane angle": 1, "magnetic flux density": 1},
+        {"velocity": 1,"force": 1, "magnetic flux density": 1, "electric charge": 1,},
       ],
     },
     {
       name: "Magnetic Force, current",
       info: {},
       equations: [
-        "F_{B}=IlB\\sin\\theta",
+        "F_{B}=IlB\\sin\\left(\\theta\\right)",
         "d\\vec{F_{B}}=Id\\vec{l}\\times\\vec{B}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
+        {"force": 1, "electric current": 1, "length": 1, "magnetic flux density": 1, "plane angle": 1},
+        {"magnetic flux density": 1, "force": 1, "electric current": 1, "length": 1},
       ],
     },
     {
       name: "Biot-savart Law",
       info: {},
       equations: [
-        "\\vec{B}=\\frac{\\mu_{0}I}{4\\pi}\\int\\frac{d\\vec{s}\\times\\hat{r}}{r^{2}}",
+        "\\vec{B}=\\frac{\\mu_{0}I}{4\\pi}\\int\\left(\\frac{d\\vec{s}\\times\\hat{r}}{r^{2}}\\right)",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
+        {"length": 2, "Permeability of vacuum": 1, "magnetic flux density": 1, "electric current": 1, },
       ],
     },
     {
@@ -1339,7 +1339,7 @@ ListOfEquations = {
         "B=\\mu_{0}nI",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"Permeability of vacuum": 1, "electric current": 1, "magnetic flux density": 1, "wave number": 1},
       ],
     },
     {
@@ -1349,25 +1349,25 @@ ListOfEquations = {
         "B=\\frac{\\mu_{0}I}{2\\pi r}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
+        {"length": 1, "Permeability of vacuum": 1, "magnetic flux density": 1, "electric current": 1,},
       ],
     },
     {
       name: "Parallel Wires",
       info: {},
       equations: [
-        "\\frac{F_{B}}{l}=\\frac{\\mu_{0}}{2\\pi}\\frac{I_{1}I_{2}}{r}",
+        "\\frac{F_{B}}{\\Delta l}=\\frac{\\mu_{0}}{2\\pi}\\frac{I_{1}I_{2}}{r}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
+        {"length": 2, "Permeability of vacuum": 1, "force": 1, "electric current": 2,},
       ],
     },
     {
       name: "Electric Flux",
       info: {},
       equations: [
-        "\\phi_{E}=EA\\cos\\theta",
-        "\\phi_{E}=\\int\\vec{E}\\cdot d\\vec{A}"
+        "\\Phi_{E}=EA\\cos\\left(\\theta\\right)",
+        "\\Phi_{E}=\\int\\left(\\vec{E}\\cdot d\\vec{A}\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {},
@@ -1378,12 +1378,12 @@ ListOfEquations = {
       name: "Magnetic Flux",
       info: {},
       equations: [
-        "\\phi_{E}=BA\\cos\\theta",
-        "\\phi_{E}=\\int\\vec{B}\\cdot d\\vec{A}"
+        "\\Phi_{B}=BA\\cos\\left(\\theta\\right)",
+        "\\Phi_{B}=\\int\\left(\\vec{B}\\cdot d\\vec{A}\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
+        {"magnetic flux": 1, "magnetic flux density": 1, "area": 1, "plane angle": 1},
+        {"magnetic flux": 1, "magnetic flux density": 1, "area": 1},
       ],
     },
     {
@@ -1393,79 +1393,79 @@ ListOfEquations = {
         "\\xi=Blv",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
+        {"length": 1, "electric potential": 1, "magnetic flux density": 1, "velocity": 1},
       ],
     },
     {
       name: "Induced Emf",
       info: {},
       equations: [
-        "\\bar{\\xi}=-\\frac{\\Delta\\phi_{B}}{\\Delta t}",
-        "\\bar{\\xi}=-\\frac{d\\phi_{B}}{dt}",
+        "\\bar{\\xi}=-\\frac{\\Delta\\Phi_{B}}{\\Delta t}",
+        "\\bar{\\xi}=-\\frac{d\\Phi_{B}}{dt}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"time": 1},
-        {"time": 1},
+        {"time": 1, "electric potential": 1, "magnetic flux": 1},
+        {"time": 1, "electric potential": 1, "magnetic flux": 1},
       ],
     },
     {
       name: "Gauss's Law",
       info: {},
       equations: [
-        "\\iint\\vec{E}\\cdot d\\vec{A}=\\frac{Q}{\\varepsilon_{0}}",
-        "\\nabla\\cdot\\vec{E}=\\frac{\\rho}{\\varepsilon_{0}}"
+        "\\int\\left(\\vec{E}\\cdot d\\vec{A}\\right)=\\frac{Q}{\\epsilon_{0}}",
+        "\\nabla\\cdot\\vec{E}=\\frac{\\rho}{\\epsilon_{0}}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
+        {"electric field strength": 1, "area": 1, "electric charge": 1, "Permittivity of vacuum": 1},
+        {"Permittivity of vacuum": 1, "electric field strength": 1, "electric charge density": 1},
       ],
     },
     {
       name: "Faraday's Law",
       info: {},
       equations: [
-        "\\oint\\vec{E}\\cdot d\\vec{s}=-\\frac{\\partial\\phi_{B}}{\\partial t}",
+        "\\oint\\vec{E}\\cdot d\\vec{s}=-\\frac{\\partial\\Phi_{B}}{\\partial t}",
         "\\nabla\\times\\vec{E}=-\\frac{\\partial\\vec{B}}{\\partial t}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"time": 1,"length": 1},
-        {"time": 1},
+        {"time": 1,"length": 1, "electric field strength": 1, "magnetic flux": 1},
+        {"time": 1, "magnetic flux density": 1, "electric field strength": 1, },
       ],
     },
     {
       name: "Ampere's Law",
       info: {},
       equations: [
-        "\\oint\\vec{B}\\cdot d\\vec{s}=\\mu_{0}\\varepsilon_{0}\\frac{\\partial\\phi_{E}}{\\partial t}+\\mu_{0}I",
-        "\\nabla\\times\\vec{B}=\\mu_{0}\\varepsilon_{0}\\frac{\\partial\\vec{E}}{\\partial t}+\\mu_{0}\\vec{J}"
+        "\\oint\\vec{B}\\cdot d\\vec{s}=\\mu_{0}\\epsilon_{0}\\frac{\\partial\\phi_{E}}{\\partial t}+\\mu_{0}I",
+        "\\nabla\\times\\vec{B}=\\mu_{0}\\epsilon_{0}\\frac{\\partial\\vec{E}}{\\partial t}+\\mu_{0}\\vec{J}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"time": 1,"length": 1},
-        {"time": 1},
+        {"time": 1,"length": 1, "Permittivity of vacuum": 1, "Permeability of vacuum": 1, "electric current": 1, "magnetic flux density": 1},
+        {"time": 1, "Permittivity of vacuum": 1, "Permeability of vacuum": 1, "magnetic flux density": 1, "current density": 1, "magnetic flux density": 1},
       ],
     },
     {
       name: "electromagnetic Plane Wave",
       info: {},
       equations: [
-        "\\vec{E}(x,t)=E_{0}\\sin[2\\pi(ft-\\frac{x}{\\lambda}+\\phi)]\\hat{j}",
-        "\\vec{B}(x,t)=B_{0}\\sin[2\\pi(ft-\\frac{x}{\\lambda}+\\phi)]\\hat{k}"
+        "\\vec{E}\\left(x,t\\right)=E_{0}\\sin\\left(2\\pi\\left(ft-\\frac{x}{\\lambda}+\\phi\\right)\\right)\\hat{j}",
+        "\\vec{B}\\left(x,t\\right)=B_{0}\\sin\\left(2\\pi\\left(ft-\\frac{x}{\\lambda}+\\phi\\right)\\right)\\hat{k}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"time": 1,"length": 1},
-        {"time": 1,"length": 1},
+        {"time": 1,"length": 2, "electric field strength": 2, "frequency": 1, "plane angle": 1, },
+        {"time": 1,"length": 2, "magnetic flux density": 2, "frequency": 1, "plane angle": 1},
       ],
     },
     {
       name: "em wave energy density",
       info: {},
       equations: [
-        "\\eta=\\varepsilon_{0}E^{2}",
+        "\\eta=\\epsilon_{0}E^{2}",
         "\\eta=\\frac{1}{\\mu_{0}}B^{2}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
+        {"Permittivity of vacuum": 1, "energy density": 1, "electric field strength": 1, },
+        {"Permeability of vacuum": 1, "energy density": 1, "magnetic flux density": 1},
       ],
     },
     {
@@ -1475,7 +1475,7 @@ ListOfEquations = {
         "\\vec{S}=\\frac{1}{\\mu_{0}}\\vec{E}\\times\\vec{B}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"Permeability of vacuum": 1, "magnetic flux density": 1, "electric field strength": 1, "energy flux density": 1},
       ],
     },
     {
@@ -1497,7 +1497,7 @@ ListOfEquations = {
         "\\gamma=\\frac{1}{\\sqrt{1-\\frac{v^{2}}{c^{2}}}}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
+        {"velocity": 1,"speed of light in vacuum": 1,"unitless": 1},
       ],
     },
     {
@@ -1508,8 +1508,8 @@ ListOfEquations = {
         "t=\\gamma t_{0}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
-        {},
+        {"time": 2, "velocity": 1, "speed of light in vacuum": 1,},
+        {"time": 2, "unitless": 1},
       ],
     },
     {
@@ -1520,8 +1520,8 @@ ListOfEquations = {
         "l=\\frac{l_{0}}{\\gamma}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1,"length": 1},
-        {"length": 1},
+        {"velocity": 1,"length": 2, "speed of light in vacuum": 1,},
+        {"length": 2, "unitless": 1},
       ],
     },
     {
@@ -1531,7 +1531,7 @@ ListOfEquations = {
         "{u}'=\\frac{u+v}{1+u\\frac{v}{c^{2}}}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
+        {"velocity": 3, "speed of light in vacuum": 1,},
       ],
     },
     {
@@ -1542,8 +1542,8 @@ ListOfEquations = {
         "E=\\gamma mc^{2}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
-        {"velocity": 1},
+        {"energy/work": 1, "speed of light in vacuum": 1, "mass": 1, "velocity": 1},
+        {"speed of light in vacuum": 1, "energy/work": 1, "mass": 1},
       ],
     },
     {
@@ -1554,8 +1554,8 @@ ListOfEquations = {
         "\\vec{p}=\\gamma m\\vec{v}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
-        {"velocity": 1},
+        {"velocity": 1, "momentum": 1, "mass": 1, "speed of light in vacuum": 1,},
+        {"velocity": 1, "unitless": 1, "mass": 1, "momentum": 1,},
       ],
     },
     {
@@ -1565,7 +1565,7 @@ ListOfEquations = {
         "E^{2}=p^{2}c^{2}+m^{2}c^{4}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
+        {"speed of light in vacuum": 1, "energy/work": 1, "momentum": 1, "mass": 1},
       ],
     },
     {
@@ -1575,27 +1575,29 @@ ListOfEquations = {
         "E=mc^{2}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
+        {"speed of light in vacuum": 1, "mass": 1, "energy/work": 1},
       ],
     },
     {
       name: "Relativistic K.E.",
       info: {},
       equations: [
-        "K=(\\frac{1}{\\sqrt{1-\\frac{v^{2}}{c^{2}}}}-1)mc^{2}",
+        "K=\\left(\\frac{1}{\\sqrt{1-\\frac{v^{2}}{c^{2}}}}-1\\right)mc^{2}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1},
+        {"velocity": 1, "speed of light in vacuum": 1, "energy/work": 1, "mass": 1, },
       ],
     },
     {
       name: "Relativistic Doppler Effect",
       info: {},
       equations: [
-        "\\frac{\\lambda}{\\lambda_{0}}=\\frac{f_{0}}{f}=\\sqrt{(\\frac{1+\\frac{v}{c}}{1-\\frac{v}{c}})}",
+        "\\frac{\\lambda}{\\lambda_{0}}=\\frac{f_{0}}{f}",
+        "\\frac{\\lambda}{\\lambda_{0}}=\\sqrt{\\left(1+\\frac{v}{c}\\right)\\left(1-\\frac{v}{c}\\right)^{-1}}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"velocity": 1,"length": 1},
+        {"frequency": 2,"length": 2},
+        {"length": 2, "velocity": 1, "speed of light in vacuum": 1,}
       ],
     },
     {
@@ -1606,8 +1608,8 @@ ListOfEquations = {
         "E=pc"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {"velocity": 1},
+        {"energy/work": 1, "Planck constant": 1, "frequency": 1},
+        {"speed of light in vacuum": 1, "energy/work": 1, "momentum": 1,},
       ],
     },
     {
@@ -1618,8 +1620,8 @@ ListOfEquations = {
         "p=\\frac{E}{c}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
-        {"velocity": 1},
+        {"length": 1, "momentum": 1, "Planck constant": 1},
+        {"speed of light in vacuum": 1, "energy/work": 1, "momentum": 1,},
       ],
     },
     {
@@ -1627,45 +1629,45 @@ ListOfEquations = {
       info: {},
       equations: [
         "K_{max}=E-\\phi",
-        "K_{max}=h(f-f_{0})"
+        "K_{max}=h\\left(f-f_{0}\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
+        {"energy/work": 2,},
+        {"energy/work": 1, "frequency": 1, "Planck constant": 1},
       ],
     },
     {
-      name: "Schredinger's Equation",
+      name: "Schrodinger's Equation",
       info: {},
       equations: [
-        "i\\hslash\\frac{\\partial}{\\partial t}\\Psi(\\vec{r},t)=-\\frac{\\hslash^{2}}{2m}\\nabla^{2}\\Psi(\\vec{r},t)+U(\\vec{r})\\Psi(\\vec{r},t)",
-        "E\\psi(\\vec{r})=-\\frac{\\hslash^{2}}{2m}\\nabla^{2}\\psi(\\vec{r})+U(\\vec{r})\\psi(\\vec{r})"
+        "i\\hbar\\frac{\\partial}{\\partial t}\\Psi\\left(\\vec{r},t\\right)=-\\frac{\\hbar^{2}}{2m}\\nabla^{2}\\Psi\\left(\\vec{r},t\\right)+U\\left(\\vec{r}\\right)\\Psi\\left(\\vec{r},t\\right)",
+        "E\\psi\\left(\\vec{r}\\right)=-\\frac{\\hbar^{2}}{2m}\\nabla^{2}\\psi\\left(\\vec{r}\\right)+U\\left(\\vec{r}\\right)\\psi\\left(\\vec{r}\\right)"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
+        {"time": 1, "length": 1, "Planck constant": 1, "mass": 1, "energy/work": 1,},
+        {"time": 1, "length": 1, "Planck constant": 1, "mass": 1, "energy/work": 1,},
       ],
     },
     {
       name: "Uncertainty Principle",
       info: {},
       equations: [
-        "\\Delta p_{x}\\Delta x \\geq\\frac{\\hslash}{2}",
-        "\\Delta E \\Delta t \\geq\\frac{\\hslash}{2}"
+        "\\Delta p_{x}\\Delta x \\geq\\frac{\\hbar}{2}",
+        "\\Delta E \\Delta t \\geq\\frac{\\hbar}{2}"
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
-        {},
+        {"momentum": 1, "length": 1, "Planck constant": 1},
+        {"energy/work": 1, "time": 1, "Planck constant": 1},
       ],
     },
     {
       name: "Rydberg equation",
       info: {},
       equations: [
-        "\\frac{1}{\\lambda}=-R_{\\infty}(\\frac{1}{n^{2}}-\\frac{1}{n_{0}^{2}})",
+        "\\frac{1}{\\lambda}=-R_{\\infty}\\left(\\frac{1}{n^{2}}-\\frac{1}{n_{0}^{2}}\\right)",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"length": 1},
+        {"length": 1, "Rydberg constant": 1, "unitless": 2, },
       ],
     },
     {
@@ -1675,7 +1677,7 @@ ListOfEquations = {
         "N=N_{0}2^{\\frac{-t}{T_{\\frac{1}{2}}}}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"time": 1},
+        {"time": 2, "unitless": 2, },
       ],
     },
     {
@@ -1685,7 +1687,7 @@ ListOfEquations = {
         "D=\\frac{E}{m}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {},
+        {"energy/work": 1, "mass": 1, "specific energy": 1},
       ],
     },
     {
@@ -1721,6 +1723,15 @@ ListOfPhysicsConstants = [
     unitsMathjs: "1 J s",
   },
   {
+    quantity: "Planck constant",
+    quantityDescription: "Reduced Plank's constant (h/2pi)",
+    symbol: "\\hbar",
+    value: "1.05457180027\\times 10^{-34}",
+    unit: "J\\cdot s",
+    unitString: "J*s",
+    unitsMathjs: "1 J s",
+  },
+  {
     quantity: "Newtonian constant of gravitation",
     quantityDescription: "Newtonian constant of gravitation",
     symbol: "G",
@@ -1730,7 +1741,7 @@ ListOfPhysicsConstants = [
     unitsMathjs: "1 m^3 / (kg s^2)",
   },
   {
-    quantity: "force",
+    quantity: "acceleration",
     quantityDescription: "Acceleration due to gravity",
     symbol: "g",
     value: "9.8",
@@ -1741,15 +1752,15 @@ ListOfPhysicsConstants = [
   {
     quantity: "Boltzmann constant",
     quantityDescription: "Boltzmann constant",
-    symbol: "K_b",
+    symbol: "k_{b}",
     value: "1.380658\\times 10^{-23}",
     unit: "\\frac{J}{K}",
     unitString: "J/K",
     unitsMathjs: "1 J/K",
   },
   {
-    quantity: "Molar gas constant",
-    quantityDescription: "Molar gas constant",
+    quantity: "molar gas constant",
+    quantityDescription: "molar gas constant",
     symbol: "R",
     value: "8.314510",
     unit: "\\frac{J}{mol}\\cdot K",
@@ -1795,7 +1806,7 @@ ListOfPhysicsConstants = [
   {
     quantity: "Coulomb constant",
     quantityDescription: "Coulomb constant",
-    symbol: "K",
+    symbol: "k",
     value: "8.987552\\times 10^{9}",
     unit: "N\\cdot\\frac{m^{2}}{C^{2}}",
     unitString: "N*(m^2)/(C^2)",
