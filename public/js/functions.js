@@ -26,7 +26,7 @@ function SelectedStringDefined(str){
   return str in DefinedVariables;
 }
 
-function RenderImportedVariablesTable(key, index){
+function RenderImportedVariablesTable(type, index){
   let headers = {
     mechanics: "Import Mechanics Variables Definitions",
     thermal: "Import Thermal Variables Definitions",
@@ -35,10 +35,11 @@ function RenderImportedVariablesTable(key, index){
     modern: "Import Modern Physics Variables Definitions",
   }
   
-  let vars = Object.assign({}, ImportVariableDefinitions[key]);
+  let vars = Object.assign({}, ImportVariableDefinitions[type]);
   //we are going to go through vars and add information to it so that we know if a checkbox should be check, unchecked, or disabled
   for(const [key, value] of Object.entries(vars)){
     vars[key].checked = false;//variable should be unchchecked until we can prove that the user has already imported it
+    vars[key].disabled = false;
     if(SimilarDefinedVariables[key] != undefined){
       if(SimilarDefinedVariables[key].rid == value.rid){//this means that the user has imported this variable so when they open up the import modal again the variable should already be checked
         vars[key].checked = true;
@@ -50,7 +51,7 @@ function RenderImportedVariablesTable(key, index){
   }
 
   //now we need to render the object, then inject the html into the modal
-  let html = ejs.render(Templates["imported-variables-modal-content"], {header: headers[key], importedVariables: vars});
+  let html = ejs.render(Templates["imported-variables-modal-content"], {header: headers[type], importedVariables: vars});
   $("#import-variable-definition-modal-content").html(html);
   //render the latex strings
   $("#modal_import_variable_definition .static-physics-equation").each(function(i){
