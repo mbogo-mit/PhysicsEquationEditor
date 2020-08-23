@@ -9,8 +9,6 @@ function RID(){
 
   return rid;
 }
-
-let intro = introJs();
 let FirstTimeThroughDemo = true;
 let SqrtLoop = 0;
 let LastVariableRIDChangedToGiven = null;
