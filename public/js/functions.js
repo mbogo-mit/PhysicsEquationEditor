@@ -74,6 +74,7 @@ function RenderImportedVariablesTable(type, index){
   });
   //now open the modal
   $("#modal_import_variable_definition").modal("open");
+  $("#import-variable-definition-modal-content").scrollTop(0)
 
   $(".already-imported-variable.tooltipped").tooltip();
   
