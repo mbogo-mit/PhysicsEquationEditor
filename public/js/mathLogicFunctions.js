@@ -117,7 +117,12 @@ function ThisIsTheContinuationOfAVariable(state){
   }
 
   if(state.currentlyParsingVariable){
-    if(subLs.indexOf("_{") == 0){//this is the only that is an acceptable continuation of a variable without the need of brackets
+    if(subLs.indexOf("'") == 0){
+      answer.yes = true;
+      answer.substring = subLs.substring(0,1);
+      answer.newState.index += 1;
+    }
+    else if(subLs.indexOf("_{") == 0){//this is the only that is an acceptable continuation of a variable without the need of brackets
       answer.yes = true;
       answer.substring = subLs.substring(0,2);
       answer.newState.numberOfRightBracketsNeeded += 1;//because the "_" needs an opening and closing bracket
