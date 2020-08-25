@@ -2,6 +2,7 @@ function EditorLogger(){
 
   this.rawExpressionData = {};
   this.linesToCheckForSelfConsistency = [];
+  this.expressionsThatDontActuallyEqualEachOther = {};
 
   this.undefinedVars = {
     undefined: {},
@@ -48,6 +49,10 @@ function EditorLogger(){
     },
     "Incorrect equations": {
       description: "You have incorrect equations on this line",
+      example: "",
+    },
+    "Expressions don't equal": {
+      description: "These equations may be symbolically equal but when the variable values are plugged in the expressions don't equal",
       example: "",
     },
     "Expressions found inside integral without differential variable": {
@@ -132,10 +137,11 @@ function EditorLogger(){
     }
 
     //after we have gone through all the lines and parsed everything we will have a list of lines that we can check for selfConsistency so lets do that
-
     this.CheckLinesForSelfConsistency();
-
+    //we use the same list of lines we can check for self consistency to check if we can figure out if we can identify known values and also check that equations actually equal each other not just symbolically
     this.UpdateKnownUnknownVariables();
+    //after this function runs it will populate "this.expressionsThatDontActuallyEqualEachOther" with information about equations that don't actually equal each other so we need to add the errors that this object represents
+    this.AddErrorsFromExpressionsThatDontActuallyEqualEachOther();
 
     //after parsing through everything and building up the list of defined undefined variables we need to check if there are any relevant equations for the set of variables we have in DefinedVariables and this.undefinedVars.defined
     CheckForAndDisplayRelevantEquations();
@@ -143,17 +149,25 @@ function EditorLogger(){
     this.display({dontRenderMyVariablesCollection: opts.dontRenderMyVariablesCollection});
   }
 
-  this.ParsePreviousLinesAgainWithNewInfoAboutUnknownVariables = function(endingLineNumber){
-    for(const [lineNumber, expressions] of Object.entries(this.rawExpressionData)){
-      if(lineNumber > endingLineNumber){
-        break;//we break the job of this function was only to parse previous lines and the current line we were on when we called this function
-      }
-      else{
-        IdentifyAllKnownVariablesAndTheirValues(expressions);
-      }
+  this.AddErrorsFromExpressionsThatDontActuallyEqualEachOther = function(){
+    let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
+    let errors = [];
+    for(const [lineNumber, latexExpressions] of Object.entries(this.expressionsThatDontActuallyEqualEachOther)){
+      errors.push({
+        error: this.createLoggerErrorFromMathJsError("Expressions don't equal"),
+        info: "",
+        latexExpressions: latexExpressions.filter((value, index, self)=>{return self.indexOf(value) === index}),//filtering so that there is only unique sets of equations because we don't need the same equation showing up twice
+        lineNumber: lineNumber,
+        mfID: orderedIds[lineNumber],
+      });
+
+      MathFields[orderedIds[lineNumber]].log.error.push({
+        error: this.createLoggerErrorFromMathJsError("Expressions don't equal"),
+        latexExpressions: latexExpressions.filter((value, index, self)=>{return self.indexOf(value) === index}),//filtering so that there is only unique sets of equations because we don't need the same equation showing up twice,
+      });
 
     }
-
+    this.addLog({error: errors});//adding errors to the log
   }
 
   this.ParsePreviousLinesAgainWithNewInfoAboutUndefinedVariables = function(endingLineNumber){
@@ -252,14 +266,225 @@ function EditorLogger(){
 
   }
 
+  this.CheckLinesForKnownVariables = function(){
+    let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
+    let lineNumber;
+    let mfID;
+    //this function will go through the "this.linesToCheckForSelfConsistency" array and do a high level check for self consistency
+    //this makes sures that there are no duplicate values in the array
+    this.linesToCheckForSelfConsistency = this.linesToCheckForSelfConsistency.filter((value, index, self)=>{
+      return self.indexOf(value) === index
+    });
+    for(let i = 0; i < this.linesToCheckForSelfConsistency.length; i++){
+      lineNumber = this.linesToCheckForSelfConsistency[i];
+      mfID = orderedIds[this.linesToCheckForSelfConsistency[i]];
+      for(let j = 0; j < this.rawExpressionData[this.linesToCheckForSelfConsistency[i]].length; j++){
+        if(this.rawExpressionData[this.linesToCheckForSelfConsistency[i]][j].length >= 2){//you can only do a self consistency check if there at least two expressions set equal to each other
+          //before we do a high level self consistency check we need to make sure that integrals are formatted properly and have the correct information. specifically if a lower bound is defined then an upperbound should also be defined and vise versa
+          if(AreIntegralBoundsFormattedProperly(this.rawExpressionData[this.linesToCheckForSelfConsistency[i]][j])){
+            IdentifyAllKnownVariablesAndTheirValues2(this.rawExpressionData[this.linesToCheckForSelfConsistency[i]][j], lineNumber, mfID);
+          }
+        }  
+      }
+    }  
+  }
+
   this.UpdateKnownUnknownVariables = function(reset = true){
     //we need to first reset all unknown variables current state to "unknown" so that they have to prove that they are known every time the user makes an edit in the editor
     if(reset){
       this.ResetAllUnknownVariblesToCurrentStateUnknown();
     }
+    this.expressionsThatDontActuallyEqualEachOther = {};//we have to reset this object everytime we run this function because this.CheckLinesForKnownVariables() will populuate this object with the most up to date expressions that don't actually equal each other
+    this.CheckLinesForKnownVariables();
     //after we have identified all of the undefined and variables and defined undefined variables and have created logs for everything we need to evaluate which variables are unknown and which variables where initil unknown but are defined by all known variables
-    for(const [lineNumber, expressions] of Object.entries(this.rawExpressionData)){
-      IdentifyAllKnownVariablesAndTheirValues(expressions);
+    /*for(const [lineNumber, expressions] of Object.entries(this.rawExpressionData)){
+      this.IdentifyAllKnownVariablesAndTheirValues(expressions);
+    }*/
+  }
+
+  this.IdentifyAllKnownVariablesAndTheirValues = function(exprs){
+    for(var i = 0; i < exprs.length; i++){
+      let exprsCopy;
+      if(exprs[i].length >= 2){//if there aren't at least two expressions set equal to each other there is no way that a variable that was previously unknown could be equal to all known variables
+        exprsCopy = JSON.parse(JSON.stringify(exprs[i]));//copying exprs data to be used later and information added
+        for(var j = 0; j < exprsCopy.length; j++){
+          let vars = GetVariablesFromLatexString(exprsCopy[j].rawStr);
+          let unknownVars = [];
+          let variableValues = {
+            unknown: {},//this holds an object of all the variables in this expression with unknown values
+            known: {},//this holds an object of all the variables in this expression with known values
+          };
+          for(let v of vars){
+            if(DefinedVariables[v] != undefined){
+              //trying to figure out if this variable is unknown
+              if(DefinedVariables[v].state != "given" && DefinedVariables[v].currentState != "known"){
+                unknownVars.push(v);
+              }
+              //trying to figure out if this variables values is undefined or defined
+              if(DefinedVariables[v].value != undefined){
+                variableValues.known[v] = DefinedVariables[v].value;
+              }
+              else{
+                variableValues.unknown[v] = undefined;
+              }
+            }
+            else if(PreDefinedVariables[v] != undefined){
+              //because this is a predefined variable we known that it is known so all we want to do is pass its value as a into the set of known values for this expression
+              //trying to figure out if this variables values is undefined or defined
+              if(PreDefinedVariables[v].value != undefined){
+                variableValues.known[v] = PreDefinedVariables[v].value;
+              }
+              else{
+                variableValues.unknown[v] = undefined;
+              }
+            }
+            else if(this.undefinedVars.undefined[v] != undefined){
+              //trying to figure out if this variable is unknown
+              if(this.undefinedVars.undefined[v].state != "given" && this.undefinedVars.undefined[v].currentState != "known"){
+                unknownVars.push(v);
+              }
+              //trying to figure out if this variables values is undefined or defined
+              if(this.undefinedVars.undefined[v].value != undefined){
+                variableValues.known[v] = this.undefinedVars.undefined[v].value;
+              }
+              else{
+                variableValues.unknown[v] = undefined;
+              }
+            }
+            else if(this.undefinedVars.defined[v] != undefined){
+              //trying to figure out if this variable is unknown
+              if(this.undefinedVars.defined[v].state != "given" && this.undefinedVars.defined[v].currentState != "known"){
+                unknownVars.push(v);
+              }
+              //trying to figure out if this variables values is undefined or defined
+              if(this.undefinedVars.defined[v].value != undefined){
+                variableValues.known[v] = this.undefinedVars.defined[v].value;
+              }
+              else{
+                variableValues.unknown[v] = undefined;
+              }
+            }
+          }
+  
+          exprsCopy[j].unknownVars = unknownVars;
+          exprsCopy[j].variableValues = variableValues;
+  
+        }
+  
+        //now that we have gathered the necessary information to check if a unknown variable can become known and to check if a now known variable could have its actual value calculated we need to actaully do these checks and calculations
+        let index = 0;
+        while(index < exprsCopy.length){
+          //first we need to see if the expression are related using an equal sign '=' if not there is no way we could say this value is known and therefore actauly calcualte this "known value"
+          if(exprsCopy[index].operator == "="){
+            if(exprsCopy[index].unknownVars.length + exprsCopy[index + 1].unknownVars.length == 1){//this means that out of these two expression one is completely known and the other only has one unknown variable which we can say is known because it is apart of an equation where it is the only unknown
+              let uniqueRIDStringArray = GenerateUniqueRIDStringForVariables(`${exprsCopy[index].rawStr} + ${exprsCopy[index + 1].rawStr}`);
+              let unknownVariable;
+              if(exprsCopy[index].unknownVars.length == 0){//if this current expression is completely known then the unknown variable is in the other expression
+                unknownVariable = exprsCopy[index + 1].unknownVars[0];
+              }
+              else{
+                unknownVariable = exprsCopy[index].unknownVars[0];
+              }
+              //we are now going to try to solve for the one variable that is unknown in the other expression
+              let expression1 = ExactConversionFromLatexStringToNerdamerReadableString(exprsCopy[index].rawStr, uniqueRIDStringArray);
+              let expression2 = ExactConversionFromLatexStringToNerdamerReadableString(exprsCopy[index + 1].rawStr, uniqueRIDStringArray);
+              if(expression1 != null && expression2 != null){//the conversion from latex to nerdamer readable string was successful
+                SqrtLoop = 0;//resetting this global variable to 0 which makes sure that nerdamer doesn't go into a loop trying to solve for a variable
+                let unknownVariableRIDString = ReplaceVariablesWithUniqueRIDString(unknownVariable, uniqueRIDStringArray).replace(/(\(|\)|\s)/g,"");//removing parentheses on the ends and white space because if the rid variable is "_ertyuio" this function will return " (_ertyuio) "
+                //console.log(`${expression1} = ${expression2}, solved for: ${unknownVariableRIDString}`);
+                try{
+                  let solution = nerdamer(`${expression1} = ${expression2}`).solveFor(unknownVariableRIDString);
+                  //console.log("solution",solution.toString());
+                  if(solution.length > 0){//that means we found a solution
+                    //we are going to gather every non-zero solution but if all solution are zero then we will send the zerio as the solution
+                    let allNonZeroSolutions = solution.filter((s) => {return s.toString() != "0"});
+                    //console.log("allNonZeroSolutions", allNonZeroSolutions);
+                    let knownVariableValue;
+                    if(allNonZeroSolutions.length == 0){
+                      knownVariableValue = solution[0].toString();
+                    }
+                    else{
+                      knownVariableValue = allNonZeroSolutions[0].toString();//grab the first non zero solution
+                    }
+                    //now that we have solved for this variable, we need to see if we can calculate its actual value
+                    if(Object.keys(exprsCopy[index].variableValues.unknown).length + Object.keys(exprsCopy[index + 1].variableValues.unknown).length == 1){
+                      //this means that the only unknown variable value in these two expression set equal to each other is the variable we are trying to calculate its value
+                      //we now need to replace every UniqueRIDString with the value of the latex variable 
+                      let count = 0;
+                      let r;
+                      let allKnownVariableValues = Object.assign(exprsCopy[index].variableValues.known, exprsCopy[index + 1].variableValues.known);
+                      //console.log("allKnownVariableValues", allKnownVariableValues);
+                      //console.log("uniqueRIDStringArray",uniqueRIDStringArray);
+                      while(count < uniqueRIDStringArray.length){
+                        if(allKnownVariableValues[uniqueRIDStringArray[count].variable] != undefined){
+                          //console.log("uniqueRIDStringArray[count].ridString",uniqueRIDStringArray[count].ridString);
+                          r = new RegExp(uniqueRIDStringArray[count].ridString, 'g');
+                          knownVariableValue = knownVariableValue.replace(r, `(${allKnownVariableValues[uniqueRIDStringArray[count].variable]})`);
+                        }
+                        count++;
+                      }
+                      try{
+                        //making sure that anything we replaced this string with is 
+                        knownVariableValue = CleanLatexString(knownVariableValue,["multiplication"]);
+                        knownVariableValue = nerdamer.convertFromLaTeX(knownVariableValue).toString();
+                        //console.log("knownVariableValue", knownVariableValue);
+                        //once we have replaced all unique rid strings with there variable values we need to try to evaluate this string using mathjs because it only allows for simple numbers and arrays so if it throws an error then we don't have a simple number or array (vector)
+                        try{
+                          knownVariableValue = math.evaluate(knownVariableValue).toString();
+                        }catch(err2){
+                          knownVariableValue = undefined;
+                          //console.log(err2);
+                        }
+                      }
+                      catch(err){
+                        knownVariableValue = undefined;
+                        //console.log(err);
+  
+                      }
+                      
+                    }
+                    else{
+                      knownVariableValue = undefined;
+                    }
+  
+                    //now that we have tried to calcuate this known value regardless if we were succesful or failed we were able to solve for a unknown variable using all known values so we need to set the variable's "currenState" equal to "knonwn"
+                    let foundMatchAndChangedVariableValueOrState = false
+                    if(DefinedVariables[unknownVariable] != undefined){
+                      DefinedVariables[unknownVariable].currentState = "known";
+                      DefinedVariables[unknownVariable].value = (knownVariableValue) ? ConvertStringToScientificNotation(knownVariableValue) : undefined;
+                      foundMatchAndChangedVariableValueOrState = true;
+                    }
+                    else if(this.undefinedVars.undefined[unknownVariable] != undefined){
+                      this.undefinedVars.undefined[unknownVariable].currentState = "known";
+                      this.undefinedVars.undefined[unknownVariable].value = (knownVariableValue) ? ConvertStringToScientificNotation(knownVariableValue) : undefined;
+                      foundMatchAndChangedVariableValueOrState = true;
+                    }
+                    else if(this.undefinedVars.defined[unknownVariable] != undefined){
+                      this.undefinedVars.defined[unknownVariable].currentState = "known";
+                      this.undefinedVars.defined[unknownVariable].value = (knownVariableValue) ? ConvertStringToScientificNotation(knownVariableValue) : undefined;
+                      foundMatchAndChangedVariableValueOrState = true;
+                    }
+  
+                    if(foundMatchAndChangedVariableValueOrState){
+                      //because we changed values and were able to identify new known variables we need
+                      //call "UpdateKnownUnknownVariables" function which will parse the rawExpressionData from the first line with the new information we have put into the known unknown variables.
+                      //By passing in "false" this function wont reset the variables currentState values which is what we want because we want the information we have just found to persist. Otherwise we would get a loop
+                      this.UpdateKnownUnknownVariables(false);
+                      return;//after this function is done running it means it has already parsed all the lines starting from the top  so we just end right here
+                    }
+                  }
+                }
+                catch(err5){
+                  console.log("error");
+                  //console.log(err5);//something went wrong when trying to sovle variable
+                }
+                
+              }
+            }
+          }
+          index++;
+        }
+      }
     }
   }
 
@@ -472,32 +697,6 @@ function EditorLogger(){
     $(".log-static-latex").each(function(){
       MQ.StaticMath($(this)[0]).latex($(this).attr("latex"));
     });
-
-    /*
-    //we need to first clear all the messages from every mathfield and set them to the default state before we populate them with information and render
-    for (const [key, value] of Object.entries(MathFields)) {
-      MathFields[key].message = {
-        question: null,//is this variable a physics constant
-        warning: null,//variable undefined,
-        error: null, //units don't match
-      };
-
-      RenderMessageUI(key);//then render the change
-    }
-
-    //display warnings and errors in the editor lines
-    for(var i = 0; i < log.error.length; i++){
-      MathFields[log.error[i].mfID].message.error = {type: 1};
-      RenderMessageUI(log.error[i].mfID);//takes the messages for a specific math field and renders it
-    }
-
-    for(var i = 0; i < log.warning.length; i++){
-      MathFields[log.warning[i].mfID].message.warning = {
-        type: 1,
-        vars: log.warning[i].variables,
-      }
-      RenderMessageUI(log.warning[i].mfID);//takes the messages for a specific math field and renders it
-    }*/
 
     if(!opts.dontRenderMyVariablesCollection){
       //after generating errors and defined undefined and defined undefined variables we need to rerender my variable collection
