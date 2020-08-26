@@ -62,7 +62,7 @@ function RemoveSumsAndProdsFromLatexString(ls){
 function GetVariablesFromLatexString(ls){
   ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
   ls = RemoveDifferentialOperatorDFromLatexString(ls);
-  //ls = RemoveSumsAndProdsFromLatexString(ls);//we will implement this line once we have more support for setting and defining parameters from summations
+  ls = RemoveSumsAndProdsFromLatexString(ls);//we will implement this line once we have more support for setting and defining parameters from summations
   let vars = [];
   let str = "";
   let answer;

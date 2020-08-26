@@ -76,7 +76,7 @@ function IsSignleUndefinedVariable(ls){
 
 function ConvertStringToScientificNotation(str){
   let scientificNotation = Number(str).toExponential().split("e");
-  scientificNotation[0] = Number(scientificNotation[0]).toFixed(6).toString()
+  scientificNotation[0] = Number(scientificNotation[0]).toFixed(PrecisionSigFigs).toString()
   if(scientificNotation[1] == "+0"){
     scientificNotation[1] = "";
   }else{
@@ -1412,6 +1412,7 @@ function SimplifyFunctionDefinitionToJustFunctionVariable(ls){
 
 }
 
+
 function AreIntegralBoundsFormattedProperly(expressionArray){
   let c = 0;
   let ls;
@@ -1601,6 +1602,14 @@ function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
           }
         }
       }
+
+      if(expressionArray[i].operator == "=" && symbolicallyEqual != "no"){
+        //this means that this line is either symbolicallyEqual or it couldn't be determined if it was symbolicallyEqual
+        if(EL.rawExpressionDataForDeeperCheck[lineNumber] == undefined){
+          EL.rawExpressionDataForDeeperCheck[lineNumber] = [];
+        }
+        EL.rawExpressionDataForDeeperCheck[lineNumber].push([JSON.parse(JSON.stringify(expressionArray[i])), JSON.parse(JSON.stringify(expressionArray[i+1]))]);
+      }
       
     }
   }
@@ -1694,7 +1703,8 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
       //an example would be log10(25)/log10(5) = 2 but when calculate the leftside gives a very long decimal that is approaching 2 so we use the function "toFixed" to round it to the 12th decimal place
       let num1 = math.evaluate(expression1).toExponential().split("e");
       let num2 = math.evaluate(expression2).toExponential().split("e");
-      if(!nerdamer(`${Number(num1[0]).toFixed(10)}e${num1[1]}`).eq(`${Number(num2[0]).toFixed(10)}e${num2[1]}`)){
+      //we are going to the 6th significant figure because that is what the variable value goes up to everything else is truncated
+      if(!nerdamer(`${Number(num1[0]).toFixed(PrecisionSigFigs)}e${num1[1]}`).eq(`${Number(num2[0]).toFixed(PrecisionSigFigs)}e${num2[1]}`)){
         //if the two expression are not equal then we need to throw an error: expression may be symbolically equal but when values are plug in for the variables they are not equal
         //console.log("error: expression may be symbolically equal but when values are plug in for the variables they are not equal");
         return "error";
@@ -1888,96 +1898,132 @@ function FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls,
     foundMatch = false;
     delta = 1;
     s = ls.substring(i);
-    if(s.indexOf("\\int  \\left(") == 0){//checking for
-      i2 = FindIndexOfClosingParenthesis(s.substring("\\int  \\left(".length));
-      if(i2 != null){
-        i2 += "\\int  \\left(".length;
-        delta = i2 + 1;
-        let stringInsideIntegral = s.substring("\\int  \\left(".length, i2 - "\\right".length);
-        //console.log(stringInsideIntegral);
-        let newString = EvaluateStringInsideIntegralAndReturnNerdamerString(stringInsideIntegral, uniqueRIDStringArray, lineNumber, mfID);
-        if(newString != null){
-          foundMatch = true;
-          newLs += `(${newString})`;
-        }
-        else{
-          console.log("couldn't evaluate string inside integral");
-          return ls;
-        }
-      }
-      else{
-        //if we can't figure out where the parentheses is then a latex inegral expression won't be parsed and for this reason there is not reason to continue parsing so we will just return the original string we astarted with
-        console.log("trouble finding closing paraenthesis");
-        return ls;
-      }
-    }
-
-    if(!foundMatch && s.indexOf("\\int_{") == 0){
-      let lowerbound;
-      let upperbound;
-      //we need to check if there is a definite integral
-      i2 = FindIndexOfClosingBracket(s.substring("\\int_{".length));
-      if(i2 != null){
-        i2 += "\\int_{".length;
-        lowerbound = s.substring("\\int_{".length, i2);
-        //console.log("substring:" + s.substring(i2+1));
-        if(s.substring(i2+1).indexOf("^{") == 0){//checking if there is an uppeerbound to this integral
-          i3 = FindIndexOfClosingBracket(s.substring(i2 + 3));//adding 3 because if the integral looks like this "\\int_{...}^{..}" you need to add 3 to get inside the next set of brackets
-          if(i3 != null){
-            i3 += i2 + 3;//this accounts for the shift created by using a substring. i3 holds the index of the second closing bracket in a defined integral
-            upperbound = s.substring(i2 + 3, i3);
-            if(s.substring(i3 + 1).indexOf("\\left(") == 0){//we need to have a opening parathensis
-              //console.log("lowerbound", lowerbound);
-              //console.log("upperbound", upperbound);
-              lowerbound = ExactConversionFromLatexStringToNerdamerReadableString(lowerbound, uniqueRIDStringArray, lineNumber, mfID);
-              upperbound = ExactConversionFromLatexStringToNerdamerReadableString(upperbound, uniqueRIDStringArray, lineNumber, mfID);
-              if(lowerbound != null && upperbound != null){
-                i4 = FindIndexOfClosingParenthesis(s.substring(i3 + 1 + "\\left(".length));
-                if(i4 != null){
-                  i4 += i3 + 1 + "\\left(".length;
-                  delta = i4 + 1;
-                  let stringInsideDefiniteIntegral = s.substring(i3 + 1 + "\\left(".length, i4 - "\\right".length);
-                  //console.log("stringInsideDefiniteIntegral:" + stringInsideDefiniteIntegral);
-                  let newString = EvaluateStringInsideDefiniteIntegralAndReturnNerdamerString(stringInsideDefiniteIntegral, uniqueRIDStringArray, lowerbound, upperbound, lineNumber, mfID);
-                  if(newString != null){
-                    foundMatch = true;
-                    newLs += `(${newString})`;
-                  }
-                  else{
-                    console.log("couldn't evaluate string inside integral");
-                    return ls;
-                  }
-                }
-                else{
-                  console.log("trouble finding closing paraenthesis");
-                  return ls;
-                }
-              }
-              else{
-                return ls;
-              }
-
-
-            }
-            else{
-              return ls;
-            }
+    if(s.indexOf("\\int") == 0){
+      if(s.indexOf("\\int  \\left(") == 0){//checking for
+        i2 = FindIndexOfClosingParenthesis(s.substring("\\int  \\left(".length));
+        if(i2 != null){
+          i2 += "\\int  \\left(".length;
+          delta = i2 + 1;
+          let stringInsideIntegral = s.substring("\\int  \\left(".length, i2 - "\\right".length);
+          //console.log(stringInsideIntegral);
+          let newString = EvaluateStringInsideIntegralAndReturnNerdamerString(stringInsideIntegral, uniqueRIDStringArray, lineNumber, mfID);
+          if(newString != null){
+            foundMatch = true;
+            newLs += `(${newString})`;
           }
           else{
-            console.log("trouble finding closing bracket");
+            console.log("couldn't evaluate string inside integral");
             return ls;
           }
         }
         else{
-          console.log("couldn't find upperbound");
+          //if we can't figure out where the parentheses is then a latex inegral expression won't be parsed and for this reason there is not reason to continue parsing so we will just return the original string we astarted with
+          console.log("trouble finding closing paraenthesis");
           return ls;
         }
       }
-      else{
-        console.log("trouble finding closing bracket");
-        return ls;
+  
+      if(!foundMatch && s.indexOf("\\int_{") == 0){
+        let lowerbound;
+        let upperbound;
+        //we need to check if there is a definite integral
+        i2 = FindIndexOfClosingBracket(s.substring("\\int_{".length));
+        if(i2 != null){
+          i2 += "\\int_{".length;
+          lowerbound = s.substring("\\int_{".length, i2);
+          //console.log("substring:" + s.substring(i2+1));
+          if(s.substring(i2+1).indexOf("^{") == 0){//checking if there is an uppeerbound to this integral
+            i3 = FindIndexOfClosingBracket(s.substring(i2 + 3));//adding 3 because if the integral looks like this "\\int_{...}^{..}" you need to add 3 to get inside the next set of brackets
+            if(i3 != null){
+              i3 += i2 + 3;//this accounts for the shift created by using a substring. i3 holds the index of the second closing bracket in a defined integral
+              upperbound = s.substring(i2 + 3, i3);
+              if(s.substring(i3 + 1).indexOf("\\left(") == 0){//we need to have a opening parathensis
+                //console.log("lowerbound", lowerbound);
+                //console.log("upperbound", upperbound);
+                lowerbound = ExactConversionFromLatexStringToNerdamerReadableString(lowerbound, uniqueRIDStringArray, lineNumber, mfID);
+                upperbound = ExactConversionFromLatexStringToNerdamerReadableString(upperbound, uniqueRIDStringArray, lineNumber, mfID);
+                if(lowerbound != null && upperbound != null){
+                  i4 = FindIndexOfClosingParenthesis(s.substring(i3 + 1 + "\\left(".length));
+                  if(i4 != null){
+                    i4 += i3 + 1 + "\\left(".length;
+                    delta = i4 + 1;
+                    let stringInsideDefiniteIntegral = s.substring(i3 + 1 + "\\left(".length, i4 - "\\right".length);
+                    //console.log("stringInsideDefiniteIntegral:" + stringInsideDefiniteIntegral);
+                    let newString = EvaluateStringInsideDefiniteIntegralAndReturnNerdamerString(stringInsideDefiniteIntegral, uniqueRIDStringArray, lowerbound, upperbound, lineNumber, mfID);
+                    if(newString != null){
+                      foundMatch = true;
+                      newLs += `(${newString})`;
+                    }
+                    else{
+                      console.log("couldn't evaluate string inside integral");
+                      return ls;
+                    }
+                  }
+                  else{
+                    console.log("trouble finding closing paraenthesis");
+                    return ls;
+                  }
+                }
+                else{
+                  return ls;
+                }
+  
+  
+              }
+              else{
+                //the integral we were parsing was not formatted properly so we need to add an error to its MathField if there isnt one already
+                let errorAlreadyExists = false;
+                for(let error of MathFields[mfID].log.error){
+                  if(error.type == "Integral not formatted correctly for editor"){
+                    errorAlreadyExists = true;
+                    break;
+                  }
+                }
+                if(!errorAlreadyExists){
+                  MathFields[mfID].log.error.push({
+                    error: EL.createLoggerErrorFromMathJsError("Integral not formatted correctly for editor"),
+                    latexExpressions: ["\\int_{x_1}^{x_2} xdx \\rightarrow \\int_{x_1}^{x_2}\\left(xdx\\right)"],
+                  });
+                }
+                
+                return ls;
+              }
+            }
+            else{
+              console.log("trouble finding closing bracket");
+              return ls;
+            }
+          }
+          else{
+            console.log("couldn't find upperbound");
+            return ls;
+          }
+        }
+        else{
+          console.log("trouble finding closing bracket");
+          return ls;
+        }
+      }
+      if(!foundMatch){
+        //if we havent found a match and we know that the character at this index is "\\int" then we known that the "\\int" doesnt have a parentheses after it so we need to throw an error 
+        let errorAlreadyExists = false;
+        for(let error of MathFields[mfID].log.error){
+          if(error.type == "Integral not formatted correctly for editor"){
+            errorAlreadyExists = true;
+            break;
+          }
+        }
+        if(!errorAlreadyExists){
+          MathFields[mfID].log.error.push({
+            error: EL.createLoggerErrorFromMathJsError("Integral not formatted correctly for editor"),
+            latexExpressions: ["\\int_{x_1}^{x_2} xdx \\rightarrow \\int_{x_1}^{x_2}\\left(xdx\\right)"],
+          });
+        }
+
+        return ls;//we if we found an int we couldn't convert there is no reason to keep going and parsing the string
       }
     }
+    
 
     if(!foundMatch && s[0] == "\\"){
       //it is possible that it is an operator or a greek letter
@@ -2199,7 +2245,7 @@ function ExactConversionFromLatexStringToNerdamerReadableString(ls, uniqueRIDStr
   if(ls == null){return null;}//a derivative is formatted incorrectly so we can't check if expressions are equal
   ls = FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls, uniqueRIDStringArray, lineNumber, mfID);
   ls = FindAndConvertLatexLogsToNerdamerReadableStrings(ls);
-  ls = FindAndConvertLatexSumsAndProductsToNerdamerReadableStrings(ls);
+  ls = FindAndConvertLatexSumsAndProductsToNerdamerReadableStrings(ls, mfID);
   //we have this if statement because if after we are done parsing the latex into nerdamer is it still has these pieces of text in it then we cant go further because nerdamer doesn't know how to handle these texts properly
   if(ls.indexOf("\\int") == -1 && ls.indexOf("\\prod") == -1 && ls.indexOf("\\sum") == -1 && ls.indexOf("\\nabla") == -1 && ls.indexOf("[") == -1 && ls.indexOf("]") == -1 && ls.indexOf("\\ln") == -1 && ls.indexOf("\\log") == -1){
     ls = ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray, true);//passing true as the last parameter tells this function that there are nerdamer functions in this string so don't try to replace the letters in the function names
@@ -2230,27 +2276,19 @@ function GetSummationBound(bound, ls){
     let a = ls.split("=");
     if(a.length == 2){
       if(Number.isInteger(Number(a[1]))){
-        let numberOfVariables = 0;
-        let v;
         let foundUnallowedCharacter = false;
-        for(var j = 0; j < ListOfOperators.length; j++){
-          if(a[0].indexOf(ListOfOperators[j]) != -1){
+        let unallowedCharacters = ListOfOperators.concat(["^"]);
+        for(var j = 0; j < unallowedCharacters.length; j++){
+          if(a[0].indexOf(unallowedCharacters[j]) != -1){
             foundUnallowedCharacter = true;
             break;
           }
         }
         if(!foundUnallowedCharacter){
-          let allVariables = Object.keys(DefinedVariables).concat(Object.keys(PreDefinedVariables)).concat(Object.keys(EL.undefinedVars.undefined)).concat(Object.keys(EL.undefinedVars.defined));
-          //console.log("allvariables", allVariables);
-          for(var i = 0; i < allVariables.length; i++){
-            if(a[0].indexOf(allVariables[i]) != -1){
-              numberOfVariables++;
-              v = allVariables[i];
-            }
-          }
-          if(numberOfVariables == 1){
+          let v = GetVariablesFromLatexString(a[0]);
+          if(v.length == 1){
             obj = {
-              variable: v,
+              variable: v[0],
               lowerbound: Number(a[1]),
             }
           }
@@ -2273,12 +2311,12 @@ function GetSummationBound(bound, ls){
   return obj;
 }
 
-function FindAndConvertLatexSumsAndProductsToNerdamerReadableStrings(ls){
+function FindAndConvertLatexSumsAndProductsToNerdamerReadableStrings(ls, mfID){
   let i1 = 0;
   let i2 = 0;
   let i3 = 0;
   let i4 = 0;
-  for(var operation of [["sum","sum"], ["prod","product"]]){
+  for(var operation of [["sum","sum","Summation"], ["prod","product","Product"]]){
     while(ls.indexOf(`\\${operation[0]}_{`) != -1){
 
       let params = {
@@ -2314,11 +2352,25 @@ function FindAndConvertLatexSumsAndProductsToNerdamerReadableStrings(ls){
                     break;
                   }
                 }else{
-                  console.log("summation doesn't have parentheses after it");
+                  //a summation or product is not formatted properly
+                  let errorAlreadyExists = false;
+                  for(let error of MathFields[mfID].log.error){
+                    if(error.type == `${operation[2]} not formatted correctly for editor`){
+                      errorAlreadyExists = true;
+                      break;
+                    }
+                  }
+                  if(!errorAlreadyExists){
+                    MathFields[mfID].log.error.push({
+                      error: EL.createLoggerErrorFromMathJsError(`${operation[2]} not formatted correctly for editor`),
+                      latexExpressions: [`\\${operation[0]}_{n=1}^{2} n+1 \\rightarrow \\${operation[0]}_{n=1}^{2}\\left( n+1\\right)`],
+                    });
+                  }
+                  //console.log("summation doesn't have parentheses after it");
                   break;
                 }
               }else{
-                console.log("upper bound not formatted properly");
+                //console.log("upper bound not formatted properly");
                 break;
               }
             }else{
@@ -2425,8 +2477,6 @@ function ReturnDefiniteIntegralExpressionAndOtherExpression(dividedString, diffe
     }
     i++;
   }
-
-  console.log(`defint(${expression.integral},${lowerbound},${upperbound},${variableRidString})`);
 
   return {
     integral: nerdamer(`defint(${expression.integral},${lowerbound},${upperbound},${variableRidString})`).toString(),//now that we have gathered the information we need for the integral, we need to format the information properly so nerdamer can understand
