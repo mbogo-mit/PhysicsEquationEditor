@@ -20,11 +20,32 @@ app.get('/', (req, res, next)=>{
   res.render('pages/index');
 });
 
+function RID(){
+  let c = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let rid = "";
+  for(var i = 0; i < 10; i++){
+    let r = Math.random() * c.length;
+    rid += c.substring(r, r+1);
+  }
+
+  return rid;
+}
+
+
 ListOfEquations = {
   mechanics: [
     {
       name: "Velocity",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [
+          {
+            iframe: "",
+            title: "",
+            thumbnail: "",
+          }
+        ],
+      },
       equations: [
         "\\bar{v}=\\frac{\\Delta s}{\\Delta t}",
         "\\vec{v}= \\frac{d\\vec{s}}{dt}"
@@ -36,7 +57,10 @@ ListOfEquations = {
     },
     {
       name: "Acceleration",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{a}= \\frac{\\Delta\\vec{v}}{\\Delta t}",
         "\\vec{a}= \\frac{d\\vec{v}}{dt}"
@@ -48,7 +72,11 @@ ListOfEquations = {
     },
     {
       name: "Linear Kinematics",
-      info: {},
+      infoId: RID(),
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "v=v_{0}+at",
         "s=s_{0}+v_{0}t+\\frac{1}{2}at^{2}",
@@ -64,7 +92,10 @@ ListOfEquations = {
     },
     {
       name: "Newton's 2nd Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\sum \\vec{F} = m\\vec{a}",
         "\\sum \\vec{F} = \\frac{d\\vec{p}}{dt}"
@@ -76,7 +107,10 @@ ListOfEquations = {
     },
     {
       name: "Weight",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{W}=mg\\hat{y}"
       ],
@@ -86,7 +120,10 @@ ListOfEquations = {
     },
     {
       name: "Dry Friction",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "f_{s}\\leq \\mu_{s}N",
         "f_{k}\\leq \\mu_{k}N"
@@ -98,7 +135,10 @@ ListOfEquations = {
     },
     {
       name: "Centripetal Accel.",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "a_{c}=\\frac{v^{2}}{r}",
         "\\vec{a_{c}}=-\\omega^{2}\\vec{r}"
@@ -110,7 +150,10 @@ ListOfEquations = {
     },
     {
       name: "Momentum",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{p}=m\\vec{v}"
       ],
@@ -120,7 +163,10 @@ ListOfEquations = {
     },
     {
       name: "Impulse",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{J}=\\bar{F}\\Delta t",
         "\\vec{J}=\\int\\left(\\vec{F}dt\\right)"
@@ -132,7 +178,10 @@ ListOfEquations = {
     },
     {
       name: "Impulse-momentum",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{F}\\Delta t=m\\Delta\\vec{v}",
         "\\int\\left(\\vec{F}dt\\right)=\\Delta\\vec{p}"
@@ -144,7 +193,10 @@ ListOfEquations = {
     },
     {
       name: "Work",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "W=\\bar{F}\\Delta s \\cos\\left(\\theta\\right)",
         "W=\\int\\left(\\vec{F}\\cdot d\\vec{s}\\right)"
@@ -156,7 +208,10 @@ ListOfEquations = {
     },
     {
       name: "Work-Energy",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{F}\\Delta s\\cos\\left(\\theta\\right)=\\Delta E",
         "\\int\\left(\\vec{F}\\cdot d\\vec{s}\\right)=\\Delta E"
@@ -168,7 +223,10 @@ ListOfEquations = {
     },
     {
       name: "Kinetic Energy",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "K=\\frac{1}{2}mv^{2}",
         "K=\\frac{p^{2}}{2m}"
@@ -180,7 +238,10 @@ ListOfEquations = {
     },
     {
       name: "General P.E.",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\Delta U=-\\int\\left(\\vec{F}\\cdot d\\vec{s}\\right)",
         "F=-\\nabla\\left(U\\right)"
@@ -192,7 +253,10 @@ ListOfEquations = {
     },
     {
       name: "Gravitational P.E.",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\Delta U_{g}=mg\\Delta h"
       ],
@@ -202,7 +266,10 @@ ListOfEquations = {
     },
     {
       name: "Efficiency",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\eta=\\frac{W_{out}}{E_{in}}"
       ],
@@ -212,7 +279,10 @@ ListOfEquations = {
     },
     {
       name: "Power",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{P}=\\frac{\\Delta W}{\\Delta t}",
         "P=\\frac{dW}{dt}"
@@ -224,7 +294,10 @@ ListOfEquations = {
     },
     {
       name: "Power-Velocity",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "P=Fv\\cos\\left(\\theta\\right)",
         "P=\\vec{F}\\cdot\\vec{v}"
@@ -236,7 +309,10 @@ ListOfEquations = {
     },
     {
       name: "Angular Velocity",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{\\omega}=\\frac{\\Delta\\theta}{\\Delta t}",
         "\\omega=\\frac{d\\theta}{dt}",
@@ -250,7 +326,10 @@ ListOfEquations = {
     },
     {
       name: "Angular Acceleration",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{\\alpha}=\\frac{\\Delta\\omega}{\\Delta t}",
         "\\vec{\\alpha}=\\frac{d\\omega}{dt}",
@@ -264,7 +343,10 @@ ListOfEquations = {
     },
     {
       name: "Rotational Kinematics",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\omega=\\omega_{0}+\\alpha t",
         "\\theta=\\theta_{0}+\\omega_{0}t+\\frac{1}{2}\\alpha t^{2}",
@@ -280,7 +362,10 @@ ListOfEquations = {
     },
     {
       name: "Torque",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\tau=rF\\sin\\left(\\theta\\right)",
         "\\vec{\\tau}=\\vec{r}\\times\\vec{F}"
@@ -292,7 +377,10 @@ ListOfEquations = {
     },
     {
       name: "2nd Law Of Rotation",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\sum\\vec{\\tau}=I\\vec{\\alpha}",
         "\\sum\\vec{\\tau}=\\frac{d\\vec{L}}{dt}"
@@ -304,7 +392,10 @@ ListOfEquations = {
     },
     {
       name: "Moment of Inertia",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "I=\\sum mr^{2}",
         "I=\\int\\left(r^{2}dm\\right)"
@@ -316,7 +407,10 @@ ListOfEquations = {
     },
     {
       name: "Rotational Work",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "W=\\bar{\\tau}\\theta",
         "W=\\int\\left(\\tau\\cdot d\\theta\\right)"
@@ -328,7 +422,10 @@ ListOfEquations = {
     },
     {
       name: "Rotational Power",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "P=\\tau\\omega\\cos\\left(\\theta\\right)",
         "P=\\vec{\\tau}\\cdot\\vec{\\omega}"
@@ -340,7 +437,10 @@ ListOfEquations = {
     },
     {
       name: "Rotational K.E.",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "K=\\frac{1}{2}I\\omega^{2}"
       ],
@@ -350,7 +450,10 @@ ListOfEquations = {
     },
     {
       name: "Angular Momentum",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "L=mrv\\sin\\left(\\theta\\right)",
         "\\vec{L}=\\vec{r}\\times\\vec{p}",
@@ -364,7 +467,10 @@ ListOfEquations = {
     },
     {
       name: "Angular Impulse",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{H}=\\vec{\\tau}\\Delta t",
         "\\vec{H}=\\int\\left(\\tau dt\\right)"
@@ -376,7 +482,10 @@ ListOfEquations = {
     },
     {
       name: "Universal Gravitation",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{F_{g}}=-\\frac{Gm_{1}m_{2}}{r^{2}}\\hat{r}",
       ],
@@ -386,7 +495,10 @@ ListOfEquations = {
     },
     {
       name: "Gravitational Field",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{g}=-\\frac{Gm}{r^{2}}\\hat{r}",
       ],
@@ -396,7 +508,10 @@ ListOfEquations = {
     },
     {
       name: "Gravitational P.E.",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "U_{g}=-\\frac{Gm_{1}m_{2}}{r}",
       ],
@@ -406,7 +521,10 @@ ListOfEquations = {
     },
     {
       name: "Gravitational Potential",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "V_{g}=-\\frac{Gm}{r}",
       ],
@@ -416,7 +534,10 @@ ListOfEquations = {
     },
     {
       name: "Orbital Speed",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "v=\\sqrt{\\frac{Gm}{r}}",
       ],
@@ -426,7 +547,10 @@ ListOfEquations = {
     },
     {
       name: "Escape Speed",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "v=\\sqrt{\\frac{2Gm}{r}}",
       ],
@@ -436,7 +560,10 @@ ListOfEquations = {
     },
     {
       name: "Hooke's Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{F}=-k\\Delta x",
       ],
@@ -446,7 +573,10 @@ ListOfEquations = {
     },
     {
       name: "Spring P.E.",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "U_{s}=\\frac{1}{2}k\\Delta x^{2}",
       ],
@@ -456,7 +586,10 @@ ListOfEquations = {
     },
     {
       name: "S.H.O.",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "T=2\\pi\\sqrt{\\frac{m}{k}}",
       ],
@@ -466,7 +599,10 @@ ListOfEquations = {
     },
     {
       name: "Simple Pendulum",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "T=2\\pi\\sqrt{\\frac{l}{g}}",
       ],
@@ -476,7 +612,10 @@ ListOfEquations = {
     },
     {
       name: "Frequency",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "f=\\frac{1}{T}",
       ],
@@ -486,7 +625,10 @@ ListOfEquations = {
     },
     {
       name: "Angular Frequency",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\omega=2\\pi f",
       ],
@@ -496,7 +638,10 @@ ListOfEquations = {
     },
     {
       name: "Density",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\rho=\\frac{m}{V}",
       ],
@@ -506,7 +651,10 @@ ListOfEquations = {
     },
     {
       name: "Pressure",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "P=\\frac{F}{A}",
       ],
@@ -516,7 +664,10 @@ ListOfEquations = {
     },
     {
       name: "Pressure in a Fluid",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "P=P_{0}+\\rho gh",
       ],
@@ -526,7 +677,10 @@ ListOfEquations = {
     },
     {
       name: "Buoyancy",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "B=\\rho g V_{displaced}",
       ],
@@ -536,7 +690,10 @@ ListOfEquations = {
     },
     {
       name: "Mass Flow Rate",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{q_{m}}=\\frac{\\Delta m}{\\Delta t}",
         "q_{m}=\\frac{dm}{dt}"
@@ -548,7 +705,10 @@ ListOfEquations = {
     },
     {
       name: "Volume Flow Rate",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{q_{v}}=\\frac{\\Delta V}{\\Delta t}",
         "q_{v}=\\frac{dV}{dt}"
@@ -560,7 +720,10 @@ ListOfEquations = {
     },
     {
       name: "Mass Continuity",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\rho_{1}A_{1}v_{1}=\\rho_{2}A_{2}v_{2}",
       ],
@@ -570,7 +733,10 @@ ListOfEquations = {
     },
     {
       name: "Volume Continuity",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "A_{1}v_{1}=A_{2}v_{2}",
       ],
@@ -580,7 +746,10 @@ ListOfEquations = {
     },
     {
       name: "Bernoulli's Equation",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "P_{1}+\\rho gy_{1}+\\frac{1}{2}\\rho v_{1}^{2}=P_{2}+\\rho gy_{2}+\\frac{1}{2}\\rho v_{2}^{2}",
       ],
@@ -590,7 +759,10 @@ ListOfEquations = {
     },
     {
       name: "Dynamic Viscosity",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\frac{\\bar{F}}{A}=\\eta\\frac{\\Delta v_{x}}{\\Delta z}",
         "\\frac{F}{A}=\\eta\\frac{dv_{x}}{dz}"
@@ -602,7 +774,10 @@ ListOfEquations = {
     },
     {
       name: "Kinematic Viscosity",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\nu=\\frac{\\eta}{\\rho}",
       ],
@@ -612,7 +787,10 @@ ListOfEquations = {
     },
     {
       name: "Drag",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "F_{drag}=\\frac{1}{2}\\rho CAv^{2}",
       ],
@@ -622,7 +800,10 @@ ListOfEquations = {
     },
     {
       name: "Mach Number",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "M=\\frac{v}{c}",
       ],
@@ -632,7 +813,10 @@ ListOfEquations = {
     },
     {
       name: "Reynolds Number",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "R_e=\\frac{\\rho vD}{\\eta}",
       ],
@@ -642,7 +826,10 @@ ListOfEquations = {
     },
     {
       name: "Froude Number",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "F_r=\\frac{v}{\\sqrt{gl}}",
       ],
@@ -652,7 +839,10 @@ ListOfEquations = {
     },
     {
       name: "Young's Modulus",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\frac{F}{A}=E\\frac{\\Delta l}{l_{0}}",
         "\\sigma=E\\epsilon"
@@ -664,7 +854,10 @@ ListOfEquations = {
     },
     {
       name: "Shear Modulus",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\frac{F}{A}=G\\frac{\\Delta x}{y}",
         "\\tau=G\\gamma"
@@ -676,7 +869,10 @@ ListOfEquations = {
     },
     {
       name: "Bulk Modulus",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\frac{F}{A}=B\\frac{\\Delta V}{V_{0}}",
         "P=B\\theta"
@@ -688,7 +884,10 @@ ListOfEquations = {
     },
     {
       name: "Surface Tension",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\gamma=\\frac{F}{l}",
       ],
@@ -700,7 +899,10 @@ ListOfEquations = {
   thermal: [
     {
       name: "Solid Expansion",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\Delta l=\\alpha l_{0}\\Delta T",
         "\\Delta A=2\\alpha A_{0}\\Delta T",
@@ -714,7 +916,10 @@ ListOfEquations = {
     },
     {
       name: "Liquid Expansion",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\Delta V=\\beta V_{0}\\Delta T",
       ],
@@ -724,7 +929,10 @@ ListOfEquations = {
     },
     {
       name: "Sensible Heat",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "Q=mc\\Delta T",
       ],
@@ -734,7 +942,10 @@ ListOfEquations = {
     },
     {
       name: "Latent Heat",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "Q=mL",
       ],
@@ -744,7 +955,10 @@ ListOfEquations = {
     },
     {
       name: "Ideal Gas Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "PV=nRT",
       ],
@@ -754,7 +968,10 @@ ListOfEquations = {
     },
     {
       name: "Molecular Constants",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "nR=Nk_b",
       ],
@@ -764,7 +981,10 @@ ListOfEquations = {
     },
     {
       name: "Maxwell-Boltzmann",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "p\\left(v\\right)=\\frac{4v^{2}}{\\sqrt{\\pi}}\\left(\\frac{m}{2k_bT}\\right)^{\\frac{3}{2}}e^{\\frac{-mv^{2}}{2k_bT}}",
       ],
@@ -774,7 +994,10 @@ ListOfEquations = {
     },
     {
       name: "Molecular K.E.",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{K}=\\frac{3}{2}k_bT",
       ],
@@ -784,7 +1007,10 @@ ListOfEquations = {
     },
     {
       name: "Molecular Speed",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "v_{p}=\\sqrt{\\frac{2k_bT}{m}}",
         "\\bar{v}=\\sqrt{\\frac{8k_bT}{\\pi m}}",
@@ -798,7 +1024,10 @@ ListOfEquations = {
     },
     {
       name: "Heat Flow Rate",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{P}=\\frac{\\Delta Q}{\\Delta t}",
         "P=\\frac{dQ}{dt}"
@@ -810,7 +1039,10 @@ ListOfEquations = {
     },
     {
       name: "Thermal Conduction",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "P=\\frac{\\kappa A\\Delta T}{l}",
       ],
@@ -820,7 +1052,10 @@ ListOfEquations = {
     },
     {
       name: "Stefan-Boltzmann Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "P=\\epsilon\\sigma A\\left(T^{4}-T_{0}^{4}\\right)",
       ],
@@ -830,7 +1065,10 @@ ListOfEquations = {
     },
     {
       name: "Displacement Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\lambda_{max}=\\frac{b}{T}",
       ],
@@ -840,7 +1078,10 @@ ListOfEquations = {
     },
     {
       name: "Internal Energy",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\Delta U=\\frac{3}{2}nR\\Delta T",
         "\\Delta U=\\frac{3}{2}Nk_b\\Delta T"
@@ -852,7 +1093,10 @@ ListOfEquations = {
     },
     {
       name: "Thermodynamic Work",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "W=-\\int\\left(PdV\\right)",
       ],
@@ -862,7 +1106,10 @@ ListOfEquations = {
     },
     {
       name: "1st Law Of Thermo.",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\Delta U=Q+W",
       ],
@@ -872,7 +1119,10 @@ ListOfEquations = {
     },
     {
       name: "Entropy",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\Delta S=\\frac{\\Delta Q}{T}",
         "S=k_blog\\left(w\\right)"
@@ -884,7 +1134,10 @@ ListOfEquations = {
     },
     {
       name: "Efficiency",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\eta_{real}=1-\\frac{Q_C}{Q_H}",
         "\\eta_{ideal}=1-\\frac{T_{C}}{T_{H}}"
@@ -898,7 +1151,10 @@ ListOfEquations = {
   waveOptics: [
     {
       name: "Periodic Waves",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "v=f\\lambda",
         "y\\left(x,t\\right)=A\\sin\\left(2\\pi\\left(ft-\\frac{x}{\\lambda}+\\phi\\right)\\right)"
@@ -910,7 +1166,10 @@ ListOfEquations = {
     },
     {
       name: "Frequency",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "f=\\frac{1}{T}",
       ],
@@ -920,7 +1179,10 @@ ListOfEquations = {
     },
     {
       name: "Beat Frequency",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "f_{beat}=f_{high}-f_{low}",
       ],
@@ -930,7 +1192,10 @@ ListOfEquations = {
     },
     {
       name: "Intensity",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "I=\\frac{\\bar{P}}{A}",
       ],
@@ -940,7 +1205,10 @@ ListOfEquations = {
     },
     {
       name: "Intensity Level",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "L_{I}=10 log\\left(\\frac{I}{I_{0}}\\right)",
       ],
@@ -950,7 +1218,10 @@ ListOfEquations = {
     },
     {
       name: "Pressure Level",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "L_{p}=20 log\\left(\\frac{\\Delta P}{\\Delta P_{0}}\\right)",
       ],
@@ -960,7 +1231,10 @@ ListOfEquations = {
     },
     {
       name: "Doppler Effect",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\frac{f_{0}}{f_{s}}=\\frac{\\lambda_{s}}{\\lambda_{0}}",
         "\\frac{f_{0}}{f_{s}}=\\frac{c\\pm v_{0}}{c\\mp v_{s}}",
@@ -976,7 +1250,10 @@ ListOfEquations = {
     },
     {
       name: "Mach Angle",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\sin\\left(\\mu\\right)=\\frac{c}{v}",
       ],
@@ -986,7 +1263,10 @@ ListOfEquations = {
     },
     {
       name: "Cerenkov Angle",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\cos\\left(\\theta\\right)=\\frac{c}{nv}",
       ],
@@ -996,7 +1276,10 @@ ListOfEquations = {
     },
     {
       name: "Interference Fringes",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "n\\lambda=d\\sin\\left(\\theta\\right)",
         "\\frac{n\\lambda}{d}\\approx\\frac{x}{l}"
@@ -1008,7 +1291,10 @@ ListOfEquations = {
     },
     {
       name: "Index Of Refraction",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "n=\\frac{c}{v}",
       ],
@@ -1018,7 +1304,10 @@ ListOfEquations = {
     },
     {
       name: "Snell's Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "n_{1}\\sin\\left(\\theta_{1}\\right)=n_{2}\\sin\\left(\\theta_{2}\\right)",
       ],
@@ -1028,7 +1317,10 @@ ListOfEquations = {
     },
     {
       name: "Critical Angle",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\sin\\left(\\theta_c\\right)=\\frac{n_{2}}{n_{1}}",
       ],
@@ -1038,7 +1330,10 @@ ListOfEquations = {
     },
     {
       name: "Image Location",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\frac{1}{d_{focal}}=\\frac{1}{d_{0}}+\\frac{1}{d_{1}}",
       ],
@@ -1048,7 +1343,10 @@ ListOfEquations = {
     },
     {
       name: "Image Size",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "M=\\frac{h_{i}}{h_{0}}=\\frac{d_{i}}{d_{0}}",
       ],
@@ -1058,7 +1356,10 @@ ListOfEquations = {
     },
     {
       name: "Spherical Mirrors",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "r_{focal}\\approx\\frac{r}{2}",
       ],
@@ -1070,7 +1371,10 @@ ListOfEquations = {
   em: [
     {
       name: "Coulomb's Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "F=k\\frac{q_{1}q_{2}}{r^{2}}",
         "\\vec{F}=\\frac{1}{4\\pi\\epsilon_{0}}\\frac{q_{1}q_{2}}{r^{2}}\\hat{r}"
@@ -1082,7 +1386,10 @@ ListOfEquations = {
     },
     {
       name: "Electric Field",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{E}=\\frac{\\vec{F_{E}}}{{q}}",
         "\\vec{E}=k\\sum\\frac{q}{r^{2}}\\hat{r}",
@@ -1096,7 +1403,10 @@ ListOfEquations = {
     },
     {
       name: "Electric Potential",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\Delta V=\\frac{\\Delta U_{E}}{q}",
         "V=k\\sum\\frac{q}{r}",
@@ -1110,7 +1420,10 @@ ListOfEquations = {
     },
     {
       name: "Field & Potential",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{E}=\\frac{\\Delta V}{d}",
         "\\vec{E}=-\\nabla V",
@@ -1124,7 +1437,10 @@ ListOfEquations = {
     },
     {
       name: "Capacitance",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "C=\\frac{Q}{V}",
       ],
@@ -1134,7 +1450,10 @@ ListOfEquations = {
     },
     {
       name: "Plate Capacitor",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "C=\\frac{\\kappa\\epsilon_{0}A}{d}",
       ],
@@ -1144,7 +1463,10 @@ ListOfEquations = {
     },
     {
       name: "Cylindrical Capacitor",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "C=\\frac{2\\pi\\kappa\\epsilon_{0}l}{ln\\left(\\frac{r_{2}}{r_{1}}\\right)}",
       ],
@@ -1154,7 +1476,10 @@ ListOfEquations = {
     },
     {
       name: "Spherical Capacitor",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "C=\\frac{4\\pi\\kappa\\epsilon_{0}}{\\left(\\frac{1}{r_{1}}\\right)-\\left(\\frac{1}{r_{2}}\\right)}",
       ],
@@ -1164,7 +1489,10 @@ ListOfEquations = {
     },
     {
       name: "Capacitor P.E.",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "U_{c}=\\frac{1}{2}QV",
         "U_{c}=\\frac{1}{2}CV^{2}",
@@ -1178,7 +1506,10 @@ ListOfEquations = {
     },
     {
       name: "Electric Current",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{I}=\\frac{\\Delta q}{\\Delta t}",
         "I=\\frac{dq}{dt}"
@@ -1190,7 +1521,10 @@ ListOfEquations = {
     },
     {
       name: "Charge Density",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\rho=\\frac{Q}{V}",
       ],
@@ -1200,7 +1534,10 @@ ListOfEquations = {
     },
     {
       name: "Current Density",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "J=\\frac{I}{A}",
         "\\vec{J}=\\rho\\vec{v}"
@@ -1212,7 +1549,10 @@ ListOfEquations = {
     },
     {
       name: "Ohm's Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "V=IR",
         "\\vec{E}=\\rho\\vec{J}",
@@ -1226,7 +1566,10 @@ ListOfEquations = {
     },
     {
       name: "Resitivity-Conductivity",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\rho=\\frac{1}{\\sigma}",
       ],
@@ -1236,7 +1579,10 @@ ListOfEquations = {
     },
     {
       name: "Electric Resistance",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "R=\\frac{\\rho l}{A}",
       ],
@@ -1246,7 +1592,10 @@ ListOfEquations = {
     },
     {
       name: "Electric Power",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "P=VI=",
         "P=I^{2}R",
@@ -1260,7 +1609,10 @@ ListOfEquations = {
     },
     {
       name: "Resistors in series",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "R_{s}=\\sum R_{i}",
       ],
@@ -1270,7 +1622,10 @@ ListOfEquations = {
     },
     {
       name: "Resistors in parallel",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\frac{1}{R_{p}}=\\sum\\frac{1}{R_{i}}",
       ],
@@ -1280,7 +1635,10 @@ ListOfEquations = {
     },
     {
       name: "Capacitors in series",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\frac{1}{C_{s}}=\\sum\\frac{1}{C_{i}}",
       ],
@@ -1290,7 +1648,10 @@ ListOfEquations = {
     },
     {
       name: "Capacitors in parallel",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "C_{p}=\\sum C_{i}",
       ],
@@ -1300,7 +1661,10 @@ ListOfEquations = {
     },
     {
       name: "Magnetic force, charge",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "F_{B}=qvB\\sin\\left(\\theta\\right)",
         "\\vec{F_{B}}=q\\vec{v}\\times\\vec{B}",
@@ -1312,7 +1676,10 @@ ListOfEquations = {
     },
     {
       name: "Magnetic Force, current",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "F_{B}=IlB\\sin\\left(\\theta\\right)",
         "d\\vec{F_{B}}=Id\\vec{l}\\times\\vec{B}"
@@ -1324,7 +1691,10 @@ ListOfEquations = {
     },
     {
       name: "Biot-savart Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{B}=\\frac{\\mu_{0}I}{4\\pi}\\int\\left(\\frac{d\\vec{s}\\times\\hat{r}}{r^{2}}\\right)",
       ],
@@ -1334,7 +1704,10 @@ ListOfEquations = {
     },
     {
       name: "Solenoid",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "B=\\mu_{0}nI",
       ],
@@ -1344,7 +1717,10 @@ ListOfEquations = {
     },
     {
       name: "Straight Wire",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "B=\\frac{\\mu_{0}I}{2\\pi r}",
       ],
@@ -1354,7 +1730,10 @@ ListOfEquations = {
     },
     {
       name: "Parallel Wires",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\frac{F_{B}}{\\Delta l}=\\frac{\\mu_{0}}{2\\pi}\\frac{I_{1}I_{2}}{r}",
       ],
@@ -1364,7 +1743,10 @@ ListOfEquations = {
     },
     {
       name: "Electric Flux",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\Phi_{E}=EA\\cos\\left(\\theta\\right)",
         "\\Phi_{E}=\\int\\left(\\vec{E}\\cdot d\\vec{A}\\right)"
@@ -1376,7 +1758,10 @@ ListOfEquations = {
     },
     {
       name: "Magnetic Flux",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\Phi_{B}=BA\\cos\\left(\\theta\\right)",
         "\\Phi_{B}=\\int\\left(\\vec{B}\\cdot d\\vec{A}\\right)"
@@ -1388,7 +1773,10 @@ ListOfEquations = {
     },
     {
       name: "Motional Emf",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\xi=Blv",
       ],
@@ -1398,7 +1786,10 @@ ListOfEquations = {
     },
     {
       name: "Induced Emf",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\bar{\\xi}=-\\frac{\\Delta\\Phi_{B}}{\\Delta t}",
         "\\bar{\\xi}=-\\frac{d\\Phi_{B}}{dt}",
@@ -1410,7 +1801,10 @@ ListOfEquations = {
     },
     {
       name: "Gauss's Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\int\\left(\\vec{E}\\cdot d\\vec{A}\\right)=\\frac{Q}{\\epsilon_{0}}",
         "\\nabla\\cdot\\vec{E}=\\frac{\\rho}{\\epsilon_{0}}"
@@ -1422,7 +1816,10 @@ ListOfEquations = {
     },
     {
       name: "Faraday's Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\oint\\vec{E}\\cdot d\\vec{s}=-\\frac{\\partial\\Phi_{B}}{\\partial t}",
         "\\nabla\\times\\vec{E}=-\\frac{\\partial\\vec{B}}{\\partial t}"
@@ -1434,7 +1831,10 @@ ListOfEquations = {
     },
     {
       name: "Ampere's Law",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\oint\\vec{B}\\cdot d\\vec{s}=\\mu_{0}\\epsilon_{0}\\frac{\\partial\\phi_{E}}{\\partial t}+\\mu_{0}I",
         "\\nabla\\times\\vec{B}=\\mu_{0}\\epsilon_{0}\\frac{\\partial\\vec{E}}{\\partial t}+\\mu_{0}\\vec{J}"
@@ -1446,7 +1846,10 @@ ListOfEquations = {
     },
     {
       name: "electromagnetic Plane Wave",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{E}\\left(x,t\\right)=E_{0}\\sin\\left(2\\pi\\left(ft-\\frac{x}{\\lambda}+\\phi\\right)\\right)\\hat{j}",
         "\\vec{B}\\left(x,t\\right)=B_{0}\\sin\\left(2\\pi\\left(ft-\\frac{x}{\\lambda}+\\phi\\right)\\right)\\hat{k}"
@@ -1458,7 +1861,10 @@ ListOfEquations = {
     },
     {
       name: "em wave energy density",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\eta=\\epsilon_{0}E^{2}",
         "\\eta=\\frac{1}{\\mu_{0}}B^{2}"
@@ -1470,7 +1876,10 @@ ListOfEquations = {
     },
     {
       name: "Poynting Vector",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{S}=\\frac{1}{\\mu_{0}}\\vec{E}\\times\\vec{B}",
       ],
@@ -1480,7 +1889,10 @@ ListOfEquations = {
     },
     {
       name: "em radiation pressure",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "P=\\frac{1}{2}\\eta",
       ],
@@ -1492,7 +1904,10 @@ ListOfEquations = {
   modern: [
     {
       name: "Lorentz Factor",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\gamma=\\frac{1}{\\sqrt{1-\\frac{v^{2}}{c^{2}}}}",
       ],
@@ -1502,7 +1917,10 @@ ListOfEquations = {
     },
     {
       name: "Time Dilation",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "t=\\frac{t_{0}}{\\sqrt{1-\\frac{v^{2}}{c^{2}}}}",
         "t=\\gamma t_{0}"
@@ -1514,7 +1932,10 @@ ListOfEquations = {
     },
     {
       name: "Length Contraction",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "l=l_{0}\\sqrt{1-\\frac{v^{2}}{c^{2}}}",
         "l=\\frac{l_{0}}{\\gamma}"
@@ -1526,7 +1947,10 @@ ListOfEquations = {
     },
     {
       name: "Relative Velocity",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "{u}'=\\frac{u+v}{1+u\\frac{v}{c^{2}}}",
       ],
@@ -1536,7 +1960,10 @@ ListOfEquations = {
     },
     {
       name: "Relativistic Energy",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "E=\\frac{mc^{2}}{\\sqrt{1-\\frac{v^{2}}{c^{2}}}}",
         "E=\\gamma mc^{2}"
@@ -1548,7 +1975,10 @@ ListOfEquations = {
     },
     {
       name: "Relativistic Momentum",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\vec{p}=\\frac{m\\vec{v}}{\\sqrt{1-\\frac{v^{2}}{c^{2}}}}",
         "\\vec{p}=\\gamma m\\vec{v}"
@@ -1560,7 +1990,10 @@ ListOfEquations = {
     },
     {
       name: "Energy-momentum",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "E^{2}=p^{2}c^{2}+m^{2}c^{4}",
       ],
@@ -1570,7 +2003,10 @@ ListOfEquations = {
     },
     {
       name: "Mass-energy",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "E=mc^{2}",
       ],
@@ -1580,7 +2016,10 @@ ListOfEquations = {
     },
     {
       name: "Relativistic K.E.",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "K=\\left(\\frac{1}{\\sqrt{1-\\frac{v^{2}}{c^{2}}}}-1\\right)mc^{2}",
       ],
@@ -1590,7 +2029,10 @@ ListOfEquations = {
     },
     {
       name: "Relativistic Doppler Effect",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\frac{\\lambda}{\\lambda_{0}}=\\frac{f_{0}}{f}",
         "\\frac{\\lambda}{\\lambda_{0}}=\\sqrt{\\left(1+\\frac{v}{c}\\right)\\left(1-\\frac{v}{c}\\right)^{-1}}",
@@ -1602,7 +2044,10 @@ ListOfEquations = {
     },
     {
       name: "Photon Energy",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "E=hf",
         "E=pc"
@@ -1614,7 +2059,10 @@ ListOfEquations = {
     },
     {
       name: "Photon Momentum",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "p=\\frac{h}{\\lambda}",
         "p=\\frac{E}{c}"
@@ -1626,7 +2074,10 @@ ListOfEquations = {
     },
     {
       name: "Photoelectric Effect",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "K_{max}=E-\\phi",
         "K_{max}=h\\left(f-f_{0}\\right)"
@@ -1638,7 +2089,10 @@ ListOfEquations = {
     },
     {
       name: "Schrodinger's Equation",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "i\\hbar\\frac{\\partial}{\\partial t}\\Psi\\left(\\vec{r},t\\right)=-\\frac{\\hbar^{2}}{2m}\\nabla^{2}\\Psi\\left(\\vec{r},t\\right)+U\\left(\\vec{r}\\right)\\Psi\\left(\\vec{r},t\\right)",
         "E\\psi\\left(\\vec{r}\\right)=-\\frac{\\hbar^{2}}{2m}\\nabla^{2}\\psi\\left(\\vec{r}\\right)+U\\left(\\vec{r}\\right)\\psi\\left(\\vec{r}\\right)"
@@ -1650,7 +2104,10 @@ ListOfEquations = {
     },
     {
       name: "Uncertainty Principle",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\Delta p_{x}\\Delta x \\geq\\frac{\\hbar}{2}",
         "\\Delta E \\Delta t \\geq\\frac{\\hbar}{2}"
@@ -1662,7 +2119,10 @@ ListOfEquations = {
     },
     {
       name: "Rydberg equation",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "\\frac{1}{\\lambda}=-R_{\\infty}\\left(\\frac{1}{n^{2}}-\\frac{1}{n_{0}^{2}}\\right)",
       ],
@@ -1672,7 +2132,10 @@ ListOfEquations = {
     },
     {
       name: "Half Life",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "N=N_{0}2^{\\frac{-t}{T_{\\frac{1}{2}}}}",
       ],
@@ -1682,7 +2145,10 @@ ListOfEquations = {
     },
     {
       name: "Absorbed Dose",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "D=\\frac{E}{m}",
       ],
@@ -1692,7 +2158,10 @@ ListOfEquations = {
     },
     {
       name: "Effective Dose",
-      info: {},
+      infoId: RID(),
+      info: {
+        videos: [],
+      },
       equations: [
         "H=QD",
       ],
