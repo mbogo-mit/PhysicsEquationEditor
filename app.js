@@ -40,9 +40,16 @@ ListOfEquations = {
       info: {
         videos: [
           {
-            iframe: "",
-            title: "",
-            thumbnail: "",
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/pfTTHx9kCHk?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: 'Instantaneous speed and velocity | One-dimensional motion | Physics | Khan',
+            thumbnail: "https://img.youtube.com/vi/pfTTHx9kCHk/mqdefault.jpg",
+            level: "beginner",
+          },
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/GtoamALPOP0?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: 'Position vs. time graphs | One-dimensional motion | Physics | Khan Academy',
+            thumbnail: 'https://img.youtube.com/vi/GtoamALPOP0/mqdefault.jpg',
+            level: "beginner",
           }
         ],
       },
@@ -59,7 +66,20 @@ ListOfEquations = {
       name: "Acceleration",
       infoId: RID(),
       info: {
-        videos: [],
+        videos: [
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/FOkQszg1-j8?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Acceleration | One-dimensional motion | Physics | Khan Academy",
+            thumbnail: "https://img.youtube.com/vi/FOkQszg1-j8/mqdefault.jpg",
+            level: "beginner",
+          },
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/sLw902V40L0?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Worked example: motion problems (with definite integrals) | AP Calculus AB | Khan Academy",
+            thumbnail: "https://img.youtube.com/vi/sLw902V40L0/mqdefault.jpg",
+            level: "intermediate",
+          }
+        ],
       },
       equations: [
         "\\bar{a}= \\frac{\\Delta\\vec{v}}{\\Delta t}",
@@ -75,7 +95,20 @@ ListOfEquations = {
       infoId: RID(),
       infoId: RID(),
       info: {
-        videos: [],
+        videos: [
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/hpWuZh6oTew?autoplay=1&start=7" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Kinematics Part 1: Horizontal Motion",
+            thumbnail: "https://img.youtube.com/vi/hpWuZh6oTew/mqdefault.jpg",
+            level: "beginner",
+          },
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/WABpcU0mHMU?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "How to use calculus in Kinematics - Displacement, Velocity \u0026 Acceleration",
+            thumbnail: "https://img.youtube.com/vi/WABpcU0mHMU/mqdefault.jpg",
+            level: "intermediate"
+          }
+        ],
       },
       equations: [
         "v=v_{0}+at",
@@ -94,7 +127,20 @@ ListOfEquations = {
       name: "Newton's 2nd Law",
       infoId: RID(),
       info: {
-        videos: [],
+        videos: [
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/kKKM8Y-u7ds?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Newton's Laws: Crash Course Physics #5",
+            thumbnail: 'https://img.youtube.com/vi/kKKM8Y-u7ds/mqdefault.jpg',
+            level: "beginner",
+          },
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/g550H4e5FCY?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Newton's Law of Motion - First, Second \u0026 Third - Physics",
+            thumbnail: 'https://img.youtube.com/vi/g550H4e5FCY/mqdefault.jpg',
+            level: "intermediate",
+          },
+        ],
       },
       equations: [
         "\\sum \\vec{F} = m\\vec{a}",
@@ -122,7 +168,20 @@ ListOfEquations = {
       name: "Dry Friction",
       infoId: RID(),
       info: {
-        videos: [],
+        videos: [
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/fo_pmp5rtzo?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Friction: Crash Course Physics #6",
+            thumbnail: "https://img.youtube.com/vi/fo_pmp5rtzo/mqdefault.jpg",
+            level: "beginner",
+          },
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/ZA_D4O6l1lo?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Static and kinetic friction example | Forces and Newton's laws of motion | Physics | Khan Academy",
+            thumbnail: "https://img.youtube.com/vi/ZA_D4O6l1lo/mqdefault.jpg",
+            level: "intermediate",
+          }
+        ],
       },
       equations: [
         "f_{s}\\leq \\mu_{s}N",
@@ -137,7 +196,20 @@ ListOfEquations = {
       name: "Centripetal Accel.",
       infoId: RID(),
       info: {
-        videos: [],
+        videos: [
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/bpFK2VCRHUs?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Uniform Circular Motion: Crash Course Physics #7",
+            thumbnail: "https://img.youtube.com/vi/bpFK2VCRHUs/mqdefault.jpg",
+            level: "beginner",
+          },
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/FfNgm-w9Krw?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Centripetal force problem solving | Centripetal force and gravitation | Physics | Khan Academy",
+            thumbnail: "https://img.youtube.com/vi/FfNgm-w9Krw/mqdefault.jpg",
+            level: "intermediate",
+          }
+        ],
       },
       equations: [
         "a_{c}=\\frac{v^{2}}{r}",
@@ -152,7 +224,26 @@ ListOfEquations = {
       name: "Momentum",
       infoId: RID(),
       info: {
-        videos: [],
+        videos: [
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/NIVNfI0RN2k?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Introduction to Momentum, Force, Newton's Second Law, Conservation of Linear Momentum, Physics",
+            thumbnail: "https://img.youtube.com/vi/NIVNfI0RN2k/mqdefault.jpg",
+            level: "beginner",
+          },
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Fp7D5D8Bqjc?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Conservation of Momentum Physics Problems - Basic Introduction",
+            thumbnail: "https://img.youtube.com/vi/Fp7D5D8Bqjc/mqdefault.jpg",
+            level: "beginner",
+          },
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/9YRgHikdcqs?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Conservation of Momentum In Two Dimensions - 2D Elastic \u0026 Inelastic Collisions - Physics Problems",
+            thumbnail: "https://img.youtube.com/vi/9YRgHikdcqs/mqdefault.jpg",
+            level: "intermediate",
+          },
+        ],
       },
       equations: [
         "\\vec{p}=m\\vec{v}"
@@ -165,7 +256,20 @@ ListOfEquations = {
       name: "Impulse",
       infoId: RID(),
       info: {
-        videos: [],
+        videos: [
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Y-QOfc2XqOk?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Collisions: Crash Course Physics #10",
+            thumbnail: "https://img.youtube.com/vi/Y-QOfc2XqOk/mqdefault.jpg",
+            level: "beginner",
+          },
+          {
+            iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/9PA0MyxjsyQ?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            title: "Physics: Mechanics- Momentum (6 of 9) What is Impulse?",
+            thumbnail: "https://img.youtube.com/vi/9PA0MyxjsyQ/mqdefault.jpg",
+            level: "intermediate",
+          }
+        ],
       },
       equations: [
         "\\vec{J}=\\bar{F}\\Delta t",

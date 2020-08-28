@@ -17,8 +17,12 @@
             <% if(i < loe.mechanics.length){%>
               <div class="col m4">
                 <div class="row my-row">
-                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
-                    <span><%=loe.mechanics[i].name%></span>
+                  <% if(loe.mechanics[i].info.videos.length > 0){%>
+                  <div class="col m12 center static-physics-equation-header" infoId="<%= loe.mechanics[i].infoId %>" info="<%= JSON.stringify(loe.mechanics[i].info) %>">
+                  <%}else{%>
+                  <div class="col m12 center static-physics-equation-header">
+                  <%}%>    
+                      <span><%=loe.mechanics[i].name%></span>
                   </div>
                 </div>
                 <% for(let eq in loe.mechanics[i].equations){ %>
@@ -35,7 +39,11 @@
             <% if(i+1 < loe.mechanics.length){%>
               <div class="col m4">
                 <div class="row my-row">
-                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                  <% if(loe.mechanics[i+1].info.videos.length > 0){%>
+                  <div class="col m12 center static-physics-equation-header" infoId="<%= loe.mechanics[i+1].infoId %>" info="<%= JSON.stringify(loe.mechanics[i+1].info) %>">
+                  <%}else{%>
+                  <div class="col m12 center static-physics-equation-header">
+                  <%}%>
                     <span><%=loe.mechanics[i+1].name%></span>
                   </div>
                 </div>
@@ -53,7 +61,11 @@
             <% if(i+2 < loe.mechanics.length){%>
               <div class="col m4">
                 <div class="row my-row">
-                  <div class="col m12 center static-physics-equation-header modal-trigger" href="#modal-physics-equation-more-information">
+                  <% if(loe.mechanics[i+2].info.videos.length > 0){%>
+                  <div class="col m12 center static-physics-equation-header" infoId="<%= loe.mechanics[i+2].infoId %>" info="<%= JSON.stringify(loe.mechanics[i+2].info) %>">
+                  <%}else{%>
+                  <div class="col m12 center static-physics-equation-header">
+                  <%}%>
                     <span><%=loe.mechanics[i+2].name%></span>
                   </div>
                 </div>
