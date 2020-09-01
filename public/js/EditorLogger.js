@@ -314,7 +314,7 @@ function EditorLogger(){
           this.undefinedVars.undefined[undefinedVars[i]] = {
             state: (savedVariable.state) ? savedVariable.state : "unknown",
             type: (IsVariableLatexStringVector(undefinedVars[i])) ? "vector" : "scalar",
-            units: "undefined (none)",
+            units: "undefined units (none)",
             value: (savedVariable.value) ? savedVariable.value: undefined,
             valueFormattingError: (savedVariable.valueFormattingError) ? savedVariable.valueFormattingError: undefined,
             unitsMathjs: "1 undefinedunit",
