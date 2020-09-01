@@ -28,7 +28,7 @@ try{
 }catch(err){
 
 }
-
+let ExecutionID = 0;
 let SqrtLoop = 0;
 let LastVariableRIDChangedToGiven = null;
 let EditingMathFields = false;

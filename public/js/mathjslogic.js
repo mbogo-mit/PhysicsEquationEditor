@@ -135,7 +135,7 @@ function SplitLsIntoExpressions(ls){
   return expressions;
 }
 
-function CheckForErrorsInExpression(ls, lineNumber, mfID){
+function CheckForErrorsInExpression(executionID, ls, lineNumber, mfID){
   ls = RemoveCommentsFromLatexString(ls);
   ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
   ls = SimplifyFunctionDefinitionToJustFunctionVariable(ls);//converts "f(x,y)=xy" to f=xy
@@ -207,6 +207,8 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
 
   let exprs = JSON.parse(JSON.stringify(rawData));//making a deep copy of the raw data
 
+  if(executionID != undefined && executionID != ExecutionID){return;}
+
   EL.rawExpressionData[lineNumber] = JSON.parse(JSON.stringify(rawData));//making a deep copy of the raw data
 
 
@@ -233,7 +235,7 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
   }
 
   //console.log(exprs);
-
+  if(executionID != undefined && executionID != ExecutionID){return;}
 
   let results = [];
   for(let i = 0; i < exprs.length; i++){
@@ -277,12 +279,14 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
 
   }
 
+  if(executionID != undefined && executionID != ExecutionID){return;}
+
   //console.log(results);
-  ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID);
+  ParseResultsArrayAndGenerateLoggerList(executionID, results, lineNumber, mfID);
 
 }
 
-function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
+function ParseResultsArrayAndGenerateLoggerList(executionID, results, lineNumber, mfID){
   let log = {
     success: [],
     info: [],
@@ -484,8 +488,10 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
 
   });
 
+  if(executionID != undefined && executionID != ExecutionID){return;}
+
   if(recordedDefinitionForUndefinedVariable){
-    EL.ParsePreviousLinesAgainWithNewInfoAboutUndefinedVariables(lineNumber);
+    EL.ParsePreviousLinesAgainWithNewInfoAboutUndefinedVariables(executionID, lineNumber);
   }
 
   EL.addLog(log);
@@ -1616,9 +1622,12 @@ function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
   return expressionThatAreNotCorrect;
 }
 
-function IdentifyAllKnownVariablesAndTheirValues2(expressionArray, lineNumber, mfID){
+function IdentifyAllKnownVariablesAndTheirValues2(executionID, expressionArray, lineNumber, mfID){
   //so now we need to check if there is even a possiblity that we can do a high level check between these expressions
   for(let i = 0; i + 1 < expressionArray.length; i++){
+
+    if(executionID != undefined && executionID != ExecutionID){return;}//there is another instance of the EL.GenerateEditorErrorMessages() running
+
     //we need to do an exact conversion from latex to a string that nerdamer can understand. they have a convertFromLatex function but it is very limited so we will use it sparingly
     //this line of code converts the two expressions we were analyzing into nerdeamer readable string then we use nerdamers .eq() function to check if they are equal. if they arent then we add these two expression to the "expressionThatDontEqualEachOther" array
     let uniqueRIDStringArray = GenerateUniqueRIDStringForVariables(`${expressionArray[i].rawStr} + ${expressionArray[i+1].rawStr}`);//passing both string and putting a plus inbetween them so that we generate a uniqueRIDStringArray that accounts for all the variables and differential variables used in both expressions
@@ -1773,7 +1782,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
           //because we changed values and were able to identify new known variables we need
           //call "UpdateKnownUnknownVariables" function which will parse the rawExpressionData from the first line with the new information we have put into the known unknown variables.
           //By passing in "false" this function wont reset the variables currentState values which is what we want because we want the information we have just found to persist. Otherwise we would get a loop
-          EL.UpdateKnownUnknownVariables(false);
+          EL.UpdateKnownUnknownVariables({reset: false});
           return;//after this function is done running it means it has already parsed all the lines starting from the top  so we just end right here
         }
       }  

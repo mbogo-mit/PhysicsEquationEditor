@@ -10,7 +10,7 @@ function EditorLogger(){
     defined: {},
   };
 
-  this.savedUndefinedVars = {};
+  this.savedUndefinedVars = {completedParsing: true};
 
   this.log = {
     success: [],
@@ -139,27 +139,46 @@ function EditorLogger(){
     this.clearLinesToCheckForSelfConsistency();
 
     for(const [lineNumber, id] of Object.entries(orderedIds)){
+      if(opts.executionID != undefined && opts.executionID != ExecutionID){return;}
       //before we do anything there are some edge case we need to take care of specifically \nabla^2 need to be formatted as \nabla \cdot \nabla
       let ls = FormatNablaSquared(MathFields[id].mf.latex());
       ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
       if(ls.length > 0){//there is something to evaluate
         let undefinedVars = GetUndefinedVariables(RemoveDifferentialOperatorDFromLatexString(ls));
         this.recordUndefinedVariables(undefinedVars);
-        CheckForErrorsInExpression(ls, lineNumber, id);
+        CheckForErrorsInExpression(opts.executionID, ls, lineNumber, id);
       }
     }
 
+    if(opts.executionID != ExecutionID){return;}
     //after we have gone through all the lines and parsed everything we will have a list of lines that we can check for selfConsistency so lets do that
-    this.CheckLinesForSelfConsistency();
+    this.CheckLinesForSelfConsistency({executionID: opts.executionID});
+    
+    if(opts.executionID != ExecutionID){return;}
     //we use the same list of lines we can check for self consistency to check if we can figure out if we can identify known values and also check that equations actually equal each other not just symbolically
-    this.UpdateKnownUnknownVariables();
+    this.UpdateKnownUnknownVariables({executionID: opts.executionID});
+    
+    if(opts.executionID != ExecutionID){return;}
     //after this function runs it will populate "this.expressionsThatDontActuallyEqualEachOther" with information about equations that don't actually equal each other so we need to add the errors that this object represents
-    this.AddErrorsFromExpressionsThatDontActuallyEqualEachOther();
+    this.AddErrorsFromExpressionsThatDontActuallyEqualEachOther({executionID: opts.executionID});
 
+    if(opts.executionID != ExecutionID){return;}
     //after parsing through everything and building up the list of defined undefined variables we need to check if there are any relevant equations for the set of variables we have in DefinedVariables and this.undefinedVars.defined
-    CheckForAndDisplayRelevantEquations();
+    CheckForAndDisplayRelevantEquations({executionID: opts.executionID});
 
+    if(opts.executionID != ExecutionID){return;}
     this.display({dontRenderMyVariablesCollection: opts.dontRenderMyVariablesCollection});
+
+    if(opts.executionID != ExecutionID){return;}
+    this.ParsingHasFinished();
+    if(opts.callback){
+      opts.callback();
+    }
+
+  }
+
+  this.ParsingHasFinished = function(){
+    this.savedUndefinedVars.completedParsing = true;
   }
 
   this.AddErrorsFromExpressionsThatDontActuallyEqualEachOther = function(){
@@ -183,12 +202,15 @@ function EditorLogger(){
     this.addLog({error: errors});//adding errors to the log
   }
 
-  this.ParsePreviousLinesAgainWithNewInfoAboutUndefinedVariables = function(endingLineNumber){
+  this.ParsePreviousLinesAgainWithNewInfoAboutUndefinedVariables = function(executionID, endingLineNumber){
     let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
     this.clearLog();//clearing log befor adding to it
     this.clearUndefinedVariables(true, false);//clearing undefined variables but not defined undefined variables
 
     for(const [lineNumber, id] of Object.entries(orderedIds)){
+
+      if(executionID != undefined && executionID != ExecutionID){return;}
+
       if(lineNumber > endingLineNumber){
         break;//we break the job of this function was only to parse previous lines and the current line we were on when we called this function
       }
@@ -199,14 +221,14 @@ function EditorLogger(){
         if(ls.length > 0){//there is something to evaluate
           let undefinedVars = GetUndefinedVariables(RemoveDifferentialOperatorDFromLatexString(ls));
           this.recordUndefinedVariables(undefinedVars);
-          CheckForErrorsInExpression(ls, lineNumber, id);
+          CheckForErrorsInExpression(executionID, ls, lineNumber, id);
         }
       }
 
     }
   }
 
-  this.CheckLinesForSelfConsistency = function(){
+  this.CheckLinesForSelfConsistency = function(opts = {}){
     let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
     let lineNumber;
     let mfID;
@@ -217,9 +239,11 @@ function EditorLogger(){
       return self.indexOf(value) === index
     });
     for(let i = 0; i < this.linesToCheckForSelfConsistency.length; i++){
+      if(opts.executionID != ExecutionID && opts.executionID != undefined){return;}//there is another instance of the EL.GenerateEditorErrorMessages() running
       lineNumber = this.linesToCheckForSelfConsistency[i];
       mfID = orderedIds[this.linesToCheckForSelfConsistency[i]];
       for(let j = 0; j < this.rawExpressionData[this.linesToCheckForSelfConsistency[i]].length; j++){
+        if(opts.executionID != ExecutionID && opts.executionID != undefined){return;}//there is another instance of the EL.GenerateEditorErrorMessages() running
         let expressionsThatDontEqualEachOtherOnThisLine = [];
         let a = [];
         let c = 0;
@@ -233,12 +257,17 @@ function EditorLogger(){
             }
           }
           else{
+
+            if(opts.executionID != ExecutionID && opts.executionID != undefined){return;}//there is another instance of the EL.GenerateEditorErrorMessages() running
+            
             this.addLog({error: [{
               error: this.createLoggerErrorFromMathJsError("Integral bounds not formatted properly"),
               info: "",
               lineNumber: lineNumber,
               mfID: mfID,
             }]});
+
+            if(opts.executionID != ExecutionID && opts.executionID != undefined){return;}//there is another instance of the EL.GenerateEditorErrorMessages() running
 
             //we are going to add this information to the correct mathfield that has this error
             MathFields[mfID].log.error.push({
@@ -260,6 +289,9 @@ function EditorLogger(){
             return `${value.expression1} ${oppositeOperator[value.operator]} ${value.expression2}`;
           });
           //console.log(latexExpressions);
+
+          if(opts.executionID != ExecutionID && opts.executionID != undefined){return;}//there is another instance of the EL.GenerateEditorErrorMessages() running
+
           this.addLog({error: [{
             error: this.createLoggerErrorFromMathJsError("Incorrect equations"),
             info: "",
@@ -267,6 +299,8 @@ function EditorLogger(){
             lineNumber: lineNumber,
             mfID: mfID,
           }]});
+
+          if(opts.executionID != ExecutionID && opts.executionID != undefined){return;}//there is another instance of the EL.GenerateEditorErrorMessages() running
 
           //we are going to add this information to the correct mathfield that has this error
           MathFields[mfID].log.error.push({
@@ -279,7 +313,7 @@ function EditorLogger(){
 
   }
 
-  this.CheckLinesForKnownVariables = function(){
+  this.CheckLinesForKnownVariables = function(opts){
     let orderedIds = OrderMathFieldIdsByLineNumber(Object.keys(MathFields));
     let mfID;
     let j;
@@ -287,19 +321,19 @@ function EditorLogger(){
       mfID = orderedIds[lineNumber];
       j = 0;
       while(j < a.length){
-        IdentifyAllKnownVariablesAndTheirValues2(a[j], lineNumber, mfID);
+        IdentifyAllKnownVariablesAndTheirValues2(opts.executionID, a[j], lineNumber, mfID);
         j++;
       }
     }
   }
 
-  this.UpdateKnownUnknownVariables = function(reset = true){
+  this.UpdateKnownUnknownVariables = function(opts = {reset: true}){
     //we need to first reset all unknown variables current state to "unknown" so that they have to prove that they are known every time the user makes an edit in the editor
-    if(reset){
-      this.ResetAllUnknownVariblesToCurrentStateUnknown();
+    if(opts.reset == undefined || opts.reset == true){
+      this.ResetAllUnknownVariblesToCurrentStateUnknown({executionID: opts.executionID});
     }
     this.expressionsThatDontActuallyEqualEachOther = {};//we have to reset this object everytime we run this function because this.CheckLinesForKnownVariables() will populuate this object with the most up to date expressions that don't actually equal each other
-    this.CheckLinesForKnownVariables();
+    this.CheckLinesForKnownVariables({executionID: opts.executionID});
   }
 
   this.recordUndefinedVariables = function(undefinedVars){
@@ -443,7 +477,9 @@ function EditorLogger(){
   }
 
   this.saveUndefinedVariablesData = function(){
-    this.savedUndefinedVars = Object.assign({}, this.undefinedVars);
+    if(this.savedUndefinedVars.completedParsing){
+      this.savedUndefinedVars = Object.assign({completedParsing: false}, this.undefinedVars);
+    }
   }
 
   this.retrieveSavedUndefinedVariablesData = function(ls){
