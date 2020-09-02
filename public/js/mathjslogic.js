@@ -76,7 +76,7 @@ function IsSignleUndefinedVariable(ls){
 
 function ConvertStringToScientificNotation(str){
   let scientificNotation = Number(str).toExponential().split("e");
-  scientificNotation[0] = Number(scientificNotation[0]).toFixed(PrecisionSigFigs).toString()
+  scientificNotation[0] = Number(Number(scientificNotation[0]).toFixed(PrecisionSigFigs)).toString()
   if(scientificNotation[1] == "+0"){
     scientificNotation[1] = "";
   }else{
