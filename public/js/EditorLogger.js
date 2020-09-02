@@ -257,7 +257,7 @@ function EditorLogger(){
               "\\le": ">",
               "\\ge": "<",
             };
-            return `${value.expression1} ${oppositeOperator[value.operator]} ${value.expression2}`;
+            return `(${value.expression1} ${oppositeOperator[value.operator]} ${value.expression2}) \\rightarrow (${value.calculatedExpression1} ${oppositeOperator[value.operator]} ${value.calculatedExpression2})`;
           });
           //console.log(latexExpressions);
           this.addLog({error: [{
