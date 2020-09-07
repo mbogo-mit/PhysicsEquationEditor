@@ -80,7 +80,7 @@ function EditorLogger(){
       description: "An equation on this line is formatted incorrectly",
     },
     "Unexpected type of argument in function addScalar": {
-      description: "There is an equation on this line that is adding a unitless value to a value with units",
+      description: "There is an equation on this line that is adding a unitless value to a value with units or adding a vector with a scalar",
     },
     "Unexpected type of argument in function log": {
       description: "Expressions inside any log must be unitless. Check all expressions on this line that are inside a log and make sure they simplify to a unitless expression",
@@ -120,6 +120,12 @@ function EditorLogger(){
     },
     "Definite integral returned 'NaN' (not a number)": {
       description: "Editor couldn't calculate the value of the definite integral; therefore, the editor can not verify if the equations on this line are correct",
+    },
+    "Dimension mismatch. Matrix A": {
+      description: "You are adding vectors that don't have the same number of demensions",
+    },
+    "Vectors with length 3 expected": {
+      description: "You have a cross product on this line that is not with a 3 demensional vector",
     },
     "defaultError": {
       description: "There is something wrong with an equation on this line. This may be a problem with the Editor. Please contact customer support if the issue persists",
