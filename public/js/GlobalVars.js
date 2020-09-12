@@ -315,6 +315,17 @@ let PreDefinedVariables = {
   },
 }
 
+/*
+variable: vars[i],
+          ridString: `__${RandomVariableString()}`,
+          differentialVariable: `d${vars[i]}`,
+          partialDifferentialVariable: `\\partial${space + vars[i]}`,
+          differentialRidString: `__${RandomVariableString()}`,
+          */
+let UniqueRIDStringObj = {
+
+};
+
 let SimilarDefinedVariables = {};
 
 let DefinedVariables = {};

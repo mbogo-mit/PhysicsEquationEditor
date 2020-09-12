@@ -416,9 +416,10 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
 
     if(equationUnits != ""){//that means that there is an equation or equations that have matched units that could help us defined the each variable in each of our possiblySolvableExpressions array
       //if the equations match then we can use these equations to defined the single undefined variables that may exist
-      let knownUnitStringConstant = "__knownUnit";
+      let knownUnitStringConstant = `__knownUnit`;
+
       for(var c = 0; c < possiblySolvableExpressions.length; c++){
-        let uniqueRIDStringArray = GenerateUniqueRIDStringForVariables(possiblySolvableExpressions[c].expression);//this generates an object that relates each variable to a unique rid string so that it is easier for nerdamer to parse to the equation
+        let uniqueRIDStringArray = UpdateUniqueRIDStringObjUsingLs(possiblySolvableExpressions[c].expression);//this generates an object that relates each variable to a unique rid string so that it is easier for nerdamer to parse to the equation
         uniqueRIDStringArray.push({//we are adding this because it represents the units of the equations that are set equal to the equation we are parsing currently
           variable: knownUnitStringConstant,
           ridString: knownUnitStringConstant,
@@ -833,7 +834,7 @@ function ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray, recognize
     //if this is true then we have converted things to nerdamer functions before we passed it to this function so
     //we need to make sure that we dont recognize a letter in a nerdamer function as a variable
     if(recognizeNerdamerFunctions){
-      let nerdamerFunctions = ["integrate(","limit(","abs(","vector(","dot(","cross(", "log(","log10(","diff("];
+      let nerdamerFunctions = ["integrate(","limit(","matrix(","abs(","vector(","dot(","cross(", "log(","log10(","diff("];
       for(var c = 0; c < nerdamerFunctions.length; c++){
         if(s.indexOf(nerdamerFunctions[c]) == 0){
           foundMatch = true;
@@ -851,6 +852,11 @@ function ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray, recognize
         if(s.indexOf(uniqueRIDStringArray[c].differentialVariable) == 0){
           foundMatch = true;
           delta = uniqueRIDStringArray[c].differentialVariable.length;
+          newLs += ` (${uniqueRIDStringArray[c].differentialRidString}) `;
+          break;
+        }else if(s.indexOf(uniqueRIDStringArray[c].partialDifferentialVariable) == 0){
+          foundMatch = true;
+          delta = uniqueRIDStringArray[c].partialDifferentialVariable.length;
           newLs += ` (${uniqueRIDStringArray[c].differentialRidString}) `;
           break;
         }
@@ -900,6 +906,67 @@ function ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray, recognize
 
   return newLs;
 }
+
+function GetAllUniqueRIDStringsArray(){
+  let allUniqueRIDStrings = [];
+  for(const[key, value] of Object.entries(UniqueRIDStringObj)){
+    allUniqueRIDStrings.push(value);
+  }
+
+  return allUniqueRIDStrings;
+}
+
+function UpdateUniqueRIDStringObjUsingLs(ls){
+
+  let vars = GetVariablesFromLatexString(ls);
+  let existingKeys = Object.keys(UniqueRIDStringObj);
+  //regardless if they are being used in the ls all uniqueRIDStringArrays should have ridString data on all
+  //the different unit vectors because some functions may need to refrence this data even if the unit vector
+  //doesn't appear in the ls string
+  vars = vars.concat(["\\hat{x}","\\hat{i}","\\hat{r}","\\hat{y}", "\\hat{j}","\\hat{\\theta}","\\hat{z}","\\hat{k}","\\hat{\\phi}","\\dim{1}","\\dim{2}","\\dim{3}"]);
+  vars = vars.filter((value, index, self) => {return self.indexOf(value) == index});
+  let array = [];
+  //we need to organize vars from longest variable to shortest variable just incase a long variable has a piece of a shorter variable in it
+  vars.sort(function(a,b){
+  	if(a.length > b.length){
+    	return -1;
+    }
+    else{
+    	return 1;
+    }
+  });
+
+  
+  for(let i = 0; i < vars.length; i++){
+    if(vars[i] != "\\pi" && vars[i] != "i" && vars[i] != "e"){//we are not going to convert these two variables because they are predefined and understood by nerdamer if you use the convertFromLaTeX function
+      if(!existingKeys.includes(vars[i])){//this is checking that we don't already have an rid for this variable
+      let space = "";//this is becauase if the text after "\\partial" is a latex keyword then there is no space but if it isn't a latex key word there is a space. Exmaple "\\partial d" and "\\partial\\theta"
+      //checking if the variable is not a latex keyword. and if it is not we need a space between "\\partial" and the variable string
+      if(vars[i][0] != "\\"){space = " ";}  
+      UniqueRIDStringObj[vars[i]] = {
+          variable: vars[i],
+          ridString: `__${RandomVariableString()}`,
+          differentialVariable: `d${vars[i]}`,
+          partialDifferentialVariable: `\\partial${space + vars[i]}`,
+          differentialRidString: `__${RandomVariableString()}`,
+        };
+      }
+      array.push(UniqueRIDStringObj[vars[i]]);
+    }
+
+    
+  }
+
+  return array;
+}
+
+function UpdateUniqueRIDStringObjUsingObj(opts){
+  UniqueRIDStringObj[opts.key] = {
+    ridString: opts.ridString,
+    unitsMathjs: opts.unitsMathjs,
+  };
+}
+
 
 function GenerateUniqueRIDStringForVariables(ls){
   let vars = GetVariablesFromLatexString(ls);
@@ -1211,6 +1278,647 @@ function ReplaceSpecialLatexCharacterWithBasicCharacterCounterpart(ls, types){
   return ls;
 }
 
+function FindAndParseVectorMultiplication(opts){
+  //the first thing we need to do is convert all vectors into matrixes so we can parse them later
+  ls = FindAndConvertAllVectorsIntoNerdamerMatrixesForLs(opts.ls);
+  ls = FindAndEvaluateVectorMultiplication(Object.assign(opts, {ls: ls}));
+  if(ls == null){return null;}
+
+  return ls;
+}
+
+function FindAndConvertAllVectorsIntoNerdamerMatrixesForLs(ls){
+  let newLs = "";
+  let s;
+  let i = 0;
+  let i2 = 0;
+  let i3 = 0;
+  let delta = 0;
+  let foundMatch = false;
+  while(i < ls.length){
+    foundMatch = false;
+    delta = 1;
+    s = ls.substring(i);
+    if(s.indexOf("\\hat{") == 0 || s.indexOf("\\dim{") == 0){
+      //trying to convert unit vectors to nerdamer matrix
+      i2 = FindIndexOfClosingBracket(s.substring("\\hat{".length));//we can choose to use the string "\\hat{" or "\\dim{" because they are the same length
+      if(i2 != null){
+        foundMatch = true;
+        //we can choose to use the string "\\hat{" or "\\dim{" because they are the same length
+        i2 += "\\hat{".length;//accounts for substring displacement
+        delta = i2 + 1;
+        let unitVectorStr = s.substring(0, i2 + 1);
+        if(unitVectorStr == "\\dim{1}"){
+          newLs += " matrix([\\dim{1}, 0, 0])";
+        }else if(unitVectorStr == "\\dim{2}"){
+          newLs += " matrix([0, \\dim{2}, 0])";
+        }else if(unitVectorStr == "\\dim{3}"){
+          newLs += " matrix([0, 0, \\dim{3}])";
+        }else if(unitVectorStr == "\\hat{x}"){
+          newLs += " matrix([\\hat{x}, 0, 0])";
+        }else if(unitVectorStr == "\\hat{y}"){
+          newLs += " matrix([0, \\hat{y}, 0])";
+        }else if(unitVectorStr == "\\hat{z}"){
+          newLs += " matrix([0, 0, \\hat{z}])";
+        }else if(unitVectorStr == "\\hat{i}"){
+          newLs += " matrix([\\hat{i}, 0, 0])";
+        }else if(unitVectorStr == "\\hat{j}"){
+          newLs += " matrix([0, \\hat{j}, 0])";
+        }else if(unitVectorStr == "\\hat{k}"){
+          newLs += " matrix([0, 0, \\hat{k}])";
+        }else if(unitVectorStr == "\\hat{r}"){
+          newLs += " matrix([\\hat{r}, 0, 0])";
+        }else if(unitVectorStr == "\\hat{\\theta}"){
+          newLs += " matrix([0, \\hat{\\theta}, 0])";
+        }else if(unitVectorStr == "\\hat{\\phi}"){
+          newLs += " matrix([0, 0, \\hat{\\phi}])";
+        }else{
+          //this means that this is a custom unit vector so we need to make a general matrix that relates this generic unit vector with a general vector with demensions "n"
+          //comp1 stands for "component one" the first component of this general vector 
+          newLs +=` matrix([\\comp1{${unitVectorStr}}\\dim{1}, \\comp2{${unitVectorStr}}\\dim{2}, \\comp3{${unitVectorStr}}\\dim{3}])`
+        }
+      }else{return null;}
+    }
+
+    if(!foundMatch && (s.indexOf("\\comp1{") == 0 || s.indexOf("\\comp2{") == 0 || s.indexOf("\\comp3{") == 0)){
+      //trying to convert generic vectors to nerdamer matrix
+      i2 = FindIndexOfClosingBracket(s.substring("\\comp1{".length));
+      if(i2 != null){
+        foundMatch = true;
+        i2 += "\\comp1{".length;
+        delta = i2 + 1;
+        newLs += s.substring(0, i2 + 1);
+      }else{return null;}
+    }
+
+    if(!foundMatch && s.indexOf("\\vec{") == 0){
+      //trying to convert generic vectors to nerdamer matrix
+      i2 = FindIndexOfClosingBracket(s.substring("\\vec{".length));
+      if(i2 != null){
+        foundMatch = true;
+        i2 += "\\vec{".length;
+        delta = i2 + 1;
+        let generalVectorStr = s.substring(0, i2 + 1);
+        newLs += ` matrix([\\comp1{${generalVectorStr}}\\dim{1}, \\comp2{${generalVectorStr}}\\dim{2}, \\comp3{${generalVectorStr}}\\dim{3}])`
+      }else{return null;}
+    }
+
+    if(!foundMatch && s.indexOf("\\left[") == 0){
+      //trying to convert explicit vector to nerdamer matrix. example [a,b,c] -> [(a)\\dim{1}, (b)\\dim{2}, (c)\\dim{3}]
+      i2 = FindIndexOfClosingSquareBracket(s.substring("\\left[".length));
+      if(i2 != null){
+        foundMatch = true;
+        i2 += "\\left[".length;
+        delta = i2 + 1;
+        //this line of code that split it by "," alone is not the most secure way of doing this because you could hvae a comma in a variable definition so later we need to fix this function and do more 
+        let vectorComponents = s.substring("\\left[".length, i2 - "\\right".length).split(",");//if the vector is "[a,b,c]" this substring returns "a,b,c" then we split it using the delimeter "," to get ["a","b","c"]
+        let formattedComponents = vectorComponents.map((value,index) => {
+          return `(${value})*\\dim{${index + 1}}`
+        });
+        //now we have an array that looks like ["(a)*\\dim{1}","(b)*\\dim{2}","(c)*\\dim{3}"]
+        newLs += ` matrix([${formattedComponents.join(",")}])`
+
+      }else{return null;}
+    }
+    
+
+    if(!foundMatch && s[0] == "\\"){
+      //it is possible that it is an operator or a greek letter
+      for(var c = 0; c < ListOfOperators.length; c++){
+        if(s.indexOf(ListOfOperators[c]) == 0){
+          foundMatch = true;
+          newLs += ListOfOperators[c];
+          if(["\\cdot","\\times"].includes(ListOfOperators[c])){
+            newLs += " ";//mathquill for some reason doesn't put a space after \\cdot or \\times
+          }
+          delta = ListOfOperators[c].length;
+          break;
+        }
+      }
+
+      if(!foundMatch){
+        for(var c = 0; c < LatexGreekLetters.length; c++){
+          if(s.indexOf(LatexGreekLetters[c]) == 0){
+            foundMatch = true;
+            newLs += LatexGreekLetters[c];
+            delta = LatexGreekLetters[c].length;
+            break;
+          }
+        }
+      }
+
+    }
+
+    if(!foundMatch){
+      delta = 1;
+      newLs += s[0];//just pass the value directly to the new latex string
+    }
+
+    i += delta;
+  }
+
+  return newLs;
+
+}
+
+function FindAndEvaluateVectorMultiplication(opts){
+  let ls = opts.ls;
+  //this function is based off of the function "FindAndWrapVectorsThatAreBeingMultiplied"
+  //before we start finding "\\times" and "\\cdot" operator we need to go through the string and parse everything in parentheses that has these operators first
+  let i = 0;
+  let i2 = 0;
+  let i3 = 0;
+  let delta = 0;
+  let s;
+  let newLs = "";
+  while(i < ls.length){
+    delta = 1;
+    s = ls.substring(i);
+    i2 = s.indexOf("\\left(");//we are finding the next index of a paretheses to see if what it incloses has a "\\times" or "\\cdot" operator
+    if(i2 != -1){
+      newLs += s.substring(0, i2 + "\\left(".length);//adding everything before the parentheses
+      i3 = FindIndexOfClosingParenthesis(s.substring(i2 + "\\left(".length));
+      if(i3 != null){
+        i3 += i2 + "\\left(".length;//accounts for shift because we used a substring of "s"
+        //now that we know the closing parentheses and opening we are going to check if there is a "\\times" or "\\cdot" operator in it
+        let stringInsideParentheses = s.substring(i2 + "\\left(".length, i3 - "\\right".length);
+        if(stringInsideParentheses.indexOf("\\times") != -1 || stringInsideParentheses.indexOf("\\cdot") != -1){
+          stringInsideParentheses = FindAndEvaluateVectorMultiplication({
+            ls: stringInsideParentheses,
+            uniqueRIDStringArray: opts.uniqueRIDStringArray,
+            lineNumber: opts.lineNumber,
+            mfID: opts.mfID,
+          });
+          if(stringInsideParentheses == null){return null;}
+        }
+        newLs += stringInsideParentheses;//adding everything inside the parentheses
+        delta = i3 - "\\right".length;
+      }
+      else{
+        console.log("error couldn't find closing parentheses");
+        return null;
+      }
+      i += delta
+    }
+    else{
+      //if we couldn't find another parentheses we need to make sure to add the rest of the string to "newLs"
+      newLs += s;
+      break;
+    }
+
+  }
+
+  //now that we have parsed the string and did parentheses first using recursion we can finish up by taking this parsed string and actually wrapping the vectors in there proper functions
+  while(newLs.lastIndexOf('\\times') != -1 || newLs.lastIndexOf("\\cdot") != -1){
+    let crossProductIndex = newLs.lastIndexOf('\\times');
+    let dotProductIndex = newLs.lastIndexOf("\\cdot");
+    //the default is to do cross product first because when two vectors are crossed the resulting vector can still  be dotted  with another vector. But once two vectors are dotted, the resulting vector can't then be crossed with another vector
+    let multiply = {
+      index: (crossProductIndex != -1) ? crossProductIndex: dotProductIndex,
+      type: (crossProductIndex != -1) ? "\\times": "\\cdot",
+      func: (crossProductIndex != -1) ? "myCrossProduct": "myDotProduct",
+     };
+
+    let v1StartIndex = FindFirstMatrixStartIndex(newLs, multiply.index);
+    let v2EndIndex = FindSecondMatrixEndIndex(newLs, multiply.index + multiply.type.length);//we want to start parsing everything after the multiplication operator
+
+    if(v1StartIndex != null && v2EndIndex != null){
+      //this string removes the multiplication operator and tries to evaluate the vector multiplication and then push the result into the orginal string
+      let evaluatedVectorMultiplicationLs = null;//this variable will hold the latex string of the multplication evalauted if that be a dot product or cross product both of them will return a latex string 
+      
+      //console.log("matrix 1 ls", newLs.substring(v1StartIndex, multiply.index));
+
+      let matrix1ls = newLs.substring(v1StartIndex, multiply.index);
+      let matrix1UniqueRIDStringArray = UpdateUniqueRIDStringObjUsingLs(matrix1ls.replace(/matrix\(\[/g,"(["));//we put this replace function because this ls may have characters that are generated for nerdamer and that didn't appear in the original ls string the user gave us
+      let matrix1Evaluated = ExactConversionFromLatexStringToNerdamerReadableString({
+        ls: matrix1ls,
+        uniqueRIDStringArray: matrix1UniqueRIDStringArray,
+        lineNumber: opts.lineNumber,
+        mfID: opts.mfID,
+        throwError: opts.throwError,
+        convertVectorsToNerdamerMatrices: false,
+      });
+
+      //console.log("matrix 2 ls", newLs.substring(multiply.index + multiply.type.length, v2EndIndex + 1));
+
+      let matrix2ls = newLs.substring(multiply.index + multiply.type.length, v2EndIndex + 1);
+      let matrix2UniqueRIDStringArray = UpdateUniqueRIDStringObjUsingLs(matrix2ls.replace(/matrix\(\[/g,"(["));//we put this replace function because this ls may have characters that are generated for nerdamer and that didn't appear in the original ls string the user gave us
+      let matrix2Evaluated = ExactConversionFromLatexStringToNerdamerReadableString({
+        ls: matrix2ls,
+        uniqueRIDStringArray: matrix2UniqueRIDStringArray,
+        lineNumber: opts.lineNumber,
+        mfID: opts.mfID,
+        throwError: opts.throwError,
+        convertVectorsToNerdamerMatrices: false,
+      });
+
+      if(matrix1Evaluated == null || matrix2Evaluated == null){
+        return null;
+      }
+
+      //console.log("matrix1Evaluated,matrix2Evaluated");      
+      //console.log(matrix1Evaluated,matrix2Evaluated);
+
+      if(multiply.func == "myCrossProduct"){
+
+        //before we do the determinant of the matrix of 2 vectors and coordinate system to get the cross product we need to first figure out what coordinate system we are using and then remove all the unit vectors from the first two vectors in the determinate
+        let rawCrossProduct = TryToCalculateCrossProductGivenTwoMatrices({
+          matrix1: matrix1Evaluated,
+          matrix2: matrix2Evaluated,
+          lineNumber: opts.lineNumber,
+          mfID: opts.mfID,
+        });
+
+        if(rawCrossProduct != null){//matrix == null then there was an error trying to figure out the coordinate system
+          evaluatedVectorMultiplicationLs  = ReplaceUniqueRIDStringWithVariableLs(rawCrossProduct, matrix1UniqueRIDStringArray.concat(matrix2UniqueRIDStringArray));
+        }
+        
+
+      }else if(multiply.func == "myDotProduct"){
+        //this is a raw dot proudct because there are some checks and cleaning we need to do for this dot product to be ready to be inserted back into the original string
+        let rawDotProduct = nerdamer(`matget(transpose(transpose(${matrix1Evaluated}) * ${matrix2Evaluated}),0,0)`).toString();
+        
+        //this makes sure that raw dot product is formatted properly so it can be converted back to an ls and represent what it is suppose to represent as a dot product
+        let cleanDotProduct = CleanRawDotProduct({
+          str: rawDotProduct,
+          uniqueRIDStringArray: opts.uniqueRIDStringArray,
+          lineNumber: opts.lineNumber,
+          mfID: opts.mfID,
+        });
+
+        //console.log("clean dot product", cleanDotProduct);
+
+        if(cleanDotProduct != null){
+          evaluatedVectorMultiplicationLs = ReplaceUniqueRIDStringWithVariableLs(cleanDotProduct, GetAllUniqueRIDStringsArray());
+        }
+      }
+
+      //console.log("evaluatedVectorMultiplicationLs", evaluatedVectorMultiplicationLs);
+
+      
+
+      if(evaluatedVectorMultiplicationLs != null){
+        if(multiply.func == "myCrossProduct"){
+          
+          //console.log("piece 1", `${newLs.substring(0,v1StartIndex)}`);
+          //console.log("piece 2", `${newLs.substring(v2EndIndex + 1)}`);
+
+          let resultingVectorMatrix;
+
+          if(evaluatedVectorMultiplicationLs == "0"){
+            resultingVectorMatrix = "matrix([0*\\dim{1},0*\\dim{2},0*\\dim{3}])"
+          }else{
+            //we do this because the cross product returns a vector but this vector is not a matrix at the
+            //momement it is just a string of ls variables that need to be parsed into a matrix so we can put it
+            //back into the the bigger equation that may be using this vector multiplication
+            resultingVectorMatrix = FindAndConvertAllVectorsIntoNerdamerMatrixesForLs(evaluatedVectorMultiplicationLs);
+          }
+
+          //console.log("resultingVectorMatrix", resultingVectorMatrix);
+
+          newLs = `${newLs.substring(0,v1StartIndex)} ${resultingVectorMatrix} ${newLs.substring(v2EndIndex + 1)}`
+        }else if(multiply.func == "myDotProduct"){
+          //console.log("piece 1", `${newLs.substring(0,v1StartIndex)}`);
+          //console.log("piece 2", `${newLs.substring(v2EndIndex + 1)}`);
+          newLs = `${newLs.substring(0,v1StartIndex + 1)} ${evaluatedVectorMultiplicationLs} ${newLs.substring(v2EndIndex + 1)}`;
+        }
+        
+      }else{
+        return null;
+      }
+    }
+    else{
+      //if it broke once then it will just keep breaking so we just got to end it
+      return null;
+    }
+
+  }
+  return newLs;
+
+}
+
+
+function DoExpressionUnitVectorsMatch(opts){
+  if(opts.str == undefined || opts.mfID == undefined){
+    return null;//we don't have all the information we need to run this function
+  }
+
+  let str = opts.str;
+  
+  let coors = {
+    generic: {
+      label: "\\text{Generic N Demensional Vector}",
+      coors: [UniqueRIDStringObj["\\dim{1}"].ridString, UniqueRIDStringObj["\\dim{2}"].ridString, UniqueRIDStringObj["\\dim{3}"].ridString],//generic
+      unique: [UniqueRIDStringObj["\\dim{1}"].ridString, UniqueRIDStringObj["\\dim{2}"].ridString, UniqueRIDStringObj["\\dim{3}"].ridString],//generic
+      uniquePairs: [],
+      unallowedUnitVectors: [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{\\theta}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],//r,theta,or z
+    },
+    cartesianXYZ: {
+      label: "\\text{Cartesian}\\ \\left(\\hat{x},\\hat{y},\\hat{z} \\right)",
+      coors: [UniqueRIDStringObj["\\hat{x}"].ridString, UniqueRIDStringObj["\\hat{y}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],//cartensian
+      unique: [UniqueRIDStringObj["\\hat{x}"].ridString, UniqueRIDStringObj["\\hat{y}"].ridString],
+      uniquePairs: [],
+      unallowedUnitVectors: [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{\\theta}"].ridString],//r or theta
+    },
+    cartesianIJK: {
+      label: "\\text{Cartesian}\\ \\left(\\hat{i},\\hat{j},\\hat{k}\\right)",
+      coors: [UniqueRIDStringObj["\\hat{i}"].ridString,UniqueRIDStringObj["\\hat{j}"].ridString,UniqueRIDStringObj["\\hat{k}"].ridString],//cartesian
+      unique: [UniqueRIDStringObj["\\hat{i}"].ridString,UniqueRIDStringObj["\\hat{j}"].ridString,UniqueRIDStringObj["\\hat{k}"].ridString],//cartesian
+      uniquePairs: [],
+      unallowedUnitVectors: [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{\\theta}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],//r,theta,or z
+    },
+    cylindrical: {
+      label: "\\text{Cylindrical}\\ \\left(\\hat{r},\\hat{\\theta},\\hat{z}\\right)",
+      coors: [UniqueRIDStringObj["\\hat{r}"].ridString,UniqueRIDStringObj["\\hat{\\theta}"].ridString,UniqueRIDStringObj["\\hat{z}"].ridString],//cylindrical
+      unique: [],
+      uniquePairs: [
+        [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],
+        [UniqueRIDStringObj["\\hat{\\theta}"].ridString,UniqueRIDStringObj["\\hat{z}"].ridString],
+      ],
+      unallowedUnitVectors: [],
+    },
+    spherical: {
+      label: "\\text{Spherical}\\ \\left(\\hat{r},\\hat{\\theta},\\hat{\\phi}\\right)",
+      coors: [UniqueRIDStringObj["\\hat{r}"].ridString,UniqueRIDStringObj["\\hat{\\theta}"].ridString,UniqueRIDStringObj["\\hat{\\phi}"].ridString],//spherical
+      unique: [UniqueRIDStringObj["\\hat{\\phi}"].ridString],
+      uniquePairs: [],
+      unallowedUnitVectors: [UniqueRIDStringObj["\\hat{z}"].ridString],//z
+    }
+  };
+
+
+  let coorKey = null;
+  let coorKey2 = null;
+  let foundKey = false;
+
+  for(const [key, value] of Object.entries(coors)){
+    foundKey = false;
+
+    //checking if either strings have a unique identify unit vector
+    if(value.unique.some((unitVectorRIDString) => {return str.indexOf(unitVectorRIDString) != -1})){
+      if(coorKey == null){
+        coorKey = key;
+        foundKey = true;
+      }else{
+        coorKey2 = key;
+        break
+      }
+    }
+
+    if(!foundKey){
+      //checking if either string has a unique identifing pair of unit vectors
+      if(value.uniquePairs.some((pairs) => {return str.indexOf(pairs[0]) != -1 && str.indexOf(pairs[1]) != -1})){
+        if(coorKey == null){
+          coorKey = key;
+        }else{
+          coorKey2 = key;
+          break
+        }
+      }
+    }
+
+  }
+
+  if(coorKey2 != null){
+    //if coorKey2 != null that means the user is using two different cooridnate systems so we need to throw an error
+    CreateInlineMathFieldError({
+      mfID: opts.mfID,
+      error: "Two different coordinate systems used in expression",
+      latexExpressions: [`${coors[coorKey].label}\\ \\text{and}\\ ${coors[coorKey2].label}`],
+    });
+
+    return false;
+  }
+
+  //so now that we may or may not know the coordinate system we are using we need to clean the string so that generic demension unit vectors "\\dim{n}" will be specific unit vectors that line up with the coordinate system detected
+  if(coorKey != null){//we couldn't detect a coordinate system.
+    //if coorKey != null then that means we found a coordinate system but we need to make sure it doesn't have any unallowed characters in it
+    if(coors[coorKey].unallowedUnitVectors.some((unitVectorRIDString) => {return str.indexOf(unitVectorRIDString) != -1})){
+      //we have some unallowed characters so we need to throw an error
+      CreateInlineMathFieldError({
+        mfID: opts.mfID,
+        error: "Unit vectors from two different coordinate systems detected in expression",
+      });
+
+      return false;
+    }
+  }
+
+  
+  return true;
+  
+}
+
+function TryToCalculateCrossProductGivenTwoMatrices(opts){
+  if(opts.matrix1 == undefined || opts.matrix2 == undefined || opts.lineNumber == undefined || opts.mfID == undefined){
+    return null;//we don't have all the information we need to run this function
+  }
+
+  let matrix1 = opts.matrix1;
+  let matrix2 = opts.matrix2;
+
+  /*
+  let v1 = nerdamer(`transpose(${opts.matrix1})`).toString();
+  v1 = v1.substring("matrix(".length, v1.length-1);//this sub string turns "matrix([...,...,...])" into "[...,...,...]". This is what we want
+  let v2 = nerdamer(`transpose(${opts.matrix2})`).toString();
+  v2 = v2.substring("matrix(".length, v2.length-1);//this sub string turns "matrix([...,...,...])" into "[...,...,...]". This is what we want
+  */
+
+  let coors = {
+    generic: {
+      label: "\\text{Generic N Demensional Vector}",
+      coors: [UniqueRIDStringObj["\\dim{1}"].ridString, UniqueRIDStringObj["\\dim{2}"].ridString, UniqueRIDStringObj["\\dim{3}"].ridString],//generic
+      unique: [UniqueRIDStringObj["\\dim{1}"].ridString, UniqueRIDStringObj["\\dim{2}"].ridString, UniqueRIDStringObj["\\dim{3}"].ridString],//generic
+      uniquePairs: [],
+      unallowedUnitVectors: [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{\\theta}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],//r,theta,or z
+    },
+    cartesianXYZ: {
+      label: "\\text{Cartesian}\\ \\left(\\hat{x},\\hat{y},\\hat{z} \\right)",
+      coors: [UniqueRIDStringObj["\\hat{x}"].ridString, UniqueRIDStringObj["\\hat{y}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],//cartensian
+      unique: [UniqueRIDStringObj["\\hat{x}"].ridString, UniqueRIDStringObj["\\hat{y}"].ridString],
+      uniquePairs: [],
+      unallowedUnitVectors: [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{\\theta}"].ridString],//r or theta
+    },
+    cartesianIJK: {
+      label: "\\text{Cartesian}\\ \\left(\\hat{i},\\hat{j},\\hat{k}\\right)",
+      coors: [UniqueRIDStringObj["\\hat{i}"].ridString,UniqueRIDStringObj["\\hat{j}"].ridString,UniqueRIDStringObj["\\hat{k}"].ridString],//cartesian
+      unique: [UniqueRIDStringObj["\\hat{i}"].ridString,UniqueRIDStringObj["\\hat{j}"].ridString,UniqueRIDStringObj["\\hat{k}"].ridString],//cartesian
+      uniquePairs: [],
+      unallowedUnitVectors: [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{\\theta}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],//r,theta,or z
+    },
+    cylindrical: {
+      label: "\\text{Cylindrical}\\ \\left(\\hat{r},\\hat{\\theta},\\hat{z}\\right)",
+      coors: [UniqueRIDStringObj["\\hat{r}"].ridString,UniqueRIDStringObj["\\hat{\\theta}"].ridString,UniqueRIDStringObj["\\hat{z}"].ridString],//cylindrical
+      unique: [],
+      uniquePairs: [
+        [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],
+        [UniqueRIDStringObj["\\hat{\\theta}"].ridString,UniqueRIDStringObj["\\hat{z}"].ridString],
+      ],
+      unallowedUnitVectors: [],
+    },
+    spherical: {
+      label: "\\text{Spherical}\\ \\left(\\hat{r},\\hat{\\theta},\\hat{\\phi}\\right)",
+      coors: [UniqueRIDStringObj["\\hat{r}"].ridString,UniqueRIDStringObj["\\hat{\\theta}"].ridString,UniqueRIDStringObj["\\hat{\\phi}"].ridString],//spherical
+      unique: [UniqueRIDStringObj["\\hat{\\phi}"].ridString],
+      uniquePairs: [],
+      unallowedUnitVectors: [UniqueRIDStringObj["\\hat{z}"].ridString],//z
+    }
+  };
+
+
+  let coorKey = null;
+  let coorKey2 = null;
+  let foundKey = false;
+
+  for(const [key, value] of Object.entries(coors)){
+    foundKey = false;
+
+    //checking if either strings have a unique identify unit vector
+    if(value.unique.some((unitVectorRIDString) => {return `${matrix1} ${matrix2}`.indexOf(unitVectorRIDString) != -1})){
+      if(coorKey == null){
+        coorKey = key;
+        foundKey = true;
+      }else{
+        coorKey2 = key;
+        break
+      }
+    }
+
+    if(!foundKey){
+      //checking if either string has a unique identifing pair of unit vectors
+      if(value.uniquePairs.some((pairs) => {return `${matrix1} ${matrix2}`.indexOf(pairs[0]) != -1 && `${matrix1} ${matrix2}`.indexOf(pairs[1]) != -1})){
+        if(coorKey == null){
+          coorKey = key;
+        }else{
+          coorKey2 = key;
+          break
+        }
+      }
+    }
+    
+    //regardless if the ridString is found in the vectors we are going to try to clear them
+    //cleaning up the vectors
+    matrix1 = matrix1.replace(new RegExp(value.coors[0], 'g'), "1").replace(new RegExp(value.coors[1], 'g'), "1").replace(new RegExp(value.coors[2], 'g'), "1");
+    matrix2 = matrix2.replace(new RegExp(value.coors[0], 'g'), "1").replace(new RegExp(value.coors[1], 'g'), "1").replace(new RegExp(value.coors[2], 'g'), "1");
+
+  }
+
+  if(coorKey2 != null){
+    //if coorKey2 != null that means the user is using two different cooridnate systems so we need to throw an error
+    CreateInlineMathFieldError({
+      mfID: opts.mfID,
+      error: "Two different coordinate systems used in cross product",
+      latexExpressions: [`${coors[coorKey].label}\\ \\text{and}\\ ${coors[coorKey2].label}`],
+    });
+    
+    return null;
+  }
+
+  if(coorKey == null){
+    //this means we werent able to identify what coordinate system the user is using in the equation
+
+    CreateInlineMathFieldError({
+      mfID: opts.mfID,
+      error: "Couldn't identify coordinate system used in cross product",
+      latexExpressions: [
+        "a\\cdot\\hat{z} \\ \\text{this could either be Cartesian or Cylinderical}",
+        "a\\cdot\\hat{z} \\rightarrow \\left(a\\cdot\\hat{z} + 0\\hat{x} \\right) \\ \\text{adding an extra component with coefficient 0 identifies the coordinate system as Cartensian}",
+        "a\\cdot\\hat{z} \\rightarrow \\left(a\\cdot\\hat{z} + 0\\hat{\\theta} \\right) \\ \\text{adding an extra component with coefficient 0 identifies the coordinate system as Cylinderical}",
+      ],
+    });
+
+    return null;
+  }
+
+  //if coorKey != null then that means we found a coordinate system but we need to make sure it doesn't have any unallowed characters in it
+  if(coors[coorKey].unallowedUnitVectors.some((unitVectorRIDString) => {return `${matrix1} ${matrix2}`.indexOf(unitVectorRIDString) != -1})){
+    //we have some unallowed characters so we need to throw an error
+    CreateInlineMathFieldError({
+      mfID: opts.mfID,
+      error: "Unit vectors from two different coordinate systems detected",
+    });
+
+    return null;
+  }
+  
+  //if we haven't returned by now then we know the coordinate system used and we will now calculate the cross product
+  //3D cross product
+  let a = [nerdamer(`matget(${matrix1},0,0)`),nerdamer(`matget(${matrix1},1,0)`),nerdamer(`matget(${matrix1},2,0)`)];
+  let b = [nerdamer(`matget(${matrix2},0,0)`),nerdamer(`matget(${matrix2},1,0)`),nerdamer(`matget(${matrix2},2,0)`)];
+  let dir = coors[coorKey].coors;//the direction / unit vector to use
+  //a x b = (a1*b2-a2*b1)*i + (a2*b0 - a0*b2)*j + (a0*b1 - a1*b0)*k
+  let crossProductString = `((${a[1]}*${b[2]}) - (${a[2]}*${b[1]}))*${dir[0]} + ((${a[2]}*${b[0]}) - (${a[0]}*${b[2]}))*${dir[1]} + ((${a[0]}*${b[1]}) - (${a[1]}*${b[0]}))*${dir[2]}`;
+  
+  return nerdamer(crossProductString).toString();
+  
+}
+
+function CreateInlineMathFieldError(opts){
+  //we need the mfID, the error string, optional: latexExpressions and if we should check if the error already exists
+  if(opts.mfID == undefined || opts.error == undefined){return;}
+
+  let errorAlreadyExists = false;//assume the error doesn't already exist unless we actually check
+  for(let error of MathFields[opts.mfID].log.error){
+    if(error.error.type == opts.error){
+      errorAlreadyExists = true;
+      break;
+    }
+  }
+
+  if(!errorAlreadyExists){
+    MathFields[opts.mfID].log.error.push({
+      error: EL.createLoggerErrorFromMathJsError(opts.error),
+      latexExpressions: Array.isArray(opts.latexExpressions) ? opts.latexExpressions : [],
+    });
+  }
+  
+}
+
+
+function CleanRawDotProduct(opts){
+  //this function takes an string that represents a dot product and checks that it is formatted properly then cleans the string and returns cleaned string which can then be injeced back into the expression it came from
+  if(opts.str == undefined || opts.uniqueRIDStringArray == undefined || opts.lineNumber == undefined || opts.mfID == undefined){
+    return null;
+  }
+
+  //before we clean this dot product and calculate it we need to check that the unit vectors used in the dot product match meaning that they are a part of the same coordinate system
+  if(!DoExpressionUnitVectorsMatch({str: opts.str, mfID: opts.mfID})){return null;}
+
+  let unitVectors = ["\\hat{x}","\\hat{i}","\\hat{r}","\\hat{y}", "\\hat{j}","\\hat{\\theta}","\\hat{z}","\\hat{k}","\\hat{\\phi}"];
+  //all we need to do is replace all unit vectors and demensions "\\dim{n}" with 1 and then evaluate the rawDotproduct and return the value as the cleaned dot product
+  let i = 0; 
+  let cleanDotProduct = opts.str;
+  let parsingGenericDemensions = true
+  while(i < unitVectors.length || parsingGenericDemensions){
+    parsingGenericDemensions = false;//this keeps track of wheter we have parsed through all the generic demension variables "\\dim{n}"
+    if(UniqueRIDStringObj[`\\dim{${i + 1}}`] != undefined){
+      let dimNRIDString = UniqueRIDStringObj[`\\dim{${i + 1}}`].ridString;
+      if(cleanDotProduct.indexOf(dimNRIDString) != -1){
+        parsingGenericDemensions = true;
+        cleanDotProduct = cleanDotProduct.replace(new RegExp(dimNRIDString, 'g'), "1");
+      }
+    }
+      
+    if(i < unitVectors.length){
+      if(UniqueRIDStringObj[unitVectors[i]] != undefined){
+        cleanDotProduct = cleanDotProduct.replace(new RegExp(UniqueRIDStringObj[unitVectors[i]].ridString, 'g'), "1");
+      }
+    }
+    i++;
+  }
+
+  return nerdamer(cleanDotProduct).toString();
+
+}
+
+
+function GetRIDStringForCoordinateSystemsAndReturnObj(uniqueRIDStringArray){
+  let coor = {
+    cartesian: {x: null, y: null, z: null},
+    cylindrical: {r: null, theta: null, z: null},
+    spherical: {r: null, theta: null, phi: null},
+  };
+}
 
 function FindAndWrapVectorsThatAreBeingMultiplied(ls){
 
@@ -1264,12 +1972,8 @@ function FindAndWrapVectorsThatAreBeingMultiplied(ls){
       func: (crossProductIndex != -1) ? "myCrossProduct": "myDotProduct",
      };
 
-     //console.log(multiply);
-
     let v1StartIndex = FindFirstVectorStartIndex(newLs, multiply.index);
     let v2EndIndex = FindSecondVectorEndIndex(newLs, multiply.index + multiply.type.length);//we want to start parsing everything after the multiplication operator
-
-    //console.log(v1StartIndex, v2EndIndex);
 
     if(v1StartIndex != null && v2EndIndex != null){
       //this string removes the multiplication operator and wraps the vectors in a function and uses each vector as a parameter for the function
@@ -1283,6 +1987,91 @@ function FindAndWrapVectorsThatAreBeingMultiplied(ls){
   }
   return newLs;
 }
+
+function FindFirstMatrixStartIndex(ls, endIndex){
+  let unwantedChars = ["=","(","+","-","\\times","\\cdot"];
+  let i = endIndex;
+  while(i > 0){
+    if(ls[i] == ")"){
+      //this parenthesis could hold a vector inside of it so we need to find the closing parenthesis and check if a vector is inside the range
+      let closingParenthesis = FindIndexOfOpeningParenthesis(ls.substring(0,i));
+      if(closingParenthesis != null){
+        //we need to check if there is a vector inside these parentheses
+        if(ThereIsAVectorInsideString(ls.substring(closingParenthesis, i + 1))){
+          //there is one case where this parenthesis is the opening parenthesis for the function myDotProduct or myCrossProduct and if so we need to include those indexes so that we are wrapping the whole statement
+          //checking if the parethesis belongs to the function myDotProduct
+          if(closingParenthesis - "matrix".length >= 0){
+            if(ls.substring(closingParenthesis - "matrix".length, closingParenthesis) == "matrix"){
+              return closingParenthesis - "matrix".length;
+            }
+          }
+
+          if(closingParenthesis - "\\left".length >= 0){
+            if(ls.substring(closingParenthesis - "\\left".length, closingParenthesis) == "\\left"){
+              return closingParenthesis - "\\left".length;
+            }
+          }
+          
+          //none of the special cases returned so we just return the index of the closingParenthesis
+          return closingParenthesis;
+        }
+        i = closingParenthesis;//just skip over the indexes before that because all that stuff is in parentheses and will be dealt with using other functions
+      }
+
+    }
+    else{
+      //we need to check if out of all the characters we have parsed if any of them were unwanted chars
+      for(var c = 0; c < unwantedChars.length; c++){
+        let char = unwantedChars[c];
+        //if this is not true then this can't be the unwanted character we are looking for because there is not enough characters before this character to even spell out the unwanted character
+        if((i + 1) - char.length >= 0){
+          if(ls.substring((i + 1) - char.length, i + 1) == char){
+            //we found an unwanted character
+            return null;
+          }
+        }
+      }
+    }
+
+    i--;
+  }
+
+  return null;
+}
+
+function FindSecondMatrixEndIndex(ls, startIndex){
+  let unwantedChars = ["=",")","+","-","\\times","\\cdot"];
+  let i = startIndex;
+  while(i < ls.length){
+    if(ls[i] == "("){
+      //this parenthesis could hold a vector inside of it so we need to find the closing parenthesis and check if a vector is inside the range
+      let closingParenthesis =  FindIndexOfClosingParenthesis(ls.substring(i + 1));
+      if(closingParenthesis){
+        closingParenthesis += (i + 1);//this correts for the shift that occurs from only using a substring in the FindIndexOfClosingParenthesis function
+        //we need to check if there is a vector inside these parentheses
+        if(ThereIsAVectorInsideString(ls.substring(i, closingParenthesis + 1))){
+          return closingParenthesis;
+        }
+        i = closingParenthesis;//just skip over the indexes before that because all that stuff is in parentheses and will be dealt with using other functions
+      }
+
+    }
+    else{
+      //if we find any unwanted characters before finding the second vector then there is a formating error on the part of the user so we will just return null
+      for(var c = 0; c < unwantedChars.length; c++){
+        if(ls.substring(i).indexOf(unwantedChars[c]) == 0){
+          return null;//we found an unwanted character when we were trying to find a vector to multiply
+        }
+      }
+    }
+
+
+    i++;
+  }
+
+  return null;
+}
+
 
 function FindFirstVectorStartIndex(ls, endIndex){
   let unwantedChars = ["=","(","+","-","\\times","\\cdot"];
@@ -1519,15 +2308,13 @@ function GenerateRidStringVariablesObjFromString(str, uniqueRIDStringArray){
   //this function returns an object of all the ridStrings used in a string and important information about the variable the rid string represents
   let i = 0;
   let ridStringsUsedInString = {};
+
   while(i < uniqueRIDStringArray.length){
     if(str.indexOf(uniqueRIDStringArray[i].ridString) != -1){
       ridStringsUsedInString[uniqueRIDStringArray[i].ridString] =  uniqueRIDStringArray[i].variable;
     }
     if(str.indexOf(uniqueRIDStringArray[i].differentialRidString) != -1){
       ridStringsUsedInString[uniqueRIDStringArray[i].differentialRidString] = null;
-    }
-    if(str.indexOf(uniqueRIDStringArray[i].partialDifferentialVariable) != -1){
-      ridStringsUsedInString[uniqueRIDStringArray[i].partialDifferentialVariable] = null;
     }
     i++;
   }
@@ -1536,132 +2323,172 @@ function GenerateRidStringVariablesObjFromString(str, uniqueRIDStringArray){
 }
 
 function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
+  console.log("high level self consistency check");
   let expressionThatAreNotCorrect = [];
   //so now we need to check if there is even a possiblity that we can do a high level check between these expressions
   for(let i = 0; i + 1 < expressionArray.length; i++){
     //we need to do an exact conversion from latex to a string that nerdamer can understand. they have a convertFromLatex function but it is very limited so we will use it sparingly
     //this line of code converts the two expressions we were analyzing into nerdeamer readable string then we use nerdamers .eq() function to check if they are equal. if they arent then we add these two expression to the "expressionThatDontEqualEachOther" array
-    let uniqueRIDStringArray = GenerateUniqueRIDStringForVariables(`${expressionArray[i].rawStr} + ${expressionArray[i+1].rawStr}`);//passing both string and putting a plus inbetween them so that we generate a uniqueRIDStringArray that accounts for all the variables and differential variables used in both expressions
+    let uniqueRIDStringArray = UpdateUniqueRIDStringObjUsingLs(`${expressionArray[i].rawStr} + ${expressionArray[i+1].rawStr}`);//passing both string and putting a plus inbetween them so that we generate a uniqueRIDStringArray that accounts for all the variables and differential variables used in both expressions
     //console.log(uniqueRIDStringArray);
-    let expression1 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[i].rawStr, uniqueRIDStringArray, lineNumber, mfID, true);
-    let expression2 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[i+1].rawStr, uniqueRIDStringArray, lineNumber, mfID, true)
-    //console.log("uniqueRIDStringArray", uniqueRIDStringArray);
-    //console.log(expression1 + " ?= " +  expression2);
-    if(expression1 != null && expression2 != null){
-      //because this is a high level check we need to make sure that both expressions use the same variables and if not we cannot be sure that the equations don't equal each other so we will not actaully do any check
-      let expression1Variables = GenerateRidStringVariablesObjFromString(expression1, uniqueRIDStringArray);
-      let expression2Variables = GenerateRidStringVariablesObjFromString(expression2, uniqueRIDStringArray);
-      let symbolicallyEqual = "idk";
-      //console.log(expression1Variables, expression2Variables);
-      if(Object.keys(expression1Variables).length == Object.keys(expression2Variables).length){//the arrays have to bee the same length
-        //we are now going to filter expression1Variables array using values from expression2Variables array and if there are any variables left in expression1Variable array we know that these two arrays don't hold the exact same variables as each other and therefore we can't do a high level check
-        if(Object.keys(expression1Variables).filter((v) => {return !Object.keys(expression2Variables).includes(v)}).length == 0){
-          //using all of nerdamer's equality functions to figure out if the expression is correct
-          if(expressionArray[i].operator == "="){
-            if(!nerdamer(expression1).eq(expression2)){//nerdamer equal to function
-              let isEqual = false;
-              //before we can be sure that these two expression are not equal we need to check if both are vectors because for some reason nerdamer returns false even if the expressions are both "[x,y,z]"
-              let resultingVector = nerdamer(expression1).subtract(expression2);
-              if(resultingVector.symbol.elements){//if this doens't equal undefined we know our result "r" is a vector so we can do an extra check before we assume the expressions don't equal
-                isEqual = true;
-                let count = 0;
-                while(count < resultingVector.symbol.elements.length){
-                  if(nerdamer.vecget(resultingVector, count).toString() != "0"){//checking if each component of this vector is equal to 0
-                    isEqual = false;
-                    break;
+    let expression1Obj = ExactConversionFromLatexStringToNerdamerReadableString({
+      ls: expressionArray[i].rawStr,
+      uniqueRIDStringArray: uniqueRIDStringArray,
+      lineNumber: lineNumber,
+      mfID: mfID,
+      throwError: true,
+      convertVectorsToNerdamerMatrices: true,
+      returnFinalObject: true,//if the expression evaulates to a vector we want to return an array
+    });
+    let expression2Obj = ExactConversionFromLatexStringToNerdamerReadableString({
+      ls: expressionArray[i+1].rawStr,
+      uniqueRIDStringArray: uniqueRIDStringArray,
+      lineNumber: lineNumber,
+      mfID: mfID,
+      throwError: true,
+      convertVectorsToNerdamerMatrices: true,
+      returnFinalObject: true,//return an array of the expressions we have to iterate through and the evaluated expression in latex
+    });
+    //console.log("expression1A", expression1Obj);
+    //console.log("expression2A", expression2Obj);
+    if(expression1Obj != null && expression2Obj != null){
+      let count = 0;
+      let lengthOfLongestExpression = Math.max(expression1Obj.array.length, expression2Obj.array.length);
+      
+      while(count < lengthOfLongestExpression){
+        let expression1 = (expression1Obj.array[count] != undefined) ? expression1Obj.array[count] : "0";
+        let expression2 = (expression2Obj.array[count] != undefined) ? expression2Obj.array[count] : "0";
+
+        //because this is a high level check we need to make sure that both expressions use the same variables and if not we cannot be sure that the equations don't equal each other so we will not actaully do any check
+        let expression1Variables = GenerateRidStringVariablesObjFromString(expression1, uniqueRIDStringArray);
+        let expression2Variables = GenerateRidStringVariablesObjFromString(expression2, uniqueRIDStringArray);
+        let symbolicallyEqual = "idk";
+        //console.log(expression1Variables, expression2Variables);
+        if(Object.keys(expression1Variables).length == Object.keys(expression2Variables).length){//the arrays have to bee the same length
+          //we are now going to filter expression1Variables array using values from expression2Variables array and if there are any variables left in expression1Variable array we know that these two arrays don't hold the exact same variables as each other and therefore we can't do a high level check
+          if(Object.keys(expression1Variables).filter((v) => {return !Object.keys(expression2Variables).includes(v)}).length == 0){
+            //using all of nerdamer's equality functions to figure out if the expression is correct
+            if(expressionArray[i].operator == "="){
+              if(!nerdamer(expression1).eq(expression2)){//nerdamer equal to function
+                let isEqual = false;
+                //before we can be sure that these two expression are not equal we need to check if both are vectors because for some reason nerdamer returns false even if the expressions are both "[x,y,z]"
+                let resultingVector = nerdamer(expression1).subtract(expression2);
+                if(resultingVector.symbol.elements){//if this doens't equal undefined we know our result "r" is a vector so we can do an extra check before we assume the expressions don't equal
+                  isEqual = true;
+                  let count = 0;
+                  while(count < resultingVector.symbol.elements.length){
+                    if(nerdamer.vecget(resultingVector, count).toString() != "0"){//checking if each component of this vector is equal to 0
+                      isEqual = false;
+                      break;
+                    }
+                    count++;
                   }
-                  count++;
+                }
+                try{
+                  //there is a case where both expressions are numbers but are equivalent but when calcuating their values the calculation is off by some decimal places
+                  //an example would be log10(25)/log10(5) = 2 but when calculate the leftside gives a very long decimal that is approaching 2 so we use the function "toFixed" to round it to the 12th decimal place
+                  let num1 = math.evaluate(expression1).toExponential().split("e");
+                  let num2 = math.evaluate(expression2).toExponential().split("e");
+                  isEqual = nerdamer(`${Number(num1[0]).toFixed(10)}e${num1[1]}`).eq(`${Number(num2[0]).toFixed(10)}e${num2[1]}`)
+                }
+                catch(err){
+                  isEqual = false;
+                }
+
+
+                if(!isEqual){
+                  symbolicallyEqual = "no";
+                  //console.log("not equal");
+                  expressionThatAreNotCorrect.push({
+                    expression1: expressionArray[i].rawStr,
+                    expression2: expressionArray[i+1].rawStr,
+                    calculatedExpression1: expression1Obj.calculatedLs,
+                    calculatedExpression2: expression2Obj.calculatedLs,
+                    operator: expressionArray[i].operator,
+                  });
+
+                  break;//because we found a component of this expression that don't match the inequality we need to break the loop that loops through each component of the vector or expression calculated
+                  
+                }else{
+                  symbolicallyEqual = "yes";
+                  EquationSet.push({
+                    equation: `${expression1} = ${expression2}`,
+                    uniqueRIDStringArray: uniqueRIDStringArray,
+                  });
                 }
               }
-              try{
-                //there is a case where both expressions are numbers but are equivalent but when calcuating their values the calculation is off by some decimal places
-                //an example would be log10(25)/log10(5) = 2 but when calculate the leftside gives a very long decimal that is approaching 2 so we use the function "toFixed" to round it to the 12th decimal place
-                let num1 = math.evaluate(expression1).toExponential().split("e");
-                let num2 = math.evaluate(expression2).toExponential().split("e");
-                isEqual = nerdamer(`${Number(num1[0]).toFixed(10)}e${num1[1]}`).eq(`${Number(num2[0]).toFixed(10)}e${num2[1]}`)
-              }
-              catch(err){
-                isEqual = false;
-              }
-
-
-              if(!isEqual){
-                symbolicallyEqual = "no";
-                //console.log("not equal");
+            }
+            else if(expressionArray[i].operator == "<"){
+              if(!nerdamer(expression1).lt(expression2)){//nerdamer less than function
+                //console.log("not less than");
                 expressionThatAreNotCorrect.push({
                   expression1: expressionArray[i].rawStr,
                   expression2: expressionArray[i+1].rawStr,
-                  calculatedExpression1: ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(expression1), uniqueRIDStringArray),
-                  calculatedExpression2: ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(expression2), uniqueRIDStringArray),
+                  calculatedExpression1: expression1Obj.calculatedLs,
+                  calculatedExpression2: expression2Obj.calculatedLs,
                   operator: expressionArray[i].operator,
                 });
-              }else{
-                symbolicallyEqual = "yes";
-                EquationSet.push({
-                  equation: `${expression1} = ${expression2}`,
-                  uniqueRIDStringArray: uniqueRIDStringArray,
+
+                break;//because we found a component of this expression that don't match the inequality we need to break the loop that loops through each component of the vector or expression calculated
+              }
+            }
+            else if(expressionArray[i].operator == ">"){
+              if(!nerdamer(expression1).gt(expression2)){//nerdamer greater than function
+                //console.log("not greater than");
+                expressionThatAreNotCorrect.push({
+                  expression1: expressionArray[i].rawStr,
+                  expression2: expressionArray[i+1].rawStr,
+                  calculatedExpression1: expression1Obj.calculatedLs,
+                  calculatedExpression2: expression2Obj.calculatedLs,
+                  operator: expressionArray[i].operator,
                 });
+
+                break;//because we found a component of this expression that don't match the inequality we need to break the loop that loops through each component of the vector or expression calculated
+              }
+            }
+            else if(expressionArray[i].operator == "\\le"){
+              if(!nerdamer(expression1).lte(expression2)){//nerdamer less than or equal to function
+                //console.log("not less than or equal");
+                expressionThatAreNotCorrect.push({
+                  expression1: expressionArray[i].rawStr,
+                  expression2: expressionArray[i+1].rawStr,
+                  calculatedExpression1: expression1Obj.calculatedLs,
+                  calculatedExpression2: expression2Obj.calculatedLs,
+                  operator: expressionArray[i].operator,
+                });
+
+                break;//because we found a component of this expression that don't match the inequality we need to break the loop that loops through each component of the vector or expression calculated
+              }
+            }
+            else if(expressionArray[i].operator == "\\ge"){
+              if(!nerdamer(expression1).gte(expression2)){//nerdamer greater than or equal to function
+                //console.log("not greater than or equal");
+                expressionThatAreNotCorrect.push({
+                  expression1: expressionArray[i].rawStr,
+                  expression2: expressionArray[i+1].rawStr,
+                  calculatedExpression1: expression1Obj.calculatedLs,
+                  calculatedExpression2: expression2Obj.calculatedLs,
+                  operator: expressionArray[i].operator,
+                });
+
+                break;//because we found a component of this expression that don't match the inequality we need to break the loop that loops through each component of the vector or expression calculated
               }
             }
           }
-          else if(expressionArray[i].operator == "<"){
-            if(!nerdamer(expression1).lt(expression2)){//nerdamer less than function
-              //console.log("not less than");
-              expressionThatAreNotCorrect.push({
-                expression1: expressionArray[i].rawStr,
-                expression2: expressionArray[i+1].rawStr,
-                calculatedExpression1: ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(expression1), uniqueRIDStringArray),
-                calculatedExpression2: ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(expression2), uniqueRIDStringArray),
-                operator: expressionArray[i].operator,
-              });
-            }
-          }
-          else if(expressionArray[i].operator == ">"){
-            if(!nerdamer(expression1).gt(expression2)){//nerdamer greater than function
-              //console.log("not greater than");
-              expressionThatAreNotCorrect.push({
-                expression1: expressionArray[i].rawStr,
-                expression2: expressionArray[i+1].rawStr,
-                calculatedExpression1: ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(expression1), uniqueRIDStringArray),
-                calculatedExpression2: ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(expression2), uniqueRIDStringArray),
-                operator: expressionArray[i].operator,
-              });
-            }
-          }
-          else if(expressionArray[i].operator == "\\le"){
-            if(!nerdamer(expression1).lte(expression2)){//nerdamer less than or equal to function
-              //console.log("not less than or equal");
-              expressionThatAreNotCorrect.push({
-                expression1: expressionArray[i].rawStr,
-                expression2: expressionArray[i+1].rawStr,
-                calculatedExpression1: ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(expression1), uniqueRIDStringArray),
-                calculatedExpression2: ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(expression2), uniqueRIDStringArray),
-                operator: expressionArray[i].operator,
-              });
-            }
-          }
-          else if(expressionArray[i].operator == "\\ge"){
-            if(!nerdamer(expression1).gte(expression2)){//nerdamer greater than or equal to function
-              //console.log("not greater than or equal");
-              expressionThatAreNotCorrect.push({
-                expression1: expressionArray[i].rawStr,
-                expression2: expressionArray[i+1].rawStr,
-                calculatedExpression1: ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(expression1), uniqueRIDStringArray),
-                calculatedExpression2: ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(expression2), uniqueRIDStringArray),
-                operator: expressionArray[i].operator,
-              });
-            }
-          }
         }
+
+        if(expressionArray[i].operator == "=" && symbolicallyEqual != "no"){
+          //this means that this line is either symbolicallyEqual or it couldn't be determined if it was symbolicallyEqual
+          if(EL.rawExpressionDataForDeeperCheck[lineNumber] == undefined){
+            EL.rawExpressionDataForDeeperCheck[lineNumber] = [];
+          }
+          EL.rawExpressionDataForDeeperCheck[lineNumber].push([JSON.parse(JSON.stringify(expressionArray[i])), JSON.parse(JSON.stringify(expressionArray[i+1]))]);
+        }
+
+        count++;
       }
 
-      if(expressionArray[i].operator == "=" && symbolicallyEqual != "no"){
-        //this means that this line is either symbolicallyEqual or it couldn't be determined if it was symbolicallyEqual
-        if(EL.rawExpressionDataForDeeperCheck[lineNumber] == undefined){
-          EL.rawExpressionDataForDeeperCheck[lineNumber] = [];
-        }
-        EL.rawExpressionDataForDeeperCheck[lineNumber].push([JSON.parse(JSON.stringify(expressionArray[i])), JSON.parse(JSON.stringify(expressionArray[i+1]))]);
-      }
+      
       
     }
   }
@@ -1673,12 +2500,26 @@ function IdentifyAllKnownVariablesAndTheirValues(expressionArray, lineNumber, mf
   for(let i = 0; i + 1 < expressionArray.length; i++){
     //we need to do an exact conversion from latex to a string that nerdamer can understand. they have a convertFromLatex function but it is very limited so we will use it sparingly
     //this line of code converts the two expressions we were analyzing into nerdeamer readable string then we use nerdamers .eq() function to check if they are equal. if they arent then we add these two expression to the "expressionThatDontEqualEachOther" array
-    let uniqueRIDStringArray = GenerateUniqueRIDStringForVariables(`${expressionArray[i].rawStr} + ${expressionArray[i+1].rawStr}`);//passing both string and putting a plus inbetween them so that we generate a uniqueRIDStringArray that accounts for all the variables and differential variables used in both expressions
+    let uniqueRIDStringArray = UpdateUniqueRIDStringObjUsingLs(`${expressionArray[i].rawStr} + ${expressionArray[i+1].rawStr}`);//passing both string and putting a plus inbetween them so that we generate a uniqueRIDStringArray that accounts for all the variables and differential variables used in both expressions
     //console.log(uniqueRIDStringArray);
-    let expression1 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[i].rawStr, uniqueRIDStringArray, lineNumber, mfID, false);
-    let expression2 = ExactConversionFromLatexStringToNerdamerReadableString(expressionArray[i+1].rawStr, uniqueRIDStringArray, lineNumber, mfID, false)
-    //console.log("uniqueRIDStringArray", uniqueRIDStringArray);
-    //console.log(expression1 + " ?= " +  expression2);
+    let expression1 = ExactConversionFromLatexStringToNerdamerReadableString({
+      ls: expressionArray[i].rawStr,
+      uniqueRIDStringArray: uniqueRIDStringArray,
+      lineNumber: lineNumber,
+      mfID: mfID,
+      throwError: false,
+      convertVectorsToNerdamerMatrices: true,
+    });
+    let expression2 = ExactConversionFromLatexStringToNerdamerReadableString({
+      ls: expressionArray[i+1].rawStr,
+      uniqueRIDStringArray: uniqueRIDStringArray,
+      lineNumber: lineNumber,
+      mfID: mfID,
+      throwError: false,
+      convertVectorsToNerdamerMatrices: true,
+    });
+    
+
     if(expression1 != null && expression2 != null){
       //because this is a high level check we need to make sure that both expressions use the same variables and if not we cannot be sure that the equations don't equal each other so we will not actaully do any check
       let expression1Variables = GenerateRidStringVariablesObjFromString(expression1, uniqueRIDStringArray);
@@ -2020,24 +2861,18 @@ function FindAndParseLimitsAndReturnLatexStringWithNerdamerLimits(ls, uniqueRIDS
               //we need to divide the limit into the variable and the value it is approaching
               let formattedLimit = DivideLimitIntoVariableAndValue(limit);
               if(formattedLimit == null){
-                let errorAlreadyExists = false;
-                for(let error of MathFields[mfID].log.error){
-                  if(error.error.type == "Cannot evaluate limit"){
-                    errorAlreadyExists = true;
-                    break;
-                  }
-                }
-                if(!errorAlreadyExists){
-                  MathFields[mfID].log.error.push({
-                    error: EL.createLoggerErrorFromMathJsError("Cannot evaluate limit"),
-                    latexExpressions: [
-                      "x^{2}\\to a \\ \\text{variable can not be an expression}",
-                      "x\\to a^2,\\ x\\to a\\cdot b,\\ x\\to 4^3 \\ \\text{the value the variable approaches can not be an expression}",
-                      "x\\to a^{-},\\ x\\to a^{+} \\ \\text{the editor can not calculate or distinguish between approaching from the left or right}",
-                      "x\\to\\infty \\ \\text{the editor can not calculate limits that approach infinity}"
-                    ],
-                  });
-                }
+
+                CreateInlineMathFieldError({
+                  mfID: mfID,
+                  error: "Cannot evaluate limit",
+                  latexExpressions: [
+                    "x^{2}\\to a \\ \\text{variable can not be an expression}",
+                    "x\\to a^2,\\ x\\to a\\cdot b,\\ x\\to 4^3 \\ \\text{the value the variable approaches can not be an expression}",
+                    "x\\to a^{-},\\ x\\to a^{+} \\ \\text{the editor can not calculate or distinguish between approaching from the left or right}",
+                    "x\\to\\infty \\ \\text{the editor can not calculate limits that approach infinity}"
+                  ],
+                });
+
                 return null;
 
               }else{
@@ -2052,19 +2887,12 @@ function FindAndParseLimitsAndReturnLatexStringWithNerdamerLimits(ls, uniqueRIDS
             }
           }
           else{
-            let errorAlreadyExists = false;
-            for(let error of MathFields[mfID].log.error){
-              if(error.error.type == "Limit not formatted correctly for editor"){
-                errorAlreadyExists = true;
-                break;
-              }
-            }
-            if(!errorAlreadyExists){
-              MathFields[mfID].log.error.push({
-                error: EL.createLoggerErrorFromMathJsError("Limit not formatted correctly for editor"),
-                latexExpressions: ["\\lim_{x\\to\\infty}\\frac{sin\\left(x\\right)}{x} \\Rightarrow \\lim_{x\\to\\infty}\\left(\\frac{sin\\left(x\\right)}{x}\\right)"]
-              });
-            }
+            CreateInlineMathFieldError({
+              mfID: mfID,
+              error: "Limit not formatted correctly for editor",
+              latexExpressions: ["\\lim_{x\\to\\infty}\\frac{sin\\left(x\\right)}{x} \\Rightarrow \\lim_{x\\to\\infty}\\left(\\frac{sin\\left(x\\right)}{x}\\right)"],
+            });
+
             return null;
           }
         }
@@ -2170,9 +2998,32 @@ function FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls,
               if(s.substring(i3 + 1).indexOf("\\left(") == 0){//we need to have a opening parathensis
                 //console.log("lowerbound", lowerbound);
                 //console.log("upperbound", upperbound);
-                lowerbound = ExactConversionFromLatexStringToNerdamerReadableString(lowerbound, uniqueRIDStringArray, lineNumber, mfID, true);
-                upperbound = ExactConversionFromLatexStringToNerdamerReadableString(upperbound, uniqueRIDStringArray, lineNumber, mfID, true);
+                lowerbound = ExactConversionFromLatexStringToNerdamerReadableString({
+                  ls: lowerbound,
+                  uniqueRIDStringArray: uniqueRIDStringArray,
+                  lineNumber: lineNumber,
+                  mfID: mfID,
+                  throwError: true,
+                });
+                upperbound = ExactConversionFromLatexStringToNerdamerReadableString({
+                  ls: upperbound,
+                  uniqueRIDStringArray: uniqueRIDStringArray,
+                  lineNumber: lineNumber,
+                  mfID: mfID,
+                  throwError: true,
+                });
                 if(lowerbound != null && upperbound != null){
+                  if(lowerbound.indexOf("matrix(") != -1 || upperbound.indexOf("matrix(") != -1){
+                    //a vector cannot be in an integral bound
+                    
+                    CreateInlineMathFieldError({
+                      mfID: mfID,
+                      error: "Vector found in integral bounds",
+                    });
+
+                    return ls;
+                  }
+
                   i4 = FindIndexOfClosingParenthesis(s.substring(i3 + 1 + "\\left(".length));
                   if(i4 != null){
                     i4 += i3 + 1 + "\\left(".length;
@@ -2202,19 +3053,11 @@ function FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls,
               }
               else{
                 //the integral we were parsing was not formatted properly so we need to add an error to its MathField if there isnt one already
-                let errorAlreadyExists = false;
-                for(let error of MathFields[mfID].log.error){
-                  if(error.error.type == "Integral not formatted correctly for editor"){
-                    errorAlreadyExists = true;
-                    break;
-                  }
-                }
-                if(!errorAlreadyExists){
-                  MathFields[mfID].log.error.push({
-                    error: EL.createLoggerErrorFromMathJsError("Integral not formatted correctly for editor"),
-                    latexExpressions: ["\\int_{x_1}^{x_2} xdx \\Rightarrow \\int_{x_1}^{x_2}\\left(xdx\\right)"],
-                  });
-                }
+                CreateInlineMathFieldError({
+                  mfID: mfID,
+                  error: "Integral not formatted correctly for editor",
+                  latexExpressions: ["\\int_{x_1}^{x_2} xdx \\Rightarrow \\int_{x_1}^{x_2}\\left(xdx\\right)"],
+                });
                 
                 return ls;
               }
@@ -2236,19 +3079,11 @@ function FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls,
       }
       if(!foundMatch){
         //if we havent found a match and we know that the character at this index is "\\int" then we known that the "\\int" doesnt have a parentheses after it so we need to throw an error 
-        let errorAlreadyExists = false;
-        for(let error of MathFields[mfID].log.error){
-          if(error.error.type == "Integral not formatted correctly for editor"){
-            errorAlreadyExists = true;
-            break;
-          }
-        }
-        if(!errorAlreadyExists){
-          MathFields[mfID].log.error.push({
-            error: EL.createLoggerErrorFromMathJsError("Integral not formatted correctly for editor"),
-            latexExpressions: ["\\int_{x_1}^{x_2} xdx \\Rightarrow \\int_{x_1}^{x_2}\\left(xdx\\right)"],
-          });
-        }
+        CreateInlineMathFieldError({
+          mfID: mfID,
+          error: "Integral not formatted correctly for editor",
+          latexExpressions: ["\\int_{x_1}^{x_2} xdx \\Rightarrow \\int_{x_1}^{x_2}\\left(xdx\\right)"],
+        });
 
         return ls;//we if we found an int we couldn't convert there is no reason to keep going and parsing the string
       }
@@ -2421,18 +3256,12 @@ function EvaluateStringInsideDefiniteIntegralAndReturnNerdamerString(ls, uniqueR
       let expr = ReturnDefiniteIntegralExpressionAndOtherExpression(dividedString, uniqueRIDStringArray[differentialVariableIndexes[c]].differentialRidString, uniqueRIDStringArray[differentialVariableIndexes[c]].ridString, lowerbound, upperbound);
       
       if(expr.integral == "NaN"){
-        let errorAlreadyExists = false;
-        for(let error of MathFields[mfID].log.error){
-          if(error.error.type == "Definite integral returned 'NaN' (not a number)"){
-            errorAlreadyExists = true;
-            break;
-          }
-        }
-        if(!errorAlreadyExists){
-          MathFields[mfID].log.error.push({
-            error: EL.createLoggerErrorFromMathJsError("Definite integral returned 'NaN' (not a number)"),
-          });
-        }
+
+        CreateInlineMathFieldError({
+          mfID: mfID,
+          error: "Definite integral returned 'NaN' (not a number)",
+        });
+
       }
 
 
@@ -2481,29 +3310,38 @@ function EvaluateStringInsideDefiniteIntegralAndReturnNerdamerString(ls, uniqueR
 
 }
 
-function ExactConversionFromLatexStringToNerdamerReadableString(ls, uniqueRIDStringArray, lineNumber, mfID, throwError = false){
-  //I'm wrapping the absolute value function in parentheses "(abs(....))" so that it doesn't through off the wrap vector
-  ls = ls.replace(/\\left\|/g,"(abs(").replace(/\\right\|/g,"))");//this converts all absolute value signs into nerdamer function "abs(......)"
-  ls = CleanLatexString(ls, ["square-brackets"]);//we need to make sure that brackets formatted in latex are cleaned and
-  ls = FindAndWrapVectorsThatAreBeingMultiplied(ls).replace(/(myCrossProduct)/g,"cross").replace(/(myDotProduct)/g,"dot");//the replacing what i call cross and dot product with what nerdamer recognizes as a cross or dot product
+function ExactConversionFromLatexStringToNerdamerReadableString(opts){
+  //requried params: ls, uniqueRIDStringArray, lineNumber, mfID
+  if(opts.ls == undefined || opts.uniqueRIDStringArray == undefined || opts.lineNumber == undefined || opts.mfID == undefined){
+    return null;
+  }
+  let ls = opts.ls;
+  let uniqueRIDStringArray = opts.uniqueRIDStringArray;
+  let lineNumber = opts.lineNumber;
+  let mfID = opts.mfID;
+  let throwError = (opts.throwError != undefined) ? opts.throwError : false;
+  let returnFinalObject = (opts.returnFinalObject != undefined) ? opts.returnFinalObject: false;//default is to return a matrix if the exprssion is a vector
+  let convertVectorsToNerdamerMatrices = (opts.convertVectorsToNerdamerMatrices != undefined) ? opts.convertVectorsToNerdamerMatrices : false;
+  
+  if(convertVectorsToNerdamerMatrices){
+    ls = FindAndParseVectorMultiplication(opts);
+    if(ls == null){return null;}
+  }
+
   if(ls.indexOf("\\times") != -1){
     if(throwError){
-      let errorAlreadyExists = false;
-      for(let error of MathFields[mfID].log.error){
-        if(error.error.type == "Editor couldn't evaluate cross product"){
-          errorAlreadyExists = true;
-          break;
-        }
-      }
-      if(!errorAlreadyExists){
-        MathFields[mfID].log.error.push({
-          error: EL.createLoggerErrorFromMathJsError("Editor couldn't evaluate cross product"),
-        });
-      }
+
+      CreateInlineMathFieldError({
+        mfID: mfID,
+        error: "Editor couldn't evaluate cross product",
+      });
+
     }
     return null;
   }
-  ls = FormatVectorsIntoNerdamerVectors(ls);
+
+  //I'm wrapping the absolute value function in parentheses "(abs(....))" so that it doesn't through off the wrap vector
+  ls = ls.replace(/\\left\|/g,"(abs(").replace(/\\right\|/g,"))");//this converts all absolute value signs into nerdamer function "abs(......)"
   //we need to see if we can parse \int into a nerdamer string like integrate(x,x). and if we can't convert all of them then the if statement below will not allow us to check if the strings are equal
   ls = FindAndParseLimitsAndReturnLatexStringWithNerdamerLimits(ls, uniqueRIDStringArray, lineNumber, mfID);
   if(ls == null){return null;}//if we couldn't convert a latex limit to nerdamer limit there is no reason to continue because the evaluation wont work
@@ -2512,15 +3350,48 @@ function ExactConversionFromLatexStringToNerdamerReadableString(ls, uniqueRIDStr
   ls = FindAndParseLatexIntegralsAndReturnLatexStringWithNerdamerIntegrals(ls, uniqueRIDStringArray, lineNumber, mfID);
   ls = FindAndConvertLatexLogsToNerdamerReadableStrings(ls);
   ls = FindAndConvertLatexSumsAndProductsToNerdamerReadableStrings(ls, mfID);
+  //console.log("after alot of stuff ls", ls);
   //we have this if statement because if after we are done parsing the latex into nerdamer is it still has these pieces of text in it then we cant go further because nerdamer doesn't know how to handle these texts properly
-  if(ls.indexOf("\\int") == -1 && ls.indexOf("\\prod") == -1 && ls.indexOf("\\sum") == -1 && ls.indexOf("\\nabla") == -1 && ls.indexOf("[") == -1 && ls.indexOf("]") == -1 && ls.indexOf("\\ln") == -1 && ls.indexOf("\\log") == -1){
-    ls = ReplaceVariablesWithUniqueRIDString(ls, uniqueRIDStringArray, true);//passing true as the last parameter tells this function that there are nerdamer functions in this string so don't try to replace the letters in the function names
+  if(ls.indexOf("\\int") == -1 && ls.indexOf("\\prod") == -1 && ls.indexOf("\\sum") == -1 && ls.indexOf("\\nabla") == -1 && ls.indexOf("\\ln") == -1 && ls.indexOf("\\log") == -1){
+    //the ls may have change by now because of cross products or vector addition so we have to use a new uniqueRIDStringArray
+    let updatedUniqueRIDStringArray = UpdateUniqueRIDStringObjUsingLs(ls);
+    ls = ReplaceVariablesWithUniqueRIDString(ls, updatedUniqueRIDStringArray, true);//passing true as the last parameter tells this function that there are nerdamer functions in this string so don't try to replace the letters in the function names
+    //console.log("replacing stuff", ls);
     try{
-      return nerdamer.convertFromLaTeX(ls).evaluate().expand().toString();//this is just a place holder for the actual value we will return
+      let calculatedResults = nerdamer.convertFromLaTeX(ls).evaluate().expand().toString();
+      //this function makes sure that the unit vector coordinate systems match
+      if(!DoExpressionUnitVectorsMatch({str: calculatedResults, mfID: mfID})){return null;}
+      //if "calculatedResults is not a matrix then it just returns an array with one index
+      if(returnFinalObject){
+        let finalObj = {
+          array: ConvertNerdamerMatrixToArray(calculatedResults),
+        };
+
+        //we need to convert each string in the finalObj array to latex
+        let arrayLs = finalObj.array.map((str) => {
+          return ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(str), GetAllUniqueRIDStringsArray());
+        });
+
+        //if the array of calculated latex strings is an array because it is a general vector of demension n we
+        //need to clean out our special characters "\\dim{n}" because they don't mean anything in real latex.
+        //Then we need to wrap the string in brackets "[" "]" and put commas in between components so it looks like a general n demensional vector. example \\left[a,b,c\\right] 
+        if(arrayLs.join(" + ").indexOf("\\dim{") != -1){
+          finalObj.calculatedLs = `\\left[${arrayLs.join(", ").replace(/\\cdot\s*\\dim\{\d\}/g,"")}\\right]`;
+        }else{
+          //if it is a normal vector like cartensian, cylinderical, or sphericial or just a string we will join its
+          //components with a plus. Example ["2\\cdot\\hat{x}","3\\cdot\\hat{y}"] -> "2\\cdot\\hat{x} + 3\\cdot\\hat{y}" which is nice and readable in latex
+          finalObj.calculatedLs = arrayLs.join(" + ");
+        }
+
+        return finalObj;
+      }
+
+      return calculatedResults;
     }catch(err){
       //console.log(err);
       if(throwError){
         //we need to throw a general error that this expression couldn't be parsed so the editor can not verify if the line is correct or not
+        
         let errorAlreadyExists = false;
         for(let error of MathFields[mfID].log.error){
           if(error.error.type == "Editor couldn't evaluate expression (this is probably an error with the editor)" && error.latexExpressions[0] == ls){
@@ -2542,6 +3413,25 @@ function ExactConversionFromLatexStringToNerdamerReadableString(ls, uniqueRIDStr
     //console.log("unparsable characters")
     return null;
   }
+}
+
+function ConvertNerdamerMatrixToArray(str){
+  if(str.indexOf("matrix(") == -1){return [str];}
+
+  let array = [];
+  let foundLastIndex = false;
+  let i = 0;
+  while(!foundLastIndex){
+    try{
+      let s = nerdamer(`matget(${str},${i},0)`).toString();
+      array.push(s);
+    }catch(err){
+      foundLastIndex = true;
+    }
+    i++;
+  }
+
+  return array;
 }
 
 function FormatVectorsIntoNerdamerVectors(ls){
@@ -2641,19 +3531,11 @@ function FindAndConvertLatexSumsAndProductsToNerdamerReadableStrings(ls, mfID){
                   }
                 }else{
                   //a summation or product is not formatted properly
-                  let errorAlreadyExists = false;
-                  for(let error of MathFields[mfID].log.error){
-                    if(error.error.type == `${operation[2]} not formatted correctly for editor`){
-                      errorAlreadyExists = true;
-                      break;
-                    }
-                  }
-                  if(!errorAlreadyExists){
-                    MathFields[mfID].log.error.push({
-                      error: EL.createLoggerErrorFromMathJsError(`${operation[2]} not formatted correctly for editor`),
-                      latexExpressions: [`\\${operation[0]}_{n=1}^{2} n+1 \\Rightarrow \\${operation[0]}_{n=1}^{2}\\left( n+1\\right)`],
-                    });
-                  }
+                  CreateInlineMathFieldError({
+                    mfID: mfID,
+                    error: `${operation[2]} not formatted correctly for editor`,
+                    latexExpressions: [`\\${operation[0]}_{n=1}^{2} n+1 \\Rightarrow \\${operation[0]}_{n=1}^{2}\\left( n+1\\right)`],
+                  });
                   //console.log("summation doesn't have parentheses after it");
                   break;
                 }
