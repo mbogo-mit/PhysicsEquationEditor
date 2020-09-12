@@ -28,6 +28,9 @@ try{
 }catch(err){
 
 }
+
+let ExecutionID = RID();
+
 let EquationSet = [];
 let SqrtLoop = 0;
 let LastVariableRIDChangedToGiven = null;

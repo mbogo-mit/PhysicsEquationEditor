@@ -143,11 +143,17 @@ function SplitLsIntoExpressions(ls){
     expressions.push(ls.substring(startIndex));
   }
 
+  //before return this array we want to filter out any expression that are just empty strings or empty white space
+  expressions = expressions.filter((value)=> {
+    return value.replace(/\s*/g,"").length > 0;//this make sure that the value at this index is not just empty white space or nothing
+  });
+
   return expressions;
 }
 
 function CheckForErrorsInExpression(ls, lineNumber, mfID){
-  ls = RemoveCommentsFromLatexString(ls);
+  //we don't want to parse comments as variables and by replacing these comments with a semicolon it forces the editor to split up equations that have comments in between them so error don't arise 
+  ls = ReplaceCommentsWithSemicolonInLatexString(ls);
   ls = PutBracketsAroundAllSubsSupsAndRemoveEmptySubsSups(ls);
   ls = SimplifyFunctionDefinitionToJustFunctionVariable(ls);//converts "f(x,y)=xy" to f=xy
   let expressions = SplitLsIntoExpressions(ls);
@@ -2323,7 +2329,6 @@ function GenerateRidStringVariablesObjFromString(str, uniqueRIDStringArray){
 }
 
 function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
-  console.log("high level self consistency check");
   let expressionThatAreNotCorrect = [];
   //so now we need to check if there is even a possiblity that we can do a high level check between these expressions
   for(let i = 0; i + 1 < expressionArray.length; i++){
@@ -2502,50 +2507,136 @@ function IdentifyAllKnownVariablesAndTheirValues(expressionArray, lineNumber, mf
     //this line of code converts the two expressions we were analyzing into nerdeamer readable string then we use nerdamers .eq() function to check if they are equal. if they arent then we add these two expression to the "expressionThatDontEqualEachOther" array
     let uniqueRIDStringArray = UpdateUniqueRIDStringObjUsingLs(`${expressionArray[i].rawStr} + ${expressionArray[i+1].rawStr}`);//passing both string and putting a plus inbetween them so that we generate a uniqueRIDStringArray that accounts for all the variables and differential variables used in both expressions
     //console.log(uniqueRIDStringArray);
-    let expression1 = ExactConversionFromLatexStringToNerdamerReadableString({
+    let expression1Obj = ExactConversionFromLatexStringToNerdamerReadableString({
       ls: expressionArray[i].rawStr,
       uniqueRIDStringArray: uniqueRIDStringArray,
       lineNumber: lineNumber,
       mfID: mfID,
       throwError: false,
       convertVectorsToNerdamerMatrices: true,
+      returnFinalObject: true,//if the expression evaulates to a vector we want to return an array
     });
-    let expression2 = ExactConversionFromLatexStringToNerdamerReadableString({
+    let expression2Obj = ExactConversionFromLatexStringToNerdamerReadableString({
       ls: expressionArray[i+1].rawStr,
       uniqueRIDStringArray: uniqueRIDStringArray,
       lineNumber: lineNumber,
       mfID: mfID,
       throwError: false,
       convertVectorsToNerdamerMatrices: true,
+      returnFinalObject: true,//if the expression evaulates to a vector we want to return an array
     });
-    
 
-    if(expression1 != null && expression2 != null){
-      //because this is a high level check we need to make sure that both expressions use the same variables and if not we cannot be sure that the equations don't equal each other so we will not actaully do any check
-      let expression1Variables = GenerateRidStringVariablesObjFromString(expression1, uniqueRIDStringArray);
-      let expression2Variables = GenerateRidStringVariablesObjFromString(expression2, uniqueRIDStringArray);
-      //console.log(expression1Variables, expression2Variables);
-      //the next thing we will check is if we can solve for any unknown variables and if there are no unknown variables 
-      if(expressionArray[i].operator == "="){
-        //this function checks if this equations can help solve for a unknown variable in it if there are any and also plugs in the values for known or given variables and sees if the expressions are actually equal
-        let returnValue = TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOther(expression1, expression2, Object.assign(expression1Variables, expression2Variables), uniqueRIDStringArray);
-        if(returnValue != undefined){
-          if(returnValue.error == true){
-            //this means that the expressions may be symbolically equal but when the variables values are plugged in they are not equal
-            if(EL.expressionsThatDontActuallyEqualEachOther[lineNumber] == undefined){
-              EL.expressionsThatDontActuallyEqualEachOther[lineNumber] = [];//setting the value equal to an array so that we can push values into it
-            } 
-            //let exp1 = nerdamer.convertToLaTeX(ReplaceUniqueRIDStringWithVariableLs(expression1, uniqueRIDStringArray));
-            //let exp2 = nerdamer.convertToLaTeX(ReplaceUniqueRIDStringWithVariableLs(expression2, uniqueRIDStringArray));
-            //EL.expressionsThatDontActuallyEqualEachOther[lineNumber].push(`(${expressionArray[i].rawStr} = ${expressionArray[i+1].rawStr}) \\rightarrow (${exp1} \\neq ${exp2})`);
-            EL.expressionsThatDontActuallyEqualEachOther[lineNumber].push(`(${expressionArray[i].rawStr} \\neq ${expressionArray[i+1].rawStr}) \\Rightarrow (${returnValue.num1} \\neq ${returnValue.num2})`);
+    let expressionsActuallyEqualEachOther = true;
+    let expression1Parsed = [];
+    let expression2Parsed = [];
+
+
+    if(expression1Obj != null && expression2Obj != null){
+      let count = 0;
+      let lengthOfLongestExpression = Math.max(expression1Obj.array.length, expression2Obj.array.length);
+      
+      while(count < lengthOfLongestExpression){
+        let expression1 = RemoveUnitVectorRIDStringFromString((expression1Obj.array[count] != undefined) ? expression1Obj.array[count] : "0");
+        let expression2 = RemoveUnitVectorRIDStringFromString((expression2Obj.array[count] != undefined) ? expression2Obj.array[count] : "0");
+
+        //because this is a high level check we need to make sure that both expressions use the same variables and if not we cannot be sure that the equations don't equal each other so we will not actaully do any check
+        let expression1Variables = GenerateRidStringVariablesObjFromString(expression1.str, uniqueRIDStringArray);
+        let expression2Variables = GenerateRidStringVariablesObjFromString(expression2.str, uniqueRIDStringArray);
+        //console.log(expression1Variables, expression2Variables);
+        //the next thing we will check is if we can solve for any unknown variables and if there are no unknown variables 
+        if(expressionArray[i].operator == "="){
+          //this function checks if this equations can help solve for a unknown variable in it if there are any and also plugs in the values for known or given variables and sees if the expressions are actually equal
+          let returnValue = TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOther(expression1.str, expression2.str, Object.assign(expression1Variables, expression2Variables), uniqueRIDStringArray);
+          if(returnValue.type == "done"){
+            return;
+          }else if(returnValue.type == "stop"){
+            //this means we couldn't calculate the actual value of the expression so we are just going to pass it to the array
+            expression1Parsed[count] = expression1.originalString;
+            expression2Parsed[count] = expression2.originalString;
+          }else if(returnValue.type == "error"){
+              //this means we were able to calculated the actual value of the expression and they don't equal so 
+              expressionsActuallyEqualEachOther = false;
+              expression1Parsed[count] = {
+                alreadyLatex: true,
+                value: (expression1.unitVectorLs == null) ? returnValue.num1 : `${returnValue.num1}\\cdot${expression1.unitVectorLs}`
+              };
+              expression2Parsed[count] = {
+                alreadyLatex: true,
+                value: (expression2.unitVectorLs == null) ? returnValue.num2 : `${returnValue.num2}\\cdot${expression2.unitVectorLs}`,
+              };
           }
         }
+        count++;
+      }
+
+      //after we have parts through all the components of the expression we need to decide if the expressions are actually equal then parse the results we go and assign them to EL.expressionsThatDontActuallyEqualEachOther Object
+
+      if(!expressionsActuallyEqualEachOther){
+        //this means that the expressions may be symbolically equal but when the variables values are plugged in they are not equal
+        if(EL.expressionsThatDontActuallyEqualEachOther[lineNumber] == undefined){
+          EL.expressionsThatDontActuallyEqualEachOther[lineNumber] = [];//setting the value equal to an array so that we can push values into it
+        } 
+
+        //we have an array of expressions represented in RIDStrings or exact numbers. If it is an exact number we need to figure
+        //out if the expression had a unit vector that we removed to do the calculation. If it did then we need to put the unit
+        //vector back and then after we have checked that for all of the components we can turn this array of expressions in RIDString
+        //format to a calculatedLs (where a calculated ls is what we call an expression when it has been calculated by nerdamer and
+        //needs to be returned as an ls. The  expression also has to be an array)
+        let calculatedLs1 = ConvertExpressionRIDStringArrayToCalculatedLs(expression1Parsed);
+        let calculatedLs2 = ConvertExpressionRIDStringArrayToCalculatedLs(expression2Parsed);
+        EL.expressionsThatDontActuallyEqualEachOther[lineNumber].push(`(${expressionArray[i].rawStr} \\neq ${expressionArray[i+1].rawStr}) \\Rightarrow (${calculatedLs1} \\neq ${calculatedLs2})`);
       }
       
+
     }
   }
 }
+
+function RemoveUnitVectorRIDStringFromString(str){
+  let originalString = str;
+  //we need to remove unit vector RIDStrings from the strings and remember which one we removed so we can return it back along with the modified str without unit vector ridStrings
+  //we want to remove the unit vector because we already know that the string is in the same demension as the other string
+  let unitVectors = ["\\hat{x}","\\hat{i}","\\hat{r}","\\hat{y}", "\\hat{j}","\\hat{\\theta}","\\hat{z}","\\hat{k}","\\hat{\\phi}"];
+  //all we need to do is replace all unit vectors and demensions "\\dim{n}" with 1 and then evaluate the rawDotproduct and return the value as the cleaned dot product
+  let unitVectorRIDString = null;
+  let unitVectorLs = null;
+  let i = 0; 
+  let parsingGenericDemensions = true;
+  while(i < unitVectors.length || parsingGenericDemensions){
+    parsingGenericDemensions = false;//this keeps track of wheter we have parsed through all the generic demension variables "\\dim{n}"
+    if(UniqueRIDStringObj[`\\dim{${i + 1}}`] != undefined){
+      parsingGenericDemensions = true;
+      let dimNRIDString = UniqueRIDStringObj[`\\dim{${i + 1}}`].ridString;
+      if(str.indexOf(dimNRIDString) != -1){
+        str = str.replace(new RegExp(dimNRIDString, 'g'), "1");
+        unitVectorRIDString = dimNRIDString;
+        unitVectorLs = `\\dim{${i + 1}}`;
+        break;//we found the unit vector ridString that was in this string
+      }
+    }
+      
+    if(i < unitVectors.length){
+      if(UniqueRIDStringObj[unitVectors[i]] != undefined){
+        if(str.indexOf(UniqueRIDStringObj[unitVectors[i]].ridString) != -1){
+          str = str.replace(new RegExp(UniqueRIDStringObj[unitVectors[i]].ridString, 'g'), "1");
+          unitVectorRIDString = UniqueRIDStringObj[unitVectors[i]].ridString;
+          unitVectorLs = unitVectors[i];
+          break;//we found the unit vector ridString that was in this string
+        }
+      }
+    }
+    i++;
+  }
+
+  return {
+    unitVectorRIDString: unitVectorRIDString,
+    unitVectorLs: unitVectorLs,
+    str: str,
+    originalString: originalString,
+  };
+
+}
+
 
 function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOther(exp1, exp2, expVars, uniqueRIDStringArray){
   //this function takes expressions that make up an equation "{expression1} = {expression2}" and checks if the expression
@@ -2554,7 +2645,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
   //if the expressions actually equal each other. For example if there is an equation "F=ma" and all variable values are konwn F=10, m=1, a=1,
   //symbolically these equations may be equal but when you plug in there values they are not equal
 
-
+  
   //the first thing is we are going to go through the list of expVars and try to plug in all the values for all the variables in exp1 and exp2.
   //if that doesn't work for some reason, either because a variable is known or given but the actual value is undefined or if the variable is actuallly
   //unknown we will stop that and we will transition to trying to solve for unknown variables symbolically
@@ -2568,27 +2659,26 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
     let v = (value != null) ? GetStoredVariableInfo(value) : null;
     if(v == null){
       //this means there are differential variables that have not been solved for in this equation or the variable we are looking for doesn't exist so we will just stop in our tracks and not go any further
-      return;
+      return {type: "stop"};
     }
-    else{
-      if(v.state != "given" && v.currentState != "known"){
-        if(status.unknownVariable == null){
-          status.unknownVariable = key;//we set this as the unknown variable we are 
-        }else{//this means that there are more than 1 unknown variable so we have to stop hear cuz we can solve for the unknown variable if there is more than one
-          return;
-        }
-      }
 
-      if(v.value != undefined && v.value != "" && v.valueFormattingError == undefined){
-        try{
-          status.variableValues[key] = nerdamer.convertFromLaTeX(CleanLatexString(v.value, ["multiplication"])).toString();
-        }catch(err){//we couldn't convert latex string to something that nerdamer could understand so we cant be sure that this variable's value is known
-          console.log("couldn't convert variable value to nerdamer value");
-          status.undefinedValuesCount += 1;
-        }
-      }else{
+    if(v.state != "given" && v.currentState != "known"){
+      if(status.unknownVariable == null){
+        status.unknownVariable = key;//we set this as the unknown variable we are 
+      }else{//this means that there are more than 1 unknown variable so we have to stop hear cuz we can solve for the unknown variable if there is more than one
+        return {type: "stop"};
+      }
+    }
+
+    if(v.value != undefined && v.value != "" && v.valueFormattingError == undefined){
+      try{
+        status.variableValues[key] = nerdamer.convertFromLaTeX(CleanLatexString(v.value, ["multiplication"])).toString();
+      }catch(err){//we couldn't convert latex string to something that nerdamer could understand so we cant be sure that this variable's value is known
+        console.log("couldn't convert variable value to nerdamer value");
         status.undefinedValuesCount += 1;
       }
+    }else{
+      status.undefinedValuesCount += 1;
     }
   }
 
@@ -2607,11 +2697,11 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
       if(!nerdamer(`${Number(num1[0]).toFixed(PrecisionSigFigs)}e${num1[1]}`).eq(`${Number(num2[0]).toFixed(PrecisionSigFigs)}e${num2[1]}`)){
         //if the two expression are not equal then we need to throw an error: expression may be symbolically equal but when values are plug in for the variables they are not equal
         //console.log("error: expression may be symbolically equal but when values are plug in for the variables they are not equal");
-        return {error: true, num1: ConvertStringToScientificNotation(num1.join("e")), num2: ConvertStringToScientificNotation(num2.join("e"))};
+        return {type: "error", num1: ConvertStringToScientificNotation(num1.join("e")), num2: ConvertStringToScientificNotation(num2.join("e"))};
       }
     }catch(err){
       //console.log("couldn't evaluate if expressions are equal")
-      return;
+      return {type: "stop"};
     }
   }else if(status.unknownVariable != null){//this means there is one unknown variable that we can try to solve for
     try{
@@ -2678,7 +2768,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
           //call "UpdateKnownUnknownVariables" function which will parse the rawExpressionData from the first line with the new information we have put into the known unknown variables.
           //By passing in "false" this function wont reset the variables currentState values which is what we want because we want the information we have just found to persist. Otherwise we would get a loop
           EL.UpdateKnownUnknownVariables(false);
-          return;//after this function is done running it means it has already parsed all the lines starting from the top  so we just end right here
+          return {type: "done"};//after this function is done running it means it has already parsed all the lines starting from the top  so we just end right here
         }
       }  
     }catch(err){
@@ -2686,6 +2776,8 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
       //console.log("couldn't figure out the solution to unknown variable");
     }
   }
+
+  return {type: "stop"};
 
 }
 
@@ -3315,6 +3407,9 @@ function ExactConversionFromLatexStringToNerdamerReadableString(opts){
   if(opts.ls == undefined || opts.uniqueRIDStringArray == undefined || opts.lineNumber == undefined || opts.mfID == undefined){
     return null;
   }
+  
+  if(opts.ls.replace(/\s*/g,"").length == 0){return null};//this means we are trying to evaluate an empty ls string
+
   let ls = opts.ls;
   let uniqueRIDStringArray = opts.uniqueRIDStringArray;
   let lineNumber = opts.lineNumber;
@@ -3367,21 +3462,7 @@ function ExactConversionFromLatexStringToNerdamerReadableString(opts){
           array: ConvertNerdamerMatrixToArray(calculatedResults),
         };
 
-        //we need to convert each string in the finalObj array to latex
-        let arrayLs = finalObj.array.map((str) => {
-          return ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(str), GetAllUniqueRIDStringsArray());
-        });
-
-        //if the array of calculated latex strings is an array because it is a general vector of demension n we
-        //need to clean out our special characters "\\dim{n}" because they don't mean anything in real latex.
-        //Then we need to wrap the string in brackets "[" "]" and put commas in between components so it looks like a general n demensional vector. example \\left[a,b,c\\right] 
-        if(arrayLs.join(" + ").indexOf("\\dim{") != -1){
-          finalObj.calculatedLs = `\\left[${arrayLs.join(", ").replace(/\\cdot\s*\\dim\{\d\}/g,"")}\\right]`;
-        }else{
-          //if it is a normal vector like cartensian, cylinderical, or sphericial or just a string we will join its
-          //components with a plus. Example ["2\\cdot\\hat{x}","3\\cdot\\hat{y}"] -> "2\\cdot\\hat{x} + 3\\cdot\\hat{y}" which is nice and readable in latex
-          finalObj.calculatedLs = arrayLs.join(" + ");
-        }
+        finalObj.calculatedLs = ConvertExpressionRIDStringArrayToCalculatedLs(finalObj.array);
 
         return finalObj;
       }
@@ -3413,6 +3494,33 @@ function ExactConversionFromLatexStringToNerdamerReadableString(opts){
     //console.log("unparsable characters")
     return null;
   }
+}
+
+function ConvertExpressionRIDStringArrayToCalculatedLs(ExpressionRIDStringArray){
+  //we need to convert each string in the finalObj array to latex
+  let arrayLs = ExpressionRIDStringArray.map((str) => {
+    if(str.alreadyLatex == true){
+      return str.value;
+    }
+    return ReplaceUniqueRIDStringWithVariableLs(nerdamer.convertToLaTeX(str), GetAllUniqueRIDStringsArray());
+  });
+
+  let calculatedLs = "";
+
+  //if the array of calculated latex strings is an array because it is a general vector of demension n we
+  //need to clean out our special characters "\\dim{n}" because they don't mean anything in real latex.
+  //Then we need to wrap the string in brackets "[" "]" and put commas in between components so it looks like a general n demensional vector. example \\left[a,b,c\\right] 
+  if(arrayLs.join(" + ").indexOf("\\dim{") != -1){
+    calculatedLs = `\\left[${arrayLs.join(", ").replace(/\\cdot\s*\\dim\{\d\}/g,"")}\\right]`;
+  }else{
+    //if it is a normal vector like cartensian, cylinderical, or sphericial or just a string we will join its
+    //components with a plus. Example ["2\\cdot\\hat{x}","3\\cdot\\hat{y}"] -> "2\\cdot\\hat{x} + 3\\cdot\\hat{y}" which is nice and readable in latex
+    //removing any indexes that are just "0". We couldn't do that untill we were sure that this is not a generic n demensional vector because if it was
+    //the "0"'s act as place holders for demensions so you could have a vector like [1,0,2]. but if it is a unit vector 1\hat{x} + 0 + 2\hat{z} in this case we don't need the "0"
+    calculatedLs = arrayLs.filter((value)=>{return value != "0"}).join(" + ");
+  }
+
+  return calculatedLs;
 }
 
 function ConvertNerdamerMatrixToArray(str){
