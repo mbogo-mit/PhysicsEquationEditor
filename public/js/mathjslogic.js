@@ -260,21 +260,20 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
       if(exprs[i][j].parsed){
         //now that we have parsed the latex string into a mathjs readable string we evaluate it and grab any errors
         //that math js throws and interprets them for the user
-        let str = "";
         try {
-          str = math.evaluate(exprs[i][j].str).toString();
-          results[i].push({success: str});
+          math.evaluate(exprs[i][j].str).toString();
+          results[i].push({success: exprs[i][j].str});//we are passing in the raw string because in the raw format we can replace radians, steradians and vectors and we don't have to worry about them being a part of some division. For example the evaluate str could be "1 m/rad" so replacing "rad" with "" would break it. the unevaluated will never break "(1 m)/(1 rad)" -> "(1 m)/(1 )"
         }
         catch(err){
           //if it throws an error then we can try evaluating the string but taking out radians and steradians because they are untiless pretty much but the editor see them as units
           try {
-            str = math.evaluate(exprs[i][j].str.replace(/rad/g,"m/m").replace(/sr/g,"m/m")).toString();
-            results[i].push({success: str});
+            math.evaluate(exprs[i][j].str.replace(/rad/g,"").replace(/sr/g,"")).toString();
+            results[i].push({success: exprs[i][j].str});//we are passing in the raw string because in the raw format we can replace radians, steradians and vectors and we don't have to worry about them being a part of some division. For example the evaluate str could be "1 m/rad" so replacing "rad" with "" would break it. the unevaluated will never break "(1 m)/(1 rad)" -> "(1 m)/(1 )"
           }
           catch(err2){
             try{
               //by removing the vector unit we can figure out if the units don't match because the user is adding a scalar with a vector
-              math.evaluate(exprs[i][j].str.replace(/rad/g,"m/m").replace(/sr/g,"m/m").replace(/vector/g,"")).toString();
+              math.evaluate(exprs[i][j].str.replace(/rad/g,"").replace(/sr/g,"").replace(/vector/g,"")).toString();
               results[i].push({error: "Adding a scalar with a vector"});
             }
             catch(err3){
@@ -345,11 +344,11 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
       }
       catch(err){
         let editedSuccesses = [];
+        //removing rad and steradian from equations to see if they will equal each other because the editor can't recorgnize the arc formula  s=r\theta cuz units wise you are saying 1m=1m*rad
+        for(var i = 0; i < successes.length; i++){
+          editedSuccesses.push(successes[i].replace(/rad/g,"").replace(/sr/g,""));
+        }
         try{
-          //removing rad and steradian from equations to see if they will equal each other because the editor can't recorgnize the arc formula  s=r\theta cuz units wise you are saying 1m=1m*rad
-          for(var i = 0; i < successes.length; i++){
-            editedSuccesses.push(successes[i].replace(/rad/g,"m/m").replace(/sr/g,"m/m"));
-          }
           equationUnits = math.evaluate(editedSuccesses.join(" + ")).toString();
           equationUnitsMatch = true;
         }
@@ -1288,8 +1287,6 @@ function FindAndParseVectorMultiplication(opts){
   //the first thing we need to do is convert all vectors into matrixes so we can parse them later
   ls = FindAndConvertAllVectorsIntoNerdamerMatrixesForLs(opts.ls);
   ls = FindAndEvaluateVectorMultiplication(Object.assign(opts, {ls: ls}));
-  if(ls == null){return null;}
-
   return ls;
 }
 
@@ -1594,8 +1591,15 @@ function FindAndEvaluateVectorMultiplication(opts){
       }
     }
     else{
-      //if it broke once then it will just keep breaking so we just got to end it
-      return null;
+      //if we werent able to find a vector on either side of the mutliplication and the multiplication is a dot product then we will just replace the "\\cdot" with "*" because it is not a true dot product
+      if(multiply.type == "\\cdot"){
+        //replacing "\\cdot" with "*"
+        newLs = `${newLs.substring(0,multiply.index)} * ${newLs.substring(multiply.index + multiply.type.length)}`
+      }else{
+        //if we werent able to find a vector on each side of the operator and the multiplication is a cross prodcut then we need to stop parsing because that means there is an error in how the user formatted their cross product
+        return null;
+      }
+      
     }
 
   }
@@ -2354,8 +2358,10 @@ function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
       convertVectorsToNerdamerMatrices: true,
       returnFinalObject: true,//return an array of the expressions we have to iterate through and the evaluated expression in latex
     });
-    //console.log("expression1A", expression1Obj);
-    //console.log("expression2A", expression2Obj);
+
+    //console.log("expression1Obj", expression1Obj);
+    //console.log("expression2Obj", expression2Obj);
+    
     if(expression1Obj != null && expression2Obj != null){
       let count = 0;
       let lengthOfLongestExpression = Math.max(expression1Obj.array.length, expression2Obj.array.length);
@@ -2365,8 +2371,8 @@ function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
         let expression2 = (expression2Obj.array[count] != undefined) ? expression2Obj.array[count] : "0";
 
         //because this is a high level check we need to make sure that both expressions use the same variables and if not we cannot be sure that the equations don't equal each other so we will not actaully do any check
-        let expression1Variables = GenerateRidStringVariablesObjFromString(expression1, uniqueRIDStringArray);
-        let expression2Variables = GenerateRidStringVariablesObjFromString(expression2, uniqueRIDStringArray);
+        let expression1Variables = GenerateRidStringVariablesObjFromString(expression1, GetAllUniqueRIDStringsArray());
+        let expression2Variables = GenerateRidStringVariablesObjFromString(expression2, GetAllUniqueRIDStringsArray());
         let symbolicallyEqual = "idk";
         //console.log(expression1Variables, expression2Variables);
         if(Object.keys(expression1Variables).length == Object.keys(expression2Variables).length){//the arrays have to bee the same length
@@ -2540,8 +2546,8 @@ function IdentifyAllKnownVariablesAndTheirValues(expressionArray, lineNumber, mf
         let expression2 = RemoveUnitVectorRIDStringFromString((expression2Obj.array[count] != undefined) ? expression2Obj.array[count] : "0");
 
         //because this is a high level check we need to make sure that both expressions use the same variables and if not we cannot be sure that the equations don't equal each other so we will not actaully do any check
-        let expression1Variables = GenerateRidStringVariablesObjFromString(expression1.str, uniqueRIDStringArray);
-        let expression2Variables = GenerateRidStringVariablesObjFromString(expression2.str, uniqueRIDStringArray);
+        let expression1Variables = GenerateRidStringVariablesObjFromString(expression1.str, GetAllUniqueRIDStringsArray());
+        let expression2Variables = GenerateRidStringVariablesObjFromString(expression2.str, GetAllUniqueRIDStringsArray());
         //console.log(expression1Variables, expression2Variables);
         //the next thing we will check is if we can solve for any unknown variables and if there are no unknown variables 
         if(expressionArray[i].operator == "="){
@@ -2694,7 +2700,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
       let num1 = math.evaluate(expression1).toExponential().split("e");
       let num2 = math.evaluate(expression2).toExponential().split("e");
       //we are going to the 6th significant figure because that is what the variable value goes up to everything else is truncated
-      if(!nerdamer(`${Number(num1[0]).toFixed(PrecisionSigFigs)}e${num1[1]}`).eq(`${Number(num2[0]).toFixed(PrecisionSigFigs)}e${num2[1]}`)){
+      if(!nerdamer(`${Number(num1[0]).toFixed(PrecisionSigFigs-2)}e${num1[1]}`).eq(`${Number(num2[0]).toFixed(PrecisionSigFigs-2)}e${num2[1]}`)){
         //if the two expression are not equal then we need to throw an error: expression may be symbolically equal but when values are plug in for the variables they are not equal
         //console.log("error: expression may be symbolically equal but when values are plug in for the variables they are not equal");
         return {type: "error", num1: ConvertStringToScientificNotation(num1.join("e")), num2: ConvertStringToScientificNotation(num2.join("e"))};
@@ -3418,8 +3424,11 @@ function ExactConversionFromLatexStringToNerdamerReadableString(opts){
   let returnFinalObject = (opts.returnFinalObject != undefined) ? opts.returnFinalObject: false;//default is to return a matrix if the exprssion is a vector
   let convertVectorsToNerdamerMatrices = (opts.convertVectorsToNerdamerMatrices != undefined) ? opts.convertVectorsToNerdamerMatrices : false;
   
+  ls = FormatAbsoluteValuesSqrtOfDotProduct(ls);
+  if(ls == null){return null;}
+
   if(convertVectorsToNerdamerMatrices){
-    ls = FindAndParseVectorMultiplication(opts);
+    ls = FindAndParseVectorMultiplication(Object.assign(opts, {ls: ls}));
     if(ls == null){return null;}
   }
 
@@ -3435,8 +3444,6 @@ function ExactConversionFromLatexStringToNerdamerReadableString(opts){
     return null;
   }
 
-  //I'm wrapping the absolute value function in parentheses "(abs(....))" so that it doesn't through off the wrap vector
-  ls = ls.replace(/\\left\|/g,"(abs(").replace(/\\right\|/g,"))");//this converts all absolute value signs into nerdamer function "abs(......)"
   //we need to see if we can parse \int into a nerdamer string like integrate(x,x). and if we can't convert all of them then the if statement below will not allow us to check if the strings are equal
   ls = FindAndParseLimitsAndReturnLatexStringWithNerdamerLimits(ls, uniqueRIDStringArray, lineNumber, mfID);
   if(ls == null){return null;}//if we couldn't convert a latex limit to nerdamer limit there is no reason to continue because the evaluation wont work
@@ -3494,6 +3501,39 @@ function ExactConversionFromLatexStringToNerdamerReadableString(opts){
     //console.log("unparsable characters")
     return null;
   }
+}
+
+function FormatAbsoluteValuesSqrtOfDotProduct(ls){
+  //this function needs to find every instance of \\left| and \\right| and replace whats inside with the sqrt of the dot product which is mathematically the absoulte value is
+  
+  let i = 0;
+  let i2 = 0;
+  let stringInsideAbsoluteValue = "";
+  let mismatchAbsoluteValueSign = false;
+  while(ls.indexOf("\\left|") != -1 && ls.indexOf("\\right|") != -1){
+    i = ls.indexOf("\\left|");
+    i2 = FindIndexOfClosingPipe(ls.substring(i + "\\left|".length));
+    if(i2 != null){
+      i2 += i + "\\left|".length
+      stringInsideAbsoluteValue = ls.substring(i + "\\left|".length, i2);
+      ls = `${ls.substring(0,i)} (\\sqrt(${stringInsideAbsoluteValue} \\cdot ${stringInsideAbsoluteValue})) ${ls.substring(i2 + "\\right|".length)}`;
+    }else{
+      mismatchAbsoluteValueSign = true;
+      break;
+    }
+  }
+
+  if(ls.indexOf("\\left|") != -1 || ls.indexOf("\\right|") != -1 || mismatchAbsoluteValueSign){
+    //the user has mismatched absolute value signs
+    console.log("mismatched absolute value signs");
+    CreateInlineMathFieldError({
+      mfID: mfID,
+      error: "Mismatched absolute value sign",
+    });
+    return null;
+  }
+
+  return ls;
 }
 
 function ConvertExpressionRIDStringArrayToCalculatedLs(ExpressionRIDStringArray){

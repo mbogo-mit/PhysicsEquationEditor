@@ -1417,9 +1417,10 @@ function CheckForAndDisplayRelevantEquations(){
           }
         }
         else{
+          console.log($(this).attr("latex"));
           console.log(`misspelled key: ${key}`);
-            isRelevantEquation = false;//misspelled quantity
-            break;
+          isRelevantEquation = false;//misspelled quantity
+          break;
         }
       }
 

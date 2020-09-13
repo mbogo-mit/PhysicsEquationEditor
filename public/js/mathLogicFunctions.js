@@ -327,3 +327,25 @@ function FindIndexOfClosingSquareBracket(ls){
   }
   return null;
 }
+
+function FindIndexOfClosingPipe(ls){
+  let unclosedBrackets = 1;
+  let i = 0;
+  while(i < ls.length){
+    if(ls.substring(i).indexOf("\\left|") == 0){
+      unclosedBrackets += 1;
+    }
+    else if(ls.substring(i).indexOf("\\right|") == 0){
+      unclosedBrackets -= 1;
+    }
+
+    if(unclosedBrackets > 0){
+      i++;
+    }
+    else{
+      return i;
+    }
+
+  }
+  return null;
+}

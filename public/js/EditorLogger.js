@@ -145,6 +145,9 @@ function EditorLogger(){
     "Vector found in integral bounds": {
       description: "Integral bounds must evaluate to a scalar value",
     },
+    "Mismatched absolute value sign": {
+      description: "There is an absolute value sign that is not formatted correctly on this line"
+    },
     "defaultError": {
       description: "There is something wrong with an equation on this line. This may be a problem with the Editor. Please contact customer support if the issue persists",
     }

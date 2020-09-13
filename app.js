@@ -1633,7 +1633,7 @@ ListOfEquations = {
         "\\rho=\\frac{Q}{V}",
       ],
       quantities: [//describes the quantities that are being related in the respective equations
-        {"electric charge density": 1, "electrci charge": 1, "volume": 1},
+        {"electric volume charge density": 1, "electric charge": 1, "volume": 1},
       ],
     },
     {
@@ -1648,7 +1648,7 @@ ListOfEquations = {
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"current density": 1, "electric current": 1, "area": 1},
-        {"velocity": 1, "electric charge density": 1, "current density": 1},
+        {"velocity": 1, "electric volume charge density": 1, "current density": 1},
       ],
     },
     {
@@ -1664,7 +1664,7 @@ ListOfEquations = {
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"electric potential": 1, "electric current": 1, "electric resistance": 1},
-        {"electric field strength": 1, "electric charge density": 1, "current density": 1},
+        {"electric field strength": 1, "electric volume charge density": 1, "current density": 1},
         {"current density": 1, "electric field strength": 1, "conductivity": 1},
       ],
     },
@@ -1915,7 +1915,7 @@ ListOfEquations = {
       ],
       quantities: [//describes the quantities that are being related in the respective equations
         {"electric field strength": 1, "area": 1, "electric charge": 1, "Permittivity of vacuum": 1},
-        {"Permittivity of vacuum": 1, "electric field strength": 1, "electric charge density": 1},
+        {"Permittivity of vacuum": 1, "electric field strength": 1, "electric volume charge density": 1},
       ],
     },
     {
