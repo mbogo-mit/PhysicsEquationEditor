@@ -5,6 +5,169 @@
         <input placeholder="Search units list" id="input-user-units-search" type="text">
       </div>
     </div>
+    <div class="row my-row">
+      <div class="col m12">
+        <span id="badge-create-custom-unit" href="#modal-create-custom-unit" class="new badge modal-trigger" data-badge-caption="Create Custom Unit"></span>
+      </div>
+    </div>
     <div id="units-search-results"></div>
+  </div>
+</div>
+
+<div id="modal-create-custom-unit" class="modal">
+  <div class="modal-content">
+    <div class="row my-row">
+      <div class="col m8">
+        <div class="row my-row">
+          <div class="col m12 my-col">
+            <div class="row">
+              <div class="col m12">
+                <h5>Custom SI Unit</h5>
+              </div>
+              <div class="col m12">
+                <input id="input-custom-unit" placeholder="m^2/s" type="text" class="validate">
+                <div id="helper-text-input-custom-unit" class="red-text text-lighten-1"></div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col m12 center">
+                <span id="staticMathFieldCustomUnit"></span>
+              </div>
+            </div>
+            <div class="row my-row">
+              <div class="col m12 my-col">
+                <a id="btn-create-custom-unit" onclick="UpdateVariableUnitsWithCustomVariable()" class="waves-effect waves-light btn-flat btn-small right">Create Custom Unit</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="quantities-match-custom-units-container" class="row">
+          <div class="col m12">
+            <h5>Quantities that match custom unit</h5>
+          </div>
+          <div class="col m12" style="max-height: calc(30vh - 55px); overflow-y: scroll;">
+            <div id="quantities-match-custom-units"></div>
+          </div>
+        </div>
+      </div>
+      <div id="supported-si-units-container" class="col m4">
+        <div class="row">
+          <div class="col m12">
+            <h5>Supported SI Units</h5>
+          </div>
+          <div class="col m12" style="height: calc(100% - 55px); overflow-y: scroll;">
+
+            <table>
+              <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Symbol</th>
+                </tr>
+              </thead>
+      
+              <tbody>
+                <tr>
+                  <td>Meter</td>
+                  <td>m</td>
+                </tr>
+                <tr>
+                  <td>Kilogram</td>
+                  <td>kg</td>
+                </tr>
+                <tr>
+                  <td>Second</td>
+                  <td>s</td>
+                </tr>
+                <tr>
+                  <td>Ampere</td>
+                  <td>A</td>
+                </tr>
+                <tr>
+                  <td>Kelvin</td>
+                  <td>K</td>
+                </tr>
+                <tr>
+                  <td>Mole</td>
+                  <td>mol</td>
+                </tr>
+                <tr>
+                  <td>Candela</td>
+                  <td>cd</td>
+                </tr>
+                <tr>
+                  <td>Radian</td>
+                  <td>rad</td>
+                </tr>
+                <tr>
+                  <td>Steradian</td>
+                  <td>steradian</td>
+                </tr>
+                <tr>
+                  <td>Siemens</td>
+                  <td>S</td>
+                </tr>
+                <tr>
+                  <td>Hertz</td>
+                  <td>Hz</td>
+                </tr>
+                <tr>
+                  <td>Katal</td>
+                  <td>kat</td>
+                </tr>
+                <tr>
+                  <td>Newton</td>
+                  <td>N</td>
+                </tr>
+                <tr>
+                  <td>Pascal</td>
+                  <td>Pa</td>
+                </tr>
+                <tr>
+                  <td>Joule</td>
+                  <td>J</td>
+                </tr>
+                <tr>
+                  <td>Watt</td>
+                  <td>W</td>
+                </tr>
+                <tr>
+                  <td>Weber</td>
+                  <td>Wb</td>
+                </tr>
+                <tr>
+                  <td>Henry</td>
+                  <td>H</td>
+                </tr>
+                <tr>
+                  <td>Tesla</td>
+                  <td>T</td>
+                </tr>
+                <tr>
+                  <td>Farad</td>
+                  <td>F</td>
+                </tr>
+                <tr>
+                  <td>Coloumb</td>
+                  <td>C</td>
+                </tr>
+                <tr>
+                  <td>Volt</td>
+                  <td>V</td>
+                </tr>
+                <tr>
+                  <td>Ohm</td>
+                  <td>ohm</td>
+                </tr>
+                <tr>
+                  <td>Degree Celcius</td>
+                  <td>degC</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

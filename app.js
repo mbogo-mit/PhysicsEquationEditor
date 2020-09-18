@@ -38,6 +38,8 @@ ListOfEquations = {
       name: "Velocity",
       infoId: RID(),
       info: {
+        videos: [],
+        /*
         videos: [
           {
             iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/pfTTHx9kCHk?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
@@ -51,7 +53,7 @@ ListOfEquations = {
             thumbnail: 'https://img.youtube.com/vi/GtoamALPOP0/mqdefault.jpg',
             level: "beginner",
           }
-        ],
+        ],*/
       },
       equations: [
         "\\bar{v}=\\frac{\\Delta s}{\\Delta t}",
@@ -66,6 +68,8 @@ ListOfEquations = {
       name: "Acceleration",
       infoId: RID(),
       info: {
+        videos: [],
+        /*
         videos: [
           {
             iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/FOkQszg1-j8?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
@@ -79,7 +83,7 @@ ListOfEquations = {
             thumbnail: "https://img.youtube.com/vi/sLw902V40L0/mqdefault.jpg",
             level: "intermediate",
           }
-        ],
+        ],*/
       },
       equations: [
         "\\bar{a}= \\frac{\\Delta\\vec{v}}{\\Delta t}",
@@ -95,7 +99,8 @@ ListOfEquations = {
       infoId: RID(),
       infoId: RID(),
       info: {
-        videos: [
+        videos: [],
+        /*videos: [
           {
             iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/hpWuZh6oTew?autoplay=1&start=7" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
             title: "Kinematics Part 1: Horizontal Motion",
@@ -108,7 +113,7 @@ ListOfEquations = {
             thumbnail: "https://img.youtube.com/vi/WABpcU0mHMU/mqdefault.jpg",
             level: "intermediate"
           }
-        ],
+        ],*/
       },
       equations: [
         "v=v_{0}+at",
@@ -127,6 +132,8 @@ ListOfEquations = {
       name: "Newton's 2nd Law",
       infoId: RID(),
       info: {
+        videos: [],
+        /*
         videos: [
           {
             iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/kKKM8Y-u7ds?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
@@ -140,7 +147,7 @@ ListOfEquations = {
             thumbnail: 'https://img.youtube.com/vi/g550H4e5FCY/mqdefault.jpg',
             level: "intermediate",
           },
-        ],
+        ],*/
       },
       equations: [
         "\\sum \\vec{F} = m\\vec{a}",
@@ -168,6 +175,8 @@ ListOfEquations = {
       name: "Dry Friction",
       infoId: RID(),
       info: {
+        videos: [],
+        /*
         videos: [
           {
             iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/fo_pmp5rtzo?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
@@ -181,7 +190,7 @@ ListOfEquations = {
             thumbnail: "https://img.youtube.com/vi/ZA_D4O6l1lo/mqdefault.jpg",
             level: "intermediate",
           }
-        ],
+        ],*/
       },
       equations: [
         "f_{s}\\leq \\mu_{s}N",
@@ -196,6 +205,8 @@ ListOfEquations = {
       name: "Centripetal Accel.",
       infoId: RID(),
       info: {
+        videos: [],
+        /*
         videos: [
           {
             iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/bpFK2VCRHUs?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
@@ -209,7 +220,7 @@ ListOfEquations = {
             thumbnail: "https://img.youtube.com/vi/FfNgm-w9Krw/mqdefault.jpg",
             level: "intermediate",
           }
-        ],
+        ],*/
       },
       equations: [
         "a_{c}=\\frac{v^{2}}{r}",
@@ -224,6 +235,8 @@ ListOfEquations = {
       name: "Momentum",
       infoId: RID(),
       info: {
+        videos: [],
+        /*
         videos: [
           {
             iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/NIVNfI0RN2k?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
@@ -243,7 +256,7 @@ ListOfEquations = {
             thumbnail: "https://img.youtube.com/vi/9YRgHikdcqs/mqdefault.jpg",
             level: "intermediate",
           },
-        ],
+        ],*/
       },
       equations: [
         "\\vec{p}=m\\vec{v}"
@@ -256,6 +269,8 @@ ListOfEquations = {
       name: "Impulse",
       infoId: RID(),
       info: {
+        videos: [],
+        /*
         videos: [
           {
             iframe: '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Y-QOfc2XqOk?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
@@ -269,7 +284,7 @@ ListOfEquations = {
             thumbnail: "https://img.youtube.com/vi/9PA0MyxjsyQ/mqdefault.jpg",
             level: "intermediate",
           }
-        ],
+        ],*/
       },
       equations: [
         "\\vec{J}=\\bar{F}\\Delta t",
