@@ -760,6 +760,7 @@ function TryToAssignDefinitionsToUndefinedVariables(undefinedVars){
           type: "scalar",//we are using a vector to define its vector magnitude variable ls
           value: undefined,
           rid:  RID(),
+          components: undefined, // a scalar shouldn't have components
         });
 
         UpdateDefinedVariables({
@@ -1200,7 +1201,7 @@ function OrderCompileAndRenderMyVariablesCollection(){
       charsThatBreakOutOfSupSub: '+-=<>',
       handlers: {
         edit: function(mathField) {
-          let valueFormattingError = FindFormattingErrorInVariableValueMathField(mathField.latex());
+          let valueFormattingError = FindFormattingErrorInVariableValueMathField(mathField.latex(), $(mathField.el()).attr("type"));
           $(`.variable-value[rid='${$(mathField.el()).attr("rid")}']`).removeClass("error");
           try{//the input field may not have a tooltip connected to it so this line may not work
             $(`.variable-value[rid='${$(mathField.el()).attr("rid")}']`).tooltip("destroy");
@@ -1208,10 +1209,16 @@ function OrderCompileAndRenderMyVariablesCollection(){
           if(valueFormattingError != undefined){
             //we found an error so we need to display it as a tooltip
             $(`.variable-value[rid='${$(mathField.el()).attr("rid")}']`).addClass("error");
-            $(`.variable-value[rid='${$(mathField.el()).attr("rid")}']`).tooltip({html: valueFormattingError});
+            $(`.variable-value[rid='${$(mathField.el()).attr("rid")}']`).attr("data-tooltip",valueFormattingError);
+            $(`.variable-value[rid='${$(mathField.el()).attr("rid")}']`).tooltip();
+            $(`.variable-value[rid='${$(mathField.el()).attr("rid")}']`).tooltip("open");
+          }else{
+            //if there are no formatting errors in the text then we can show the default tooltip
+            $(`.variable-value[rid='${$(mathField.el()).attr("rid")}']`).attr("data-tooltip","Edit value and press enter to update editor");
+            $(`.variable-value[rid='${$(mathField.el()).attr("rid")}']`).tooltip();
             $(`.variable-value[rid='${$(mathField.el()).attr("rid")}']`).tooltip("open");
           }
-          FindAndUpdateVariableByRID($(mathField.el()).attr("rid"),{value: mathField.latex(), valueFormattingError: valueFormattingError});
+          FindAndUpdateVariableByRID({rid: $(mathField.el()).attr("rid"), value: mathField.latex(), valueFormattingError: valueFormattingError, type: $(mathField.el()).attr("type") });
         },
         enter: function(){
           DisplayLoadingBar(true);
@@ -1265,14 +1272,28 @@ function OrderCompileAndRenderMyVariablesCollection(){
 
 }
 
-function FindFormattingErrorInVariableValueMathField(ls){
+function FindFormattingErrorInVariableValueMathField(ls, type){
+
+  // before we do anything we need to check that the ls is actually something and not just empty space
+  if(ls.replace(/\\\s/g,"").replace(/\s*/g,"").length == 0){return;}
+
   //this function needs to check that there are no variables in the string and or vectors and that the string is formatted properly
-  if(GetVariablesFromLatexString(ls).filter((variable) => {return !(["\\pi","e","i"].includes(variable))}).length > 0){
-    //this if statement gets all the variables in the latex string and removes constants that nederamer can understand
-    //and if there are any variables left over than the user is using variables and that is not allowed becauase the variable
-    //value mathfield should only be taking in numbers and simple operations like multiplication, division, substraction and addition
-    return "No variables allowed in input box! Only numbers";
+  if(type == "scalar"){
+    if(GetVariablesFromLatexString(ls).filter((variable) => {return !(["\\pi","e","i"].includes(variable))}).length > 0){
+      //this if statement gets all the variables in the latex string and removes constants that nederamer can understand
+      //and if there are any variables left over than the user is using variables and that is not allowed becauase the variable
+      //value mathfield should only be taking in numbers and simple operations like multiplication, division, substraction and addition
+      return "No variables allowed in input box! Only numbers";
+    }
+  }else if(type == "vector"){
+    if(GetVariablesFromLatexString(ls).filter((variable) => {return !(["\\pi","e","i","\\hat{x}","\\hat{y}","\\hat{z}","\\hat{i}","\\hat{j}","\\hat{k}","\\hat{r}","\\hat{\\theta}","\\hat{\\phi}"].includes(variable))}).length > 0){
+      //this if statement gets all the variables in the latex string and removes constants that nederamer can understand along with any unit vectors apart of a coordinate system
+      //and if there are any variables left over than the user is using variables and that is not allowed becauase the variable
+      //value mathfield should only be taking in numbers and simple operations like multiplication, division, substraction and addition
+      return "No variables allowed in input box! Only numbers and unit vectors";
+    }
   }
+  
   
   //the next check is checking if there are any unallowed operations in the box like integral or summation or nabla stuff like that
   let notAllowedOperators = ["\\int", "\\oint", "\\sum", "\\prod", "\\triangledown","\\bigcup","\\coprod","\\circ","<", ">", "=", "\\doteq", "\\geq", "\\leq", "\\leqslant", "\\geqslant", "\\equiv", "\\neq", "\\ngtr", "\\nless", "\\nleqslant", "\\ngeqslant", "\\approx", "\\simeq", "\\cong", "\\propto", "\\left\\langle", "\\right\\rangle", "\\left \\{", "\\right \\}", "\\exp"];
@@ -1282,6 +1303,33 @@ function FindFormattingErrorInVariableValueMathField(ls){
     }
   }
 
+  let expressionObj = ExactConversionFromLatexStringToNerdamerReadableString({
+    ls: ls,
+    uniqueRIDStringArray: UpdateUniqueRIDStringObjUsingLs(ls),
+    lineNumber: 0,
+    mfID: "0",
+    throwError: false,
+    convertVectorsToNerdamerMatrices: true,
+    returnFinalObject: true,//return an array of the expressions we have to iterate through and the evaluated expression in latex
+  });
+
+  if(expressionObj == null){
+    return "couldn't parse input";
+  }else{
+    // if we were able to parse the string then if the variable is a vector we need to make sure that the output of parsing is a vector as well
+    if(type == "vector"){
+      if(expressionObj.array.length == 1){// if the length is one we need to check if the 0 index has a unit vector ridString in it if it doesn't then we know that the resulting string is not a vector
+        // because we are checking the first index there are only 4 possible unit vectors that can be at the zero index: "\\hat{x]","\\hat{i}","\\hat{r}","\\dim{1}"
+        let zeroIndexUnitVectors = ["\\hat{x}","\\hat{i}","\\hat{r}","\\dim{1}"];
+        if(zeroIndexUnitVectors.every((str) => {return expressionObj.array[0].indexOf(UniqueRIDStringObj[str].ridString) == -1})){
+          // this means that none of the zero index unit vectors rid strings appeared in the string so the string doesn't represent a vector
+          return "Input must be a vector"
+        }
+      }
+    }
+  }
+
+  /*
   //last check is to run it through nerdamer and see if it throws up errors meaning the string is not formatted properly
   ls = CleanLatexString(ls, ["fractions","addition","parentheses","brackets", "white-space"]);
   ls = CleanLatexString(ls,["multiplication"]);
@@ -1293,27 +1341,57 @@ function FindFormattingErrorInVariableValueMathField(ls){
   catch(err){
     return "Formatting error detected";
   }
+  */
   
 }
 
-function FindAndUpdateVariableByRID(rid,opts = {}){
+function GetComponentsForVectorFromVariableValue(ls, variableLs){
+  console.log('GetComponentsForVectorFromVariableValue');
+  // this object will hold the data about the different components that make up the vector
+  let components = {};
+
+  //console.log("ls",ls);
+  let expressionObj = ExactConversionFromLatexStringToNerdamerReadableString({
+    ls: ls,
+    uniqueRIDStringArray: UpdateUniqueRIDStringObjUsingLs(ls),
+    lineNumber: 0,
+    mfID: "0",
+    throwError: false,
+    convertVectorsToNerdamerMatrices: true,
+    returnFinalObject: true,//return an array of the expressions we have to iterate through and the evaluated expression in latex
+  });
+
+  //console.log("expressionObj",expressionObj);
+
+  // we know by this point that the latex string we are parsing is a vector so we don't have to check if it has a unit vector in the string
+  for(let i = 0; i < expressionObj.array.length; i++){
+    components[`\\comp${i+1}{${variableLs}}`] = RemoveUnitVectorRIDStringFromString(expressionObj.array[i]);
+  }
+
+  return components;
+}
+
+function FindAndUpdateVariableByRID(opts = {}){
+
   let foundVariable = false;
   
   for(const [key, value] of Object.entries(DefinedVariables)){
-    if(value.rid == rid){
+    if(value.rid == opts.rid){
       foundVariable = true;
       DefinedVariables[key].value = opts.value;
       DefinedVariables[key].valueFormattingError = opts.valueFormattingError;
+      DefinedVariables[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
       break;
     }
   }
 
   if(!foundVariable){
     for(const [key, value] of Object.entries(EL.undefinedVars.undefined)){
-      if(value.rid == rid){
+      if(value.rid == opts.rid){
         foundVariable = true;
         EL.undefinedVars.undefined[key].value = opts.value;
         EL.undefinedVars.undefined[key].valueFormattingError = opts.valueFormattingError;
+        EL.undefinedVars.undefined[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
         break;
       }
     }
@@ -1321,10 +1399,11 @@ function FindAndUpdateVariableByRID(rid,opts = {}){
 
   if(!foundVariable){
     for(const [key, value] of Object.entries(EL.undefinedVars.defined)){
-      if(value.rid == rid){
+      if(value.rid == opts.rid){
         foundVariable = true;
         EL.undefinedVars.defined[key].value = opts.value;
         EL.undefinedVars.defined[key].valueFormattingError = opts.valueFormattingError;
+        EL.undefinedVars.defined[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
         break;
       }
     }
@@ -1334,7 +1413,6 @@ function FindAndUpdateVariableByRID(rid,opts = {}){
   ExecutionID = RID();
   (debounce(function(executionID){
     if(executionID == ExecutionID){
-      //console.log("currently parsing", EL.currentlyParsing);
       EL.GenerateEditorErrorMessages({dontRenderMyVariablesCollection: true});
       DisplayLoadingBar(false);
     }

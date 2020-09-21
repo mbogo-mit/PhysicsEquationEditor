@@ -267,22 +267,37 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
           results[i].push({success: exprs[i][j].str, operator: exprs[i][j].operator, latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});//we are passing in the raw string because in the raw format we can replace radians, steradians and vectors and we don't have to worry about them being a part of some division. For example the evaluate str could be "1 m/rad" so replacing "rad" with "" would break it. the unevaluated will never break "(1 m)/(1 rad)" -> "(1 m)/(1 )"
         }
         catch(err){
-          //if it throws an error then we can try evaluating the string but taking out radians and steradians because they are untiless pretty much but the editor see them as units
-          try {
-            math.evaluate(exprs[i][j].str.replace(/rad/g,"").replace(/sr/g,"")).toString();
-            results[i].push({success: exprs[i][j].str, operator: exprs[i][j].operator, latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});//we are passing in the raw string because in the raw format we can replace radians, steradians and vectors and we don't have to worry about them being a part of some division. For example the evaluate str could be "1 m/rad" so replacing "rad" with "" would break it. the unevaluated will never break "(1 m)/(1 rad)" -> "(1 m)/(1 )"
-          }
-          catch(err2){
-            try{
-              //by removing the vector unit we can figure out if the units don't match because the user is adding a scalar with a vector
-              math.evaluate(exprs[i][j].str.replace(/rad/g,"").replace(/sr/g,"").replace(/vector/g,"")).toString();
-              results[i].push({error: "Adding a scalar with a vector"});
+          //we need to check what the error was and if it doesn't have to do with demensions being incorrect and with units then we will continue tyring to figure out if the units are correct or not
+          if(/Dimension mismatch\. Matrix A \(\d*\) must match Matrix B \(\d*\)/.test(err.message)){
+            results[i].push({error: "Dimension mismatch. Adding vectors with different amount of demension", latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});
+          }else{
+            //if it throws an error then we can try evaluating the string but taking out radians and steradians because they are untiless pretty much but the editor see them as units
+            try {
+              math.evaluate(exprs[i][j].str.replace(/rad/g,"").replace(/sr/g,"")).toString();
+              results[i].push({success: exprs[i][j].str, operator: exprs[i][j].operator, latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});//we are passing in the raw string because in the raw format we can replace radians, steradians and vectors and we don't have to worry about them being a part of some division. For example the evaluate str could be "1 m/rad" so replacing "rad" with "" would break it. the unevaluated will never break "(1 m)/(1 rad)" -> "(1 m)/(1 )"
             }
-            catch(err3){
-              results[i].push({error: err2.message, latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});
+            catch(err2){
+              //we need to check what the error was and if it doesn't have to do with demensions being incorrect and with units then we will continue tyring to figure out if the units are correct or not
+              if(/Dimension mismatch\. Matrix A \(\d*\) must match Matrix B \(\d*\)/.test(err2.message)){
+                results[i].push({error: "Dimension mismatch. Adding vectors with different amount of demension", latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});
+              }else{
+                try{
+                  //by removing the vector unit we can figure out if the units don't match because the user is adding a scalar with a vector
+                  math.evaluate(exprs[i][j].str.replace(/rad/g,"").replace(/sr/g,"").replace(/vector/g,"")).toString();
+                  results[i].push({error: "Adding a scalar with a vector"});
+                }
+                catch(err3){
+                  //we need to check what the error was and if it doesn't have to do with demensions being incorrect and with units then we will continue tyring to figure out if the units are correct or not
+                  if(/Dimension mismatch\. Matrix A \(\d*\) must match Matrix B \(\d*\)/.test(err.message)){
+                    results[i].push({error: "Dimension mismatch. Adding vectors with different amount of demension", latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});
+                  }else{
+                    results[i].push({error: err2.message, latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});
+                  }  
+                }
+              }
             }
-            
           }
+          
         }
 
       }
@@ -345,13 +360,14 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
 
       console.log("successes",successes);
 
-      let allExpressionsUnitsEqual = true;
+      let allExpressionsUnitsEqualAndNoErrors = true;
       for(let i = 0; i + 1 < successes.str.length; i++){
         let stringToBeComparedForUnits = [successes.str[i], successes.str[i+1]];
-        console.log("stringToBeComparedForUnits",stringToBeComparedForUnits);
+        //console.log("stringToBeComparedForUnits",stringToBeComparedForUnits);
         //check if units match for success equations
         let equationUnitsMatch = false;
         let settingScalarToVector = false;
+        let demensionMismatch = false;// setting vectors with different amount of dimesions equal to each other
 
         try {
           //trying to add the units of each equation and see if they add if they don't then they are not the same unit so an error will occur
@@ -360,32 +376,45 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
         }
         catch(err){
 
-          //removing rad and steradian from equations to see if they will equal each other because the editor can't recorgnize the arc formula  s=r\theta cuz units wise you are saying 1m=1m*rad
-          let editedSuccesses = [
-            stringToBeComparedForUnits[0].replace(/rad/g,"").replace(/sr/g,""),
-            stringToBeComparedForUnits[1].replace(/rad/g,"").replace(/sr/g,""),
-          ];
+          //we need to check what the error was and if it doesn't have to do with demensions being incorrect and with units then we will continue tyring to figure out if the units are correct or not
+          if(/Dimension mismatch\. Matrix A \(\d*\) must match Matrix B \(\d*\)/.test(err.message)){
+            demensionMismatch = true;
+          }else{
+            //removing rad and steradian from equations to see if they will equal each other because the editor can't recorgnize the arc formula  s=r\theta cuz units wise you are saying 1m=1m*rad
+            let editedSuccesses = [
+              stringToBeComparedForUnits[0].replace(/rad/g,"").replace(/sr/g,""),
+              stringToBeComparedForUnits[1].replace(/rad/g,"").replace(/sr/g,""),
+            ];
 
-          try{
-            equationUnits = math.evaluate(editedSuccesses.join(" + ")).toString();
-            equationUnitsMatch = true;
-          }
-          catch(err2){
-            equationUnitsMatch = false;
             try{
-              //removing vector math js key words to see if the problem is setting scalar equal to a vector
-              editedSuccesses[0] = editedSuccesses[0].replace(/vector/g,"");
-              editedSuccesses[1] = editedSuccesses[1].replace(/vector/g,"");
-
-              math.evaluate(editedSuccesses.join(" + ")).toString();
-              settingScalarToVector = true;
-
+              equationUnits = math.evaluate(editedSuccesses.join(" + ")).toString();
+              equationUnitsMatch = true;
             }
-            catch(err3){
-              //console.log(err3);
-              settingScalarToVector = false;
+            catch(err2){
+              equationUnitsMatch = false;
+
+              //we need to check what the error was and if it doesn't have to do with demensions being incorrect and with units then we will continue tyring to figure out if the units are correct or not
+              if(/Dimension mismatch\. Matrix A \(\d*\) must match Matrix B \(\d*\)/.test(err2.message)){
+                demensionMismatch = true;
+              }else{
+                try{
+                  //removing vector math js key words to see if the problem is setting scalar equal to a vector
+                  editedSuccesses[0] = editedSuccesses[0].replace(/vector/g,"");
+                  editedSuccesses[1] = editedSuccesses[1].replace(/vector/g,"");
+  
+                  math.evaluate(editedSuccesses.join(" + ")).toString();
+                  settingScalarToVector = true;
+  
+                }
+                catch(err3){
+                  //console.log(err3);
+                  settingScalarToVector = false;
+                }
+              }
             }
           }
+
+          
 
         }
 
@@ -397,8 +426,14 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
             });
             
             //if we got an error then one of the expressions units don't equal anothers
-            allExpressionsUnitsEqual = false;
+            allExpressionsUnitsEqualAndNoErrors = false;
             break;
+          }else if(demensionMismatch){
+            CreateInlineMathFieldError({
+              mfID: mfID,
+              error: "Demension mismatch. Setting to vectors with a different number of demensions equal to each other",
+            });
+            allExpressionsUnitsEqualAndNoErrors = false;
           }
           else{
             //we are going to add this information to the correct mathfield that has this error
@@ -411,15 +446,15 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
             });
 
             //if we got an error then one of the expressions units don't equal anothers
-            allExpressionsUnitsEqual = false;
+            allExpressionsUnitsEqualAndNoErrors = false;
             break;
           }
         }
 
       }
 
-      //after the for loop if "allExpressionsUnitsEqual" is still true then that means that we didn't have any errors comparing all the expressions on this line
-      if(allExpressionsUnitsEqual){
+      //after the for loop if "allExpressionsUnitsEqualAndNoErrors" is still true then that means that we didn't have any errors comparing all the expressions on this line
+      if(allExpressionsUnitsEqualAndNoErrors){
         //if all the expressions units match then we should do a high level self consistency check
         EL.linesToCheckForSelfConsistency.push(lineNumber);
       }
@@ -1015,6 +1050,8 @@ function GetAllUniqueRIDStringsArray(){
     allUniqueRIDStrings.push(value);
   }
 
+  allUniqueRIDStrings = allUniqueRIDStrings.sort((a,b) => {return b.variable.length - a.variable.length});
+
   return allUniqueRIDStrings;
 }
 
@@ -1062,11 +1099,20 @@ function UpdateUniqueRIDStringObjUsingLs(ls){
   return array;
 }
 
-function UpdateUniqueRIDStringObjUsingObj(opts){
-  UniqueRIDStringObj[opts.key] = {
-    ridString: opts.ridString,
-    unitsMathjs: opts.unitsMathjs,
+function UpdateUniqueRIDStringObj(variable){
+
+  let space = "";//this is becauase if the text after "\\partial" is a latex keyword then there is no space but if it isn't a latex key word there is a space. Exmaple "\\partial d" and "\\partial\\theta"
+  //checking if the variable is not a latex keyword. and if it is not we need a space between "\\partial" and the variable string
+  if(variable[0] != "\\"){space = " ";}  
+
+  UniqueRIDStringObj[variable] = {
+    variable: variable,
+    ridString: `__${RandomVariableString()}`,
+    differentialVariable: `d${variable}`,
+    partialDifferentialVariable: `\\partial${space + variable}`,
+    differentialRidString: `__${RandomVariableString()}`,
   };
+
 }
 
 
@@ -1393,7 +1439,7 @@ function ReplaceSpecialLatexCharacterWithBasicCharacterCounterpart(ls, types){
 
 function FindAndParseVectorMultiplication(opts){
   //the first thing we need to do is convert all vectors into matrixes so we can parse them later
-  ls = FindAndConvertAllVectorsIntoNerdamerMatrixesForLs(opts.ls);
+  let ls = FindAndConvertAllVectorsIntoNerdamerMatrixesForLs(opts.ls);
   ls = FindAndEvaluateVectorMultiplication(Object.assign(opts, {ls: ls}));
   return ls;
 }
@@ -1484,6 +1530,10 @@ function FindAndConvertAllVectorsIntoNerdamerMatrixesForLs(ls){
         //this line of code that split it by "," alone is not the most secure way of doing this because you could hvae a comma in a variable definition so later we need to fix this function and do more 
         let vectorComponents = s.substring("\\left[".length, i2 - "\\right".length).split(",");//if the vector is "[a,b,c]" this substring returns "a,b,c" then we split it using the delimeter "," to get ["a","b","c"]
         let formattedComponents = vectorComponents.map((value,index) => {
+          // if the demension goes above 3 we need to make sure that we add higher demesions to the UniqueRIDStringObj if the ridString for the demension "\\dim{n}" doesn't exist
+          if(UniqueRIDStringObj[`\\dim{${index + 1}}`] == undefined){
+            UpdateUniqueRIDStringObj(`\\dim{${index + 1}}`);
+          }
           return `(${value})*\\dim{${index + 1}}`
         });
         //now we have an array that looks like ["(a)*\\dim{1}","(b)*\\dim{2}","(c)*\\dim{3}"]
@@ -2467,8 +2517,8 @@ function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
       returnFinalObject: true,//return an array of the expressions we have to iterate through and the evaluated expression in latex
     });
 
-    //console.log("expression1Obj", expression1Obj);
-    //console.log("expression2Obj", expression2Obj);
+    console.log("expression1Obj", expression1Obj);
+    console.log("expression2Obj", expression2Obj);
     
     if(expression1Obj != null && expression2Obj != null){
       let count = 0;
@@ -2762,6 +2812,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
   //if the expressions actually equal each other. For example if there is an equation "F=ma" and all variable values are konwn F=10, m=1, a=1,
   //symbolically these equations may be equal but when you plug in there values they are not equal
 
+  console.log(exp1, exp2, expVars,)
   
   //the first thing is we are going to go through the list of expVars and try to plug in all the values for all the variables in exp1 and exp2.
   //if that doesn't work for some reason, either because a variable is known or given but the actual value is undefined or if the variable is actuallly
@@ -3548,6 +3599,8 @@ function ExactConversionFromLatexStringToNerdamerReadableString(opts){
     ls = FindAndParseVectorMultiplication(Object.assign(opts, {ls: ls}));
     if(ls == null){return null;}
   }
+  
+  console.log("ls", ls);
 
   if(ls.indexOf("\\times") != -1){
     if(throwError){
@@ -3572,9 +3625,8 @@ function ExactConversionFromLatexStringToNerdamerReadableString(opts){
   //console.log("after alot of stuff ls", ls);
   //we have this if statement because if after we are done parsing the latex into nerdamer is it still has these pieces of text in it then we cant go further because nerdamer doesn't know how to handle these texts properly
   if(ls.indexOf("\\int") == -1 && ls.indexOf("\\prod") == -1 && ls.indexOf("\\sum") == -1 && ls.indexOf("\\nabla") == -1 && ls.indexOf("\\ln") == -1 && ls.indexOf("\\log") == -1){
-    //the ls may have change by now because of cross products or vector addition so we have to use a new uniqueRIDStringArray
-    let updatedUniqueRIDStringArray = UpdateUniqueRIDStringObjUsingLs(ls);
-    ls = ReplaceVariablesWithUniqueRIDString(ls, updatedUniqueRIDStringArray, true);//passing true as the last parameter tells this function that there are nerdamer functions in this string so don't try to replace the letters in the function names
+    //we are passing all of the uniqueRIDString as an array into this function so that everything that can possibly get replaced gets replaced. It may not be the most efficient way of doing things but it insures that everything works
+    ls = ReplaceVariablesWithUniqueRIDString(ls, GetAllUniqueRIDStringsArray(), true);//passing true as the last parameter tells this function that there are nerdamer functions in this string so don't try to replace the letters in the function names
     //console.log("replacing stuff", ls);
     try{
       let calculatedResults = nerdamer.convertFromLaTeX(ls).evaluate().expand().toString();

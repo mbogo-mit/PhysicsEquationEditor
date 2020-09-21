@@ -202,6 +202,12 @@ function EditorLogger(){
     "Dimension mismatch. Matrix A": {
       description: "You are adding vectors that don't have the same number of demensions",
     },
+    "Dimension mismatch. Adding vectors with different amount of demension": {
+      descripton: "You can only add vectors with the same number of demensions",
+    },
+    "Demension mismatch. Setting to vectors with a different number of demensions equal to each other": {
+      description: "Vectors must have the same number of demensions to be set equal to each other",
+    },
     "Vectors with length 3 expected": {
       description: "You have a cross product on this line that is not with a 3 demensional vector",
     },
@@ -433,6 +439,7 @@ function EditorLogger(){
             units: "undefined units (none)",
             value: (savedVariable.value) ? savedVariable.value: undefined,
             valueFormattingError: (savedVariable.valueFormattingError) ? savedVariable.valueFormattingError: undefined,
+            components: (savedVariable.components) ? (savedVariable.components) : undefined,
             unitsMathjs: "1 undefinedunit",
             rid: (savedVariable.rid) ? savedVariable.rid : RID(),
           };
