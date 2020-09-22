@@ -1347,6 +1347,10 @@ function FindFormattingErrorInVariableValueMathField(ls, type){
 
 function GetComponentsForVectorFromVariableValue(ls, variableLs){
   console.log('GetComponentsForVectorFromVariableValue');
+
+  // before we do anything we need to check that the ls is actually something and not just empty space
+  if(ls.replace(/\\\s/g,"").replace(/\s*/g,"").length == 0){return;}
+
   // this object will hold the data about the different components that make up the vector
   let components = {};
 
@@ -1364,8 +1368,13 @@ function GetComponentsForVectorFromVariableValue(ls, variableLs){
   //console.log("expressionObj",expressionObj);
 
   // we know by this point that the latex string we are parsing is a vector so we don't have to check if it has a unit vector in the string
+  let componentData;
   for(let i = 0; i < expressionObj.array.length; i++){
-    components[`\\comp${i+1}{${variableLs}}`] = RemoveUnitVectorRIDStringFromString(expressionObj.array[i]);
+    componentData = RemoveUnitVectorRIDStringFromString(expressionObj.array[i]);
+    components[`\\comp${i+1}{${variableLs}}`] = {
+      value: componentData.str,
+      unitVectorLs: componentData.unitVectorLs,
+    }
   }
 
   return components;

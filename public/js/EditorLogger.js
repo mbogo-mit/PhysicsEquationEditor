@@ -544,6 +544,7 @@ function EditorLogger(){
         DefinedVariables[key].currentState = "unknown";
         //if the value is unknown by definition then the value of the variable must be "undefined"
         DefinedVariables[key].value = undefined;
+        DefinedVariables[key].components = undefined;
       }
     }
 
@@ -556,6 +557,7 @@ function EditorLogger(){
         this.undefinedVars.undefined[key].currentState = "unknown";
         //if the value is unknown by definition then the value of the variable must be "undefined"
         this.undefinedVars.undefined[key].value = undefined;
+        this.undefinedVars.undefined[key].components = undefined;
       }
     }
     for(const [key, value] of Object.entries(this.undefinedVars.defined)){
@@ -563,6 +565,7 @@ function EditorLogger(){
         this.undefinedVars.defined[key].currentState = "unknown";
         //if the value is unknown by definition then the value of the variable must be "undefined"
         this.undefinedVars.defined[key].value = undefined;
+        this.undefinedVars.defined[key].components = undefined;
       }
     }
 
