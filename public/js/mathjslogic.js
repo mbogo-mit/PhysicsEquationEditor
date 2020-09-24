@@ -28,7 +28,11 @@ math.import({
     }
   },
   myCrossProduct: function (v1, v2) {
-    return math.evaluate(math.cross(v1 , v2).toString() + "/ 1 vector");
+    let crossProduct = math.cross(v1 , v2);
+    if(crossProduct.toString().indexOf("vector") != -1){//this is if the user is just crossing to strings that do have "vector" as part of their units
+      return math.evaluate(`${crossProduct.toString()} / 1 vector`)
+    }
+    return crossProduct;
   },
   absoluteValue: function(v){
     if(v == undefined){
@@ -269,7 +273,7 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
         catch(err){
           //we need to check what the error was and if it doesn't have to do with demensions being incorrect and with units then we will continue tyring to figure out if the units are correct or not
           if(/Dimension mismatch\. Matrix A \(\d*\) must match Matrix B \(\d*\)/.test(err.message)){
-            results[i].push({error: "Dimension mismatch. Adding vectors with different amount of demension", latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});
+            results[i].push({error: "Dimension mismatch. Adding vectors with different amount of demension"});
           }else{
             //if it throws an error then we can try evaluating the string but taking out radians and steradians because they are untiless pretty much but the editor see them as units
             try {
@@ -279,7 +283,7 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
             catch(err2){
               //we need to check what the error was and if it doesn't have to do with demensions being incorrect and with units then we will continue tyring to figure out if the units are correct or not
               if(/Dimension mismatch\. Matrix A \(\d*\) must match Matrix B \(\d*\)/.test(err2.message)){
-                results[i].push({error: "Dimension mismatch. Adding vectors with different amount of demension", latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});
+                results[i].push({error: "Dimension mismatch. Adding vectors with different amount of demension"});
               }else{
                 try{
                   //by removing the vector unit we can figure out if the units don't match because the user is adding a scalar with a vector
@@ -289,7 +293,7 @@ function CheckForErrorsInExpression(ls, lineNumber, mfID){
                 catch(err3){
                   //we need to check what the error was and if it doesn't have to do with demensions being incorrect and with units then we will continue tyring to figure out if the units are correct or not
                   if(/Dimension mismatch\. Matrix A \(\d*\) must match Matrix B \(\d*\)/.test(err.message)){
-                    results[i].push({error: "Dimension mismatch. Adding vectors with different amount of demension", latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});
+                    results[i].push({error: "Dimension mismatch. Adding vectors with different amount of demension"});
                   }else{
                     results[i].push({error: err2.message, latexExpression: exprs[i][j].rawStr, unitsLatexExpression: unitsLatexExpression});
                   }  
@@ -358,7 +362,7 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
     let equationUnits = "";
     if(successes.str.length > 1){
 
-      console.log("successes",successes);
+      //console.log("successes",successes);
 
       let allExpressionsUnitsEqualAndNoErrors = true;
       for(let i = 0; i + 1 < successes.str.length; i++){
@@ -401,7 +405,7 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
                   //removing vector math js key words to see if the problem is setting scalar equal to a vector
                   editedSuccesses[0] = editedSuccesses[0].replace(/vector/g,"");
                   editedSuccesses[1] = editedSuccesses[1].replace(/vector/g,"");
-  
+                  //console.log("editedSuccesses", editedSuccesses);
                   math.evaluate(editedSuccesses.join(" + ")).toString();
                   settingScalarToVector = true;
   
@@ -532,10 +536,12 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
 
     if(errors.length > 0){
       errors.map(function(error, index){
-        //we are going to add this information to the correct mathfield that has this error
+        // we are going to add this information to the correct mathfield that has this error
+        // we are adding this manually and not with "CreateInlineMathFieldError" because that function checks if the error type already exists but with
+        // this setup we don't care if the error type already exist because there may be multiple errors of the same type on one line
         MathFields[mfID].log.error.push({
           error: EL.createLoggerErrorFromMathJsError(error.error),
-          latexExpressions: [
+          latexExpressions: error.latexExpression == undefined || error.unitsLatexExpression == undefined ? undefined : [
             `\\text{Expression}\\ ${error.latexExpression}\\ \\Rightarrow ${error.unitsLatexExpression}`,
           ],
         });
@@ -548,10 +554,6 @@ function ParseResultsArrayAndGenerateLoggerList(results, lineNumber, mfID){
   if(recordedDefinitionForUndefinedVariable){
     EL.ParsePreviousLinesAgainWithNewInfoAboutUndefinedVariables(lineNumber);
   }
-
-  EL.addLog(log);
-
-
 
 }
 
@@ -1509,6 +1511,13 @@ function FindAndConvertAllVectorsIntoNerdamerMatrixesForLs(ls){
       }else{return null;}
     }
 
+    if(!foundMatch && s.indexOf("\\vec{0}") == 0){
+      //the zero vector should be treated different then a regular vector because we know what the zero vector is suppose to evaluate to
+      foundMatch = true;
+      delta = "\\vec{0}".length;
+      newLs += ` matrix([0*\\dim{1}, 0*\\dim{2}, 0*\\dim{3}])`
+    }
+
     if(!foundMatch && s.indexOf("\\vec{") == 0){
       //trying to convert generic vectors to nerdamer matrix
       i2 = FindIndexOfClosingBracket(s.substring("\\vec{".length));
@@ -1517,7 +1526,23 @@ function FindAndConvertAllVectorsIntoNerdamerMatrixesForLs(ls){
         i2 += "\\vec{".length;
         delta = i2 + 1;
         let generalVectorStr = s.substring(0, i2 + 1);
-        newLs += ` matrix([\\comp1{${generalVectorStr}}\\dim{1}, \\comp2{${generalVectorStr}}\\dim{2}, \\comp3{${generalVectorStr}}\\dim{3}])`
+        let vectorComponents = GetStoredVariableInfo(generalVectorStr).components;
+        let coordinateSystemUsedInVector = vectorComponents != undefined ? vectorComponents.coordinateSystem : undefined;
+        let vectorMatrixString = "";
+        //based on the coordinate system used by the vector we will add a different matrix string to the newLs
+        if(coordinateSystemUsedInVector == "cartesianXYZ"){
+          vectorMatrixString = ` matrix([\\comp1{${generalVectorStr}}\\hat{x}, \\comp2{${generalVectorStr}}\\hat{y}, \\comp3{${generalVectorStr}}\\hat{z}])`;
+        }else if(coordinateSystemUsedInVector == "cartesianIJK"){
+          vectorMatrixString = ` matrix([\\comp1{${generalVectorStr}}\\hat{i}, \\comp2{${generalVectorStr}}\\hat{j}, \\comp3{${generalVectorStr}}\\hat{k}])`;
+        }else if(coordinateSystemUsedInVector == "cylindrical"){
+          vectorMatrixString = ` matrix([\\comp1{${generalVectorStr}}\\hat{r}, \\comp2{${generalVectorStr}}\\hat{\\theta}, \\comp3{${generalVectorStr}}\\hat{z}])`;
+        }else if(coordinateSystemUsedInVector == "spherical"){
+          vectorMatrixString = ` matrix([\\comp1{${generalVectorStr}}\\hat{r}, \\comp2{${generalVectorStr}}\\hat{\\theta}, \\comp3{${generalVectorStr}}\\theta{\\phi}])`;
+        }else{
+          // if "coordinateSystemUsedInVector" doesn't equal any of those values then it either equals "generic" or undefined. Either way the default string is the one below
+          vectorMatrixString = ` matrix([\\comp1{${generalVectorStr}}\\dim{1}, \\comp2{${generalVectorStr}}\\dim{2}, \\comp3{${generalVectorStr}}\\dim{3}])`;
+        }
+        newLs += vectorMatrixString;
       }else{return null;}
     }
 
@@ -1708,7 +1733,7 @@ function FindAndEvaluateVectorMultiplication(opts){
           mfID: opts.mfID,
         });
 
-        console.log("clean dot product", cleanDotProduct);
+        //console.log("clean dot product", cleanDotProduct);
 
         if(cleanDotProduct != null){
           evaluatedVectorMultiplicationLs = ReplaceUniqueRIDStringWithVariableLs(cleanDotProduct, GetAllUniqueRIDStringsArray());
@@ -1738,11 +1763,11 @@ function FindAndEvaluateVectorMultiplication(opts){
 
           //console.log("resultingVectorMatrix", resultingVectorMatrix);
 
-          newLs = `${newLs.substring(0,v1StartIndex)} ${resultingVectorMatrix} ${newLs.substring(v2EndIndex + 1)}`
+          newLs = `${newLs.substring(0,v1StartIndex)} \\left(${resultingVectorMatrix}\\right) ${newLs.substring(v2EndIndex + 1)}`
         }else if(multiply.func == "myDotProduct"){
           //console.log("piece 1", `${newLs.substring(0,v1StartIndex)}`);
           //console.log("piece 2", `${newLs.substring(v2EndIndex + 1)}`);
-          newLs = `${newLs.substring(0,v1StartIndex)} ${evaluatedVectorMultiplicationLs} ${newLs.substring(v2EndIndex + 1)}`;
+          newLs = `${newLs.substring(0,v1StartIndex)} \\left(${evaluatedVectorMultiplicationLs}\\right) ${newLs.substring(v2EndIndex + 1)}`;
         }
         
       }else{
@@ -1768,8 +1793,12 @@ function FindAndEvaluateVectorMultiplication(opts){
 
 
 function DoExpressionUnitVectorsMatch(opts){
+  let response = {
+    answer: false,
+    str: opts.str,
+  };
   if(opts.str == undefined){
-    return null;//we don't have all the information we need to run this function
+    return response;//we don't have all the information we need to run this function
   }
 
   let str = opts.str;
@@ -1778,6 +1807,7 @@ function DoExpressionUnitVectorsMatch(opts){
     generic: {
       label: "\\text{Generic N Demensional Vector}",
       coors: [UniqueRIDStringObj["\\dim{1}"].ridString, UniqueRIDStringObj["\\dim{2}"].ridString, UniqueRIDStringObj["\\dim{3}"].ridString],//generic
+      coorsLs: ["\\dim{1}","\\dim{2}","\\dim{3}"],
       unique: [UniqueRIDStringObj["\\dim{1}"].ridString, UniqueRIDStringObj["\\dim{2}"].ridString, UniqueRIDStringObj["\\dim{3}"].ridString],//generic
       uniquePairs: [],
       unallowedUnitVectors: [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{\\theta}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],//r,theta,or z
@@ -1785,6 +1815,7 @@ function DoExpressionUnitVectorsMatch(opts){
     cartesianXYZ: {
       label: "\\text{Cartesian}\\ \\left(\\hat{x},\\hat{y},\\hat{z} \\right)",
       coors: [UniqueRIDStringObj["\\hat{x}"].ridString, UniqueRIDStringObj["\\hat{y}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],//cartensian
+      coorsLs: ["\\hat{x}","\\hat{y}","\\hat{z}"],
       unique: [UniqueRIDStringObj["\\hat{x}"].ridString, UniqueRIDStringObj["\\hat{y}"].ridString],
       uniquePairs: [],
       unallowedUnitVectors: [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{\\theta}"].ridString],//r or theta
@@ -1792,6 +1823,7 @@ function DoExpressionUnitVectorsMatch(opts){
     cartesianIJK: {
       label: "\\text{Cartesian}\\ \\left(\\hat{i},\\hat{j},\\hat{k}\\right)",
       coors: [UniqueRIDStringObj["\\hat{i}"].ridString,UniqueRIDStringObj["\\hat{j}"].ridString,UniqueRIDStringObj["\\hat{k}"].ridString],//cartesian
+      coorsLs: ["\\hat{i}","\\hat{j}","\\hat{k}"],
       unique: [UniqueRIDStringObj["\\hat{i}"].ridString,UniqueRIDStringObj["\\hat{j}"].ridString,UniqueRIDStringObj["\\hat{k}"].ridString],//cartesian
       uniquePairs: [],
       unallowedUnitVectors: [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{\\theta}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],//r,theta,or z
@@ -1799,6 +1831,7 @@ function DoExpressionUnitVectorsMatch(opts){
     cylindrical: {
       label: "\\text{Cylindrical}\\ \\left(\\hat{r},\\hat{\\theta},\\hat{z}\\right)",
       coors: [UniqueRIDStringObj["\\hat{r}"].ridString,UniqueRIDStringObj["\\hat{\\theta}"].ridString,UniqueRIDStringObj["\\hat{z}"].ridString],//cylindrical
+      coorsLs: ["\\hat{r}","\\hat{\\theta}","\\hat{z}"],
       unique: [],
       uniquePairs: [
         [UniqueRIDStringObj["\\hat{r}"].ridString, UniqueRIDStringObj["\\hat{z}"].ridString],
@@ -1809,6 +1842,7 @@ function DoExpressionUnitVectorsMatch(opts){
     spherical: {
       label: "\\text{Spherical}\\ \\left(\\hat{r},\\hat{\\theta},\\hat{\\phi}\\right)",
       coors: [UniqueRIDStringObj["\\hat{r}"].ridString,UniqueRIDStringObj["\\hat{\\theta}"].ridString,UniqueRIDStringObj["\\hat{\\phi}"].ridString],//spherical
+      coorsLs: ["\\hat{r}","\\hat{\\theta}","\\hat{\\phi}"],
       unique: [UniqueRIDStringObj["\\hat{\\phi}"].ridString],
       uniquePairs: [],
       unallowedUnitVectors: [UniqueRIDStringObj["\\hat{z}"].ridString],//z
@@ -1848,18 +1882,49 @@ function DoExpressionUnitVectorsMatch(opts){
 
   }
 
-  if(coorKey2 != null){
-    //if coorKey2 != null that means the user is using two different cooridnate systems so we need to throw an error
-    if(opts.throwError != false){
-      CreateInlineMathFieldError({
-        mfID: opts.mfID,
-        error: "Two different coordinate systems used in expression",
-        latexExpressions: [`${coors[coorKey].label}\\ \\text{and}\\ ${coors[coorKey2].label}`],
-      });
-    }
-    
+  //after the for loop we have to look at the sate of coorKey and coorKey2 to see if there are two different coordinate systems in the string. Depending on if the one of them is a generic coordinate system that we can possibly erradicate and turn it into a more specific coordinate system
 
-    return false;
+  //lets first check if we found two different coordinate systems
+  if(coorKey2 != null){
+    // okay now we know that we found two different coordinate systems. The next questions is are one of them generic and if so can we change the generic cooridnate system to a more specific cooridnate system
+    let twoDifferentCooridnateSystems = true;
+    let nonGenericCoordinateSystem;
+    if(coorKey == "generic" || coorKey2 == "generic"){
+      //if one of the coordinate systems is generic we will see if we can replace all the generic unit vectors with specific unit vectors
+      // the first thing we have to do is check if this string is using higher demensions generic unit vectors like "\\dim{4}" or "\\dim{6}" for example. If they are then we can't convert these generic into a specific cooridnate system of which all of them are only three demensional
+      twoDifferentCooridnateSystems = false;
+      let i = 0;
+      nonGenericCoordinateSystem = coorKey == "generic" ? coorKey2 : coorKey;
+      while(UniqueRIDStringObj[`\\dim{${i+1}}`] != undefined){
+        if(str.indexOf(UniqueRIDStringObj[`\\dim{${i+1}}`].ridString) != -1){
+          //we found a generic unit vector string now we need to see if we can change it or not
+          if(i <= 2 ){
+            str = str.replace(new RegExp(UniqueRIDStringObj[`\\dim{${i+1}}`].ridString, 'g'), coors[nonGenericCoordinateSystem].coors[i])
+          }else{
+            //if i is greater than 2 then we are dealing with a higher demensional unit vector that can't be converted to an other coordinate system
+            twoDifferentCooridnateSystems = true;
+            break;//the minute we find even one higher demensional unit vector that's all we need to say that we can't convert the generic coordinate system to the more specific one
+          }
+        }
+        i++;
+      }
+    }
+
+    if(twoDifferentCooridnateSystems){
+      if(opts.throwError != false){
+        CreateInlineMathFieldError({
+          mfID: opts.mfID,
+          error: "Two different coordinate systems used in expression",
+          latexExpressions: [`${coors[coorKey].label}\\ \\text{and}\\ ${coors[coorKey2].label}`],
+        });
+      }
+      // coordinate systems don't match by default resposne.answer = false
+      return response;
+    }else{
+      //this insures that the next if statement "coorKey != null" returns true so we check if the string has any unallowed characters
+      coorKey = nonGenericCoordinateSystem;
+    }
+
   }
 
   //so now that we may or may not know the coordinate system we are using we need to clean the string so that generic demension unit vectors "\\dim{n}" will be specific unit vectors that line up with the coordinate system detected
@@ -1873,13 +1938,17 @@ function DoExpressionUnitVectorsMatch(opts){
           error: "Unit vectors from two different coordinate systems detected in expression",
         });
       }
-      
-
-      return false;
+      // unit vectors don't match and by default response.answer = false
+      return response;
     }
   }
 
-  return true;
+
+  return {
+    answer: true, // if we have gotten to this point then we know no errors were found
+    str: str,// the original string may have changed throughout the process so we are returning the it as well
+    coorsLs: coorKey != null ? coors[coorKey].coorsLs : undefined,
+  };
 }
 
 function TryToCalculateCrossProductGivenTwoMatrices(opts){
@@ -1948,7 +2017,7 @@ function TryToCalculateCrossProductGivenTwoMatrices(opts){
 
     //checking if either strings have a unique identify unit vector
     if(value.unique.some((unitVectorRIDString) => {return `${matrix1} ${matrix2}`.indexOf(unitVectorRIDString) != -1})){
-      if(coorKey == null){
+      if(coorKey == null || coorKey == "generic"){
         coorKey = key;
         foundKey = true;
       }else{
@@ -1960,7 +2029,7 @@ function TryToCalculateCrossProductGivenTwoMatrices(opts){
     if(!foundKey){
       //checking if either string has a unique identifing pair of unit vectors
       if(value.uniquePairs.some((pairs) => {return `${matrix1} ${matrix2}`.indexOf(pairs[0]) != -1 && `${matrix1} ${matrix2}`.indexOf(pairs[1]) != -1})){
-        if(coorKey == null){
+        if(coorKey == null || coorKey == "generic"){
           coorKey = key;
         }else{
           coorKey2 = key;
@@ -2055,7 +2124,10 @@ function CleanRawDotProduct(opts){
   }
 
   //before we clean this dot product and calculate it we need to check that the unit vectors used in the dot product match meaning that they are a part of the same coordinate system
-  if(!DoExpressionUnitVectorsMatch({str: opts.str, mfID: opts.mfID})){return null;}
+  let expressionUnitVectorsMatchObj = DoExpressionUnitVectorsMatch({str: opts.str, mfID: opts.mfID});
+  if(expressionUnitVectorsMatchObj.answer){
+    opts.str = expressionUnitVectorsMatchObj.str;
+  }else{return null;}
 
   let unitVectors = ["\\hat{x}","\\hat{i}","\\hat{r}","\\hat{y}", "\\hat{j}","\\hat{\\theta}","\\hat{z}","\\hat{k}","\\hat{\\phi}"];
   //all we need to do is replace all unit vectors and demensions "\\dim{n}" with 1 and then evaluate the rawDotproduct and return the value as the cleaned dot product
@@ -2603,8 +2675,8 @@ function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
       returnFinalObject: true,//return an array of the expressions we have to iterate through and the evaluated expression in latex
     });
 
-    console.log("expression1Obj", expression1Obj);
-    console.log("expression2Obj", expression2Obj);
+    //console.log("expression1Obj", expression1Obj);
+    //console.log("expression2Obj", expression2Obj);
     
     if(expression1Obj != null && expression2Obj != null){
       let count = 0;
@@ -2624,8 +2696,8 @@ function DoHighLevelSelfConsistencyCheck(expressionArray, lineNumber, mfID){
           if(Object.keys(expression1Variables).filter((v) => {return !Object.keys(expression2Variables).includes(v)}).length == 0){
             //using all of nerdamer's equality functions to figure out if the expression is correct
             if(expressionArray[i].operator == "="){
-              console.log("expression1", expression1);
-              console.log("expression2", expression2);
+              //console.log("expression1", expression1);
+              //console.log("expression2", expression2);
               if(!nerdamer(expression1).eq(expression2)){//nerdamer equal to function
                 let isEqual = false;
                 //before we can be sure that these two expression are not equal we need to check if both are vectors because for some reason nerdamer returns false even if the expressions are both "[x,y,z]"
@@ -2910,7 +2982,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
   let expVars = opts.expressionVariablesObj;
   let uniqueRIDStringArray = opts.uniqueRIDStringArray;
 
-  //console.log(exp1, exp2, expVars)
+  //console.log(exp1, exp2, expVars);
   
   //the first thing is we are going to go through the list of expVars and try to plug in all the values for all the variables in exp1 and exp2.
   //if that doesn't work for some reason, either because a variable is known or given but the actual value is undefined or if the variable is actuallly
@@ -3070,9 +3142,21 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
                 DefinedVariables[k].currentState = variableVectorData.currentState;
                 DefinedVariables[k].value = variableVectorData.value;
                 DefinedVariables[k].components = variableVectorData.components;
+                // after we set component and value data for this vector we need to check that the vector's magnitude variable (if there is one) actually equals the magnitude of the vector with its new data and if it doesn't have a value we will see if we can set one 
+                CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+                  location: "DefinedVariables",
+                  vectorLs: k,
+                  vectorMagnitudeLs: RemoveVectorLatexString(k),
+                });
               }else{
                 DefinedVariables[k].currentState = "known";
                 DefinedVariables[k].value = (actualValue) ? ConvertStringToScientificNotation(actualValue) : undefined;
+                // after we set component and value data for this vector we need to check that the vector's magnitude variable (if there is one) actually equals the magnitude of the vector with its new data and if it doesn't have a value we will see if we can set one 
+                CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+                  location: "DefinedVariables",
+                  vectorLs: `\\vec{${k}}`,
+                  vectorMagnitudeLs: k,
+                });
               }
               
               foundMatchAndChangedVariableValueOrState = true;
@@ -3096,9 +3180,21 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
                 EL.undefinedVars.undefined[k].currentState = variableVectorData.currentState;
                 EL.undefinedVars.undefined[k].value = variableVectorData.value;
                 EL.undefinedVars.undefined[k].components = variableVectorData.components;
+                // after we set component and value data for this vector we need to check that the vector's magnitude variable (if there is one) actually equals the magnitude of the vector with its new data and if it doesn't have a value we will see if we can set one 
+                CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+                  location: "EL.undefinedVars.undefined",
+                  vectorLs: k,
+                  vectorMagnitudeLs: RemoveVectorLatexString(k),
+                });
               }else{
                 EL.undefinedVars.undefined[k].currentState = "known";
                 EL.undefinedVars.undefined[k].value = (actualValue) ? ConvertStringToScientificNotation(actualValue) : undefined;
+                // after we set component and value data for this vector we need to check that the vector's magnitude variable (if there is one) actually equals the magnitude of the vector with its new data and if it doesn't have a value we will see if we can set one 
+                CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+                  location: "EL.undefinedVars.undefined",
+                  vectorLs: `\\vec{${k}}`,
+                  vectorMagnitudeLs: k,
+                });
               }
 
               foundMatchAndChangedVariableValueOrState = true;
@@ -3122,9 +3218,20 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
                 EL.undefinedVars.defined[k].currentState = variableVectorData.currentState;
                 EL.undefinedVars.defined[k].value = variableVectorData.value;
                 EL.undefinedVars.defined[k].components = variableVectorData.components;
+                CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+                  location: "EL.undefinedVars.defined",
+                  vectorLs: k,
+                  vectorMagnitudeLs: RemoveVectorLatexString(k),
+                });
               }else{
                 EL.undefinedVars.defined[k].currentState = "known";
                 EL.undefinedVars.defined[k].value = (actualValue) ? ConvertStringToScientificNotation(actualValue) : undefined;
+                // after we set component and value data for this vector we need to check that the vector's magnitude variable (if there is one) actually equals the magnitude of the vector with its new data and if it doesn't have a value we will see if we can set one 
+                CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+                  location: "EL.undefinedVars.defined",
+                  vectorLs: `\\vec{${k}}`,
+                  vectorMagnitudeLs: k,
+                });
               }
 
               foundMatchAndChangedVariableValueOrState = true;
@@ -3151,6 +3258,73 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
 
 }
 
+function CheckThatVectorMagnitudeVariableEqualsVectorMagnitude(opts){
+  console.log("CheckThatVectorMagnitudeVariableEqualsVectorMagnitude");
+  // this function takes a vectorLs, vectorMagnitudeLs, and a location where these variables are stored and checks that vector magnitude and vector variable equal each other
+  // when you calculated the magnitude of the vector variable. And if the vector magnitude is not known then we set its value to known and calculate its value
+
+  // making sure we have all the data we need to do what we are trying to do in this function
+  if(opts.location == undefined || opts.vectorLs == undefined || opts.vectorMagnitudeLs == undefined){return}
+
+  let variables = opts.location == "DefinedVariables" ? DefinedVariables : opts.location == "EL.undefinedVars.defined" ? EL.undefinedVars.defined :  EL.undefinedVars.undefined;
+  let vectorLs = opts.vectorLs;
+  let vectorMagnitudeLs = opts.vectorMagnitudeLs;
+
+  // first thing we need to do is check that both the vectorLs and vectorMagnitudeLs exist in the variables object.
+  if(variables[vectorLs] == undefined ||  variables[vectorMagnitudeLs] == undefined){return}
+
+  // the next thing we need to check is if the vector is known. If it is then the magnitude by definition is known
+  if(variables[vectorLs].state == "given" || variables[vectorLs].currentState == "known"){
+    variables[vectorMagnitudeLs].currentState = "known";
+    // the next thing we need to do is check if the vector variable has all of its components and that all the component values are defined
+    let componentValues = [];
+    let allComponentValuesAreDefined = true;
+    if(variables[vectorLs].components != undefined){
+      for(const [key, value] of Object.entries(variables[vectorLs].components)){
+        if(typeof(value) == "object"){
+          if(value.value == undefined){
+            allComponentValuesAreDefined = false;
+            break;
+          }else{
+            componentValues.push(value.value);
+          }
+        }
+      }
+    }
+    
+    
+    if(componentValues.length >= 3 && allComponentValuesAreDefined){
+      let calculatedVectorMagnitudeValue = `\\sqrt{${componentValues.map((value)=>{return `(${value})^{2}`}).join("+")}}`;
+
+      calculatedVectorMagnitudeValue = nerdamer.convertFromLaTeX(calculatedVectorMagnitudeValue).evaluate().toString();
+      //running it through mathjs because nerdamer produces crazy fractions 
+      let calculatedVectorMagnitudeValueMathJs = math.evaluate(calculatedVectorMagnitudeValue);
+      //making sure that there is a specific number of sig fig precision
+      calculatedVectorMagnitudeValue = Number(calculatedVectorMagnitudeValueMathJs.toString()).toFixed(PrecisionSigFigs);
+      // now we need to check if the vector magnitude has a value and if it does then we need to compare the values. If it doesn't then we set the value to what we calculated -> "calculatedVectorMagnitudeValue"
+      if(variables[vectorMagnitudeLs].value == undefined || variables[vectorMagnitudeLs].value == ""){
+        variables[vectorMagnitudeLs].value = ConvertStringToScientificNotation(calculatedVectorMagnitudeValue);
+      }else{
+        // we need to check if the two values equal
+        let vectorMagnitudeValue; 
+
+        let num1 = calculatedVectorMagnitudeValueMathJs.toExponential().split("e");
+        let num2 = math.evaluate(nerdamer.convertFromLaTeX(variables[vectorMagnitudeLs].value).evaluate().toString()).toExponential().split("e");
+        let isEqual = nerdamer(`${Number(num1[0]).toFixed(PrecisionSigFigs)}e${num1[1]}`).eq(`${Number(num2[0]).toFixed(PrecisionSigFigs)}e${num2[1]}`);
+        if(!isEqual){
+          ThrowErrorVectorMagnitudeAndVectorDontEqual();
+        }
+      }
+    }
+  }
+
+}
+
+function ThrowErrorVectorMagnitudeAndVectorDontEqual(){
+  console.log("ThrowErrorVectorMagnitudeAndVectorDontEqual");
+}
+
+
 function CalculateVariableVectorCurrentStateAndValueFromComponents(components){
   // this function takes an object that represents the components of a variable vector and it figures out if the
   // variable's currentState should be known or unknown. And if it is known then it looks at the component data and
@@ -3159,11 +3333,11 @@ function CalculateVariableVectorCurrentStateAndValueFromComponents(components){
   let keys = Object.keys(components);
   let variableVectorData = {
     // this means that all three components of this vector are defined in some shape or form so overall the variable is known
-    currentState: keys.length >= 3 ? "known" : "unknown",
+    currentState: keys.filter((key) =>{return  key != "coordinateSystem"}).length >= 3 ? "known" : "unknown",
     value: undefined,
   };
 
-  console.log("CalculateVariableVectorCurrentStateAndValueFromComponents");
+  //console.log("CalculateVariableVectorCurrentStateAndValueFromComponents");
 
   // if the currentState is known then we will try to create a latex string for the value that represents the known values of the components
   if(variableVectorData.currentState == "known"){
@@ -3178,15 +3352,22 @@ function CalculateVariableVectorCurrentStateAndValueFromComponents(components){
     let allComponentsUseGenericUnitVector = true;
 
     for(const [key, value] of Object.entries(components)){
-      if(value.value == undefined){
-        allComponentValuesAreDefined = false;
-      }
-      if(!/\\dim\{\d*\}/.test(value.unitVectorLs)){
-        allComponentsUseGenericUnitVector = false;
+      if(typeof(value) == "object"){//components holds a key value pair which is a string and the key is "coordinateSystem" so we only want key value pairs that are objects for example "\\comp1{\\vec{F}}" : {value : "...", unitVectorLs: "..."}
+        if(value.value == undefined){
+          allComponentValuesAreDefined = false;
+        }
+        if(!/\\dim\{\d*\}/.test(value.unitVectorLs)){
+          allComponentsUseGenericUnitVector = false;
+        }
       }
     }
 
-    console.log(allComponentValuesAreDefined,allComponentsUseGenericUnitVector);
+    // before we go a step further we need to run this function that edits the components object. Pretty much what it does is it looks at all
+    // the components and sees if it can figure out the coordinate system used with the components and if it can it turns generic demension
+    // unit vectors ("\\dim{n}") into something more specific like "\hat{i}" to match the coordinate system used. Additionally it adds a new
+    // key value pair called "coordinateSystem" which stores the coordinate system used by the components. If the "coordinateSystem" key equals
+    // "generic" that means that the function wasn't able to define the coordinate system
+    components = FigureOutCoordinateSystemEachComponent(components);
 
     if(allComponentValuesAreDefined){
       //this line tries to get all of the unit vectors on the same page which coordinate system to use if possible. It does this by looking at
@@ -3197,21 +3378,26 @@ function CalculateVariableVectorCurrentStateAndValueFromComponents(components){
         //if all the components use generic unit vector then it will be very easy to render a latex string for the variable value
         let variableValue = [];
         for(let [key, value] of Object.entries(components)){
-          variableValue.push(value.value);
+          if(typeof(value) == "object"){//components holds a key value pair which is a string and the key is "coordinateSystem" so we only want key value pairs that are objects for example "\\comp1{\\vec{F}}" : {value : "...", unitVectorLs: "..."}
+            variableValue.push(value.value);
+          }
+          
         }
 
         variableVectorData.value = `\\left[${variableValue.join(",")}\\right]`;
 
       }else{
-        components = FigureOutCoordinateSystemEachComponent(components);
         // next we need to see if we could render the components into a variable value latex string. We do this by only looking at the components
         //whose values don't equal "0" then we check if the remain values are a part of the same coordiante system and if they are then we do the 
         // last step and actually parse the components object into a variable value latex string
         let nonZeroComponents = {};
         for(let [key, value] of Object.entries(components)){
-          if(value.value != "0"){
-            nonZeroComponents[key] = value;
+          if(typeof(value) == "object"){//components holds a key value pair which is a string and the key is "coordinateSystem" so we only want key value pairs that are objects for example "\\comp1{\\vec{F}}" : {value : "...", unitVectorLs: "..."}
+            if(value.value != "0"){
+              nonZeroComponents[key] = value;
+            }
           }
+          
         }
         //now nonZeroComponents is populated
         // if there are no components in the nonZeroComponents object then we will render the zero vector for the variable value
@@ -3226,8 +3412,20 @@ function CalculateVariableVectorCurrentStateAndValueFromComponents(components){
             unitVectorRIDStrings.push(UniqueRIDStringObj[value.unitVectorLs].ridString);
             variableValue.push(`${value.value} ${value.unitVectorLs}`);
           }
-          if(DoExpressionUnitVectorsMatch({str: unitVectorRIDStrings.join(" "),throwError: false})){
-            variableVectorData.value = variableValue.join(" + ")
+          let originalStr = unitVectorRIDStrings.join(" ");
+          let expressionUnitVectorsMatchObj = DoExpressionUnitVectorsMatch({str: originalStr,throwError: false});
+          //console.log('expressionUnitVectorsMatchObj',expressionUnitVectorsMatchObj);
+          if(expressionUnitVectorsMatchObj.answer){
+            //console.log("variableValue", variableValue);
+            if(originalStr != expressionUnitVectorsMatchObj.str && expressionUnitVectorsMatchObj.coorsLs != undefined){
+              // this means that this function had to replace generic n demensional unit vectors with more specific coordinate systems 
+              // so we also need to replace all unit vector latex string that are generic with their more specific unit vector counter part
+              variableVectorData.value = variableValue.join(" + ").replace(/\\dim\{1\}/,expressionUnitVectorsMatchObj.coorsLs[0]).replace(/\\dim\{2\}/,expressionUnitVectorsMatchObj.coorsLs[1]).replace(/\\dim\{3\}/,expressionUnitVectorsMatchObj.coorsLs[2])
+            }else{
+              //otherwise if the strings match then we don't have to change anything
+              variableVectorData.value = variableValue.join(" + ");
+            }
+            
           }
         }
       }
@@ -3243,7 +3441,10 @@ function CalculateVariableVectorCurrentStateAndValueFromComponents(components){
 function FigureOutCoordinateSystemEachComponent(components){
   let componentUnitVectors = [];// an array of all the unit vectors used in the variable vector components 
   for(let [key, value] of Object.entries(components)){
-    componentUnitVectors.push(value.unitVectorLs);
+    if(typeof(value) == "object"){//components holds a key value pair which is a string and the key is "coordinateSystem" so we only want key value pairs that are objects for example "\\comp1{\\vec{F}}" : {value : "...", unitVectorLs: "..."}
+      componentUnitVectors.push(value.unitVectorLs);
+    }
+    
   }
   // this function takes a components object and it tries to figure out what coordinate system the components should use and if it arrives at just generic then we return the object back the way we got it
   // this holds an array of all the generic demension unit vectors used in the editor example "\\dim{2}"
@@ -3316,16 +3517,22 @@ function FigureOutCoordinateSystemEachComponent(components){
 
   //now that we have recorded possible coordinate system that these components could be a part of in the form of coorKey we need to return an editted version of components where we apply the coordinate system we found to the vectors
   if(coorKey != "generic"){// if coorKey == "generic" then we can't change the components to make them any more descriptive then they already are
-    for(let [key] of Object.entries(components)){
-      if(/\\comp1\{/.test(key)){
-        components[key].unitVectorLs = coors[coorKey].coors[0];
-      }else if(/\\comp2\{/.test(key)){
-        components[key].unitVectorLs = coors[coorKey].coors[1];
-      }else if(/\\comp3\{/.test(key)){
-        components[key].unitVectorLs = coors[coorKey].coors[2];
+    for(let [key, value] of Object.entries(components)){
+      if(typeof(value) == "object"){//components holds a key value pair which is a string and the key is "coordinateSystem" so we only want key value pairs that are objects for example "\\comp1{\\vec{F}}" : {value : "...", unitVectorLs: "..."}
+        if(/\\comp1\{/.test(key)){
+          components[key].unitVectorLs = coors[coorKey].coors[0];
+        }else if(/\\comp2\{/.test(key)){
+          components[key].unitVectorLs = coors[coorKey].coors[1];
+        }else if(/\\comp3\{/.test(key)){
+          components[key].unitVectorLs = coors[coorKey].coors[2];
+        }
       }
+      
     }
   }
+
+  //we need to save the coordinate system that this vector should overall follow
+  components.coordinateSystem = coorKey;
 
   //now we return the component object which may or may not hvae changed
   return components;
@@ -4006,7 +4213,11 @@ function ExactConversionFromLatexStringToNerdamerReadableString(opts){
     try{
       let calculatedResults = nerdamer.convertFromLaTeX(ls).evaluate().expand().toString();
       //this function makes sure that the unit vector coordinate systems match
-      if(!DoExpressionUnitVectorsMatch({str: calculatedResults, mfID: mfID})){return null;}
+      let expressionUnitVectorsMatchObj = DoExpressionUnitVectorsMatch({str: calculatedResults, mfID: mfID});
+      if(expressionUnitVectorsMatchObj.answer){
+        //we set the calculatedResults equal to the objects str property because the string may have been changed so that generic demensions like "\\dim{1}" were changed to more specific coordinate systems for example "\\hat{x}"
+        calculatedResults = expressionUnitVectorsMatchObj.str;
+      }else{return null;}
       //if "calculatedResults is not a matrix then it just returns an array with one index
       if(returnFinalObject){
         let finalObj = {
@@ -4020,7 +4231,7 @@ function ExactConversionFromLatexStringToNerdamerReadableString(opts){
 
       return calculatedResults;
     }catch(err){
-      //console.log(err);
+      console.log(err);
       if(throwError){
         //we need to throw a general error that this expression couldn't be parsed so the editor can not verify if the line is correct or not
         
@@ -4186,7 +4397,7 @@ function ConvertExpressionRIDStringArrayToCalculatedLs(ExpressionRIDStringArray)
     calculatedLs = arrayLs.filter((value)=>{return value != "0"}).join(" + ");
   }
 
-  return calculatedLs;
+  return calculatedLs == "" ? "0" : calculatedLs;
 }
 
 function ConvertNerdamerMatrixToArray(str){

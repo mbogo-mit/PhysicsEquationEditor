@@ -1009,6 +1009,7 @@ function GetDefinedPhysicsConstants(){
 
 
 function OrderCompileAndRenderMyVariablesCollection(){
+  console.log("OrderCompileAndRenderMyVariablesCollection");
   //ORDER
   //get all the variables we need
   let trulyUndefinedVars = Object.keys(EL.undefinedVars.undefined);
@@ -1201,6 +1202,13 @@ function OrderCompileAndRenderMyVariablesCollection(){
       charsThatBreakOutOfSupSub: '+-=<>',
       handlers: {
         edit: function(mathField) {
+          console.log("edit.....................");
+          console.log("mathField.latex()",mathField.latex());
+          // it seems like the "edit" event listener  is triggered when the mathField is initialized which happens every time the my
+          // variables collection is update. We don't consider this an edit so the below if statements are checking if the "edit" was
+          // triggered because of an initialization or because the user actually changed something
+
+
           let valueFormattingError = FindFormattingErrorInVariableValueMathField(mathField.latex(), $(mathField.el()).attr("type"));
           $(`.variable-value[rid='${$(mathField.el()).attr("rid")}']`).removeClass("error");
           try{//the input field may not have a tooltip connected to it so this line may not work
@@ -1240,12 +1248,22 @@ function OrderCompileAndRenderMyVariablesCollection(){
       MQ.StaticMath($(this)[0]).latex($(this).attr("latex"));
     }
     else{
+      let mf;
+      if($(this).attr("latex") == ""){// if the latex equals nothing then all we have to do is initialize the mathField  
+        // for some reason this element has html inside of it eventhough we haven't created the mathfield so we are removing any html before we initialize the math field
+        $(this).html("");
+        mf = MQ.MathField($(this)[0], opts);
+        console.log("mf.latex()",mf.latex())
+      }else{// if the latex attribute actually equals something then we need to initialize the mathfield with its correct latex information
+        mf = MQ.MathField($(this)[0], opts).latex($(this).attr("latex"));
+      }
+
       if(LastVariableRIDChangedToGiven == $(this).attr("rid")){
-        MQ.MathField($(this)[0], opts).latex($(this).attr("latex")).focus();
+        mf.focus();
       }
-      else{
-        MQ.MathField($(this)[0], opts).latex($(this).attr("latex"));
-      }
+
+      
+      
     }
     
     
@@ -1346,7 +1364,7 @@ function FindFormattingErrorInVariableValueMathField(ls, type){
 }
 
 function GetComponentsForVectorFromVariableValue(ls, variableLs){
-  console.log('GetComponentsForVectorFromVariableValue');
+  //console.log('GetComponentsForVectorFromVariableValue');
 
   // before we do anything we need to check that the ls is actually something and not just empty space
   if(ls.replace(/\\\s/g,"").replace(/\s*/g,"").length == 0){return;}
@@ -1373,9 +1391,15 @@ function GetComponentsForVectorFromVariableValue(ls, variableLs){
     componentData = RemoveUnitVectorRIDStringFromString(expressionObj.array[i]);
     components[`\\comp${i+1}{${variableLs}}`] = {
       value: componentData.str,
-      unitVectorLs: componentData.unitVectorLs,
+      unitVectorLs: (componentData.unitVectorLs != null) ? componentData.unitVectorLs : `\\dim{${i+1}}`,
     }
   }
+
+  // so now that we have an object of components before we send it off we want to see if we can figure out the coordinate system the user is
+  // trying to use for this vector. If we can, we will change generic demensions ("\\dim{n}") into their correct unit vector
+  // for example: "\\dim{1}" -> "\\hat{i}". Additionally we will add another key value pair to define overall which coordinate system
+  // the coordinates are using. Thats what this line below does
+  components = FigureOutCoordinateSystemEachComponent(components);
 
   return components;
 }
@@ -1383,13 +1407,34 @@ function GetComponentsForVectorFromVariableValue(ls, variableLs){
 function FindAndUpdateVariableByRID(opts = {}){
 
   let foundVariable = false;
+  let updatedVariable = false;
   
   for(const [key, value] of Object.entries(DefinedVariables)){
     if(value.rid == opts.rid){
       foundVariable = true;
-      DefinedVariables[key].value = opts.value;
-      DefinedVariables[key].valueFormattingError = opts.valueFormattingError;
-      DefinedVariables[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
+      // we should only updated the variable if the value or valueFormattingError has actually changed
+      //console.log("DefinedVariables[key].value != opts.value", DefinedVariables[key].value != opts.value);
+      //console.log("DefinedVariables[key].valueFormattingError != opts.valueFormattingError", DefinedVariables[key].valueFormattingError != opts.valueFormattingError);
+      if(DefinedVariables[key].value != opts.value || DefinedVariables[key].valueFormattingError != opts.valueFormattingError){
+        updatedVariable = true;
+        DefinedVariables[key].value = opts.value;
+        DefinedVariables[key].valueFormattingError = opts.valueFormattingError;
+        DefinedVariables[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
+        if(opts.type == "vector"){
+          CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+            location: "DefinedVariables",
+            vectorLs: key,
+            vectorMagnitudeLs: RemoveVectorLatexString(key),
+          });
+        }else{
+          CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+            location: "DefinedVariables",
+            vectorLs: `\\vec{${key}}`,
+            vectorMagnitudeLs: key,
+          });
+        }
+        
+      }
       break;
     }
   }
@@ -1398,10 +1443,27 @@ function FindAndUpdateVariableByRID(opts = {}){
     for(const [key, value] of Object.entries(EL.undefinedVars.undefined)){
       if(value.rid == opts.rid){
         foundVariable = true;
-        EL.undefinedVars.undefined[key].value = opts.value;
-        EL.undefinedVars.undefined[key].valueFormattingError = opts.valueFormattingError;
-        EL.undefinedVars.undefined[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
-        break;
+        // we should only updated the variable if the value or valueFormattingError has actually changed
+        if(EL.undefinedVars.undefined[key].value != opts.value || EL.undefinedVars.undefined[key].valueFormattingError != opts.valueFormattingError){
+          updatedVariable = true;
+          EL.undefinedVars.undefined[key].value = opts.value;
+          EL.undefinedVars.undefined[key].valueFormattingError = opts.valueFormattingError;
+          EL.undefinedVars.undefined[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
+          if(opts.type == "vector"){
+            CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+              location: "EL.undefinedVars.undefined",
+              vectorLs: key,
+              vectorMagnitudeLs: RemoveVectorLatexString(key),
+            });
+          }else{
+            CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+              location: "EL.undefinedVars.undefined",
+              vectorLs: `\\vec{${key}}`,
+              vectorMagnitudeLs: key,
+            });
+          }
+        }
+        break;  
       }
     }
   }
@@ -1410,24 +1472,45 @@ function FindAndUpdateVariableByRID(opts = {}){
     for(const [key, value] of Object.entries(EL.undefinedVars.defined)){
       if(value.rid == opts.rid){
         foundVariable = true;
-        EL.undefinedVars.defined[key].value = opts.value;
-        EL.undefinedVars.defined[key].valueFormattingError = opts.valueFormattingError;
-        EL.undefinedVars.defined[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
+        // we should only updated the variable if the value or valueFormattingError has actually changed
+        if(EL.undefinedVars.defined[key].value != opts.value || EL.undefinedVars.defined[key].valueFormattingError != opts.valueFormattingError){
+          updatedVariable = true;
+          EL.undefinedVars.defined[key].value = opts.value;
+          EL.undefinedVars.defined[key].valueFormattingError = opts.valueFormattingError;
+          EL.undefinedVars.defined[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
+          if(opts.type == "vector"){
+            CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+              location: "EL.undefinedVars.defined",
+              vectorLs: key,
+              vectorMagnitudeLs: RemoveVectorLatexString(key),
+            });
+          }else{
+            CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+              location: "EL.undefinedVars.defined",
+              vectorLs: `\\vec{${key}}`,
+              vectorMagnitudeLs: key,
+            });
+          }
+        }
         break;
       }
     }
   }
 
-  DisplayLoadingBar(true);
-  ExecutionID = RID();
-  (debounce(function(executionID){
-    if(executionID == ExecutionID){
-      EL.GenerateEditorErrorMessages({dontRenderMyVariablesCollection: true});
-      DisplayLoadingBar(false);
-    }
-    
-  }, 1000))(ExecutionID);
-  
+  console.log("updatedVariable",updatedVariable);
+
+  if(updatedVariable){
+    DisplayLoadingBar(true);
+    ExecutionID = RID();
+    (debounce(function(executionID){
+      if(executionID == ExecutionID){
+        EL.GenerateEditorErrorMessages({dontRenderMyVariablesCollection: true});
+        DisplayLoadingBar(false);
+      }
+      
+    }, 1000))(ExecutionID);
+  }
+
 }
 
 function UpdateMyVariablesCollection(opts = {ls: "", rid: "", update: true, add: false, pc: {}, remove: false, editable: true}){
@@ -2390,7 +2473,7 @@ function ParseAndRenderCustomUnit(){
       error = "String is formatted incorrectly";
     }
 
-    console.log("mathJsCustomUnitString",mathJsCustomUnitString);
+    //console.log("mathJsCustomUnitString",mathJsCustomUnitString);
 
     if(mathJsCustomUnitString != null){
       mathJsCustomUnitString = math.evaluate(isNaN(mathJsCustomUnitString) ? `1 ${mathJsCustomUnitString}` : mathJsCustomUnitString).toString();

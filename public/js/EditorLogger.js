@@ -203,7 +203,7 @@ function EditorLogger(){
       description: "You are adding vectors that don't have the same number of demensions",
     },
     "Dimension mismatch. Adding vectors with different amount of demension": {
-      descripton: "You can only add vectors with the same number of demensions",
+      description: "You can only add vectors with the same number of demensions",
     },
     "Demension mismatch. Setting to vectors with a different number of demensions equal to each other": {
       description: "Vectors must have the same number of demensions to be set equal to each other",
@@ -295,7 +295,6 @@ function EditorLogger(){
       });
 
     }
-    this.addLog({error: errors});//adding errors to the log
   }
 
   this.ParsePreviousLinesAgainWithNewInfoAboutUndefinedVariables = function(endingLineNumber){
@@ -348,13 +347,6 @@ function EditorLogger(){
             }
           }
           else{
-            this.addLog({error: [{
-              error: this.createLoggerErrorFromMathJsError("Integral bounds not formatted properly"),
-              info: "",
-              lineNumber: lineNumber,
-              mfID: mfID,
-            }]});
-
             //we are going to add this information to the correct mathfield that has this error
             MathFields[mfID].log.error.push({
               error: this.createLoggerErrorFromMathJsError("Integral bounds not formatted properly"),
@@ -381,14 +373,6 @@ function EditorLogger(){
             
             return `(${value.expression1} ${oppositeOperator[value.operator]} ${value.expression2}) \\rightarrow (${value.calculatedExpression1} ${oppositeOperator[value.operator]} ${value.calculatedExpression2})`;
           });
-          //console.log(latexExpressions);
-          this.addLog({error: [{
-            error: this.createLoggerErrorFromMathJsError("Incorrect equations"),
-            info: "",
-            latexExpressions: latexExpressions,
-            lineNumber: lineNumber,
-            mfID: mfID,
-          }]});
 
           //we are going to add this information to the correct mathfield that has this error
           MathFields[mfID].log.error.push({
@@ -475,6 +459,7 @@ function EditorLogger(){
       state: (savedVariable.state) ? savedVariable.state : "unknown",
       type: (isVariableVector) ? "vector" : "scalar",
       value: (savedVariable.value) ? savedVariable.value: undefined,
+      components: (savedVariable.components) ? savedVariable.components: undefined,
       valueFormattingError: (savedVariable.valueFormattingError) ? savedVariable.valueFormattingError: undefined,
       canBeVector: fullUnitsString.canBeVector,
       fullUnitsString: fullUnitsString.str,
@@ -487,17 +472,6 @@ function EditorLogger(){
     };
     //then after giving this variable a definiton we need to remove it from the undefined object of this.undefinedVars
     delete this.undefinedVars.undefined[definedUndefinedVariable];
-
-  }
-
-  this.addLog = function(log){
-    this.log.success = this.log.success.concat((log.success) ? log.success : []);
-    this.log.info = this.log.info.concat((log.info) ? log.info : []);
-    this.log.warning = this.log.warning.concat((log.warning) ? log.warning : []);
-    this.log.error = this.log.error.concat((log.error) ? log.error : []);
-  }
-
-  this.addToMathFieldsLog = function(log){
 
   }
 
@@ -623,11 +597,6 @@ function EditorLogger(){
   this.display = function(opts = {}){
 
     RenderAllMathFieldLogs();
-
-    //initialize static math fields that are used in the log
-    $(".log-static-latex").each(function(){
-      MQ.StaticMath($(this)[0]).latex($(this).attr("latex"));
-    });
 
     if(!opts.dontRenderMyVariablesCollection){
       //after generating errors and defined undefined and defined undefined variables we need to rerender my variable collection
