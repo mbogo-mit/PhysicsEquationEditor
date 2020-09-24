@@ -269,7 +269,6 @@ function EditorLogger(){
     this.UpdateKnownUnknownVariables();
     //after this function runs it will populate "this.expressionsThatDontActuallyEqualEachOther" with information about equations that don't actually equal each other so we need to add the errors that this object represents
     this.AddErrorsFromExpressionsThatDontActuallyEqualEachOther();
-
     //after parsing through everything and building up the list of defined undefined variables we need to check if there are any relevant equations for the set of variables we have in DefinedVariables and this.undefinedVars.defined
     CheckForAndDisplayRelevantEquations();
 
@@ -403,6 +402,7 @@ function EditorLogger(){
     //we need to first reset all unknown variables current state to "unknown" so that they have to prove that they are known every time the user makes an edit in the editor
     if(reset){
       this.ResetAllUnknownVariblesToCurrentStateUnknown();
+      this.TryToCheckAndSetVectorsAndVectorMagnitudes();
     }
     this.expressionsThatDontActuallyEqualEachOther = {};//we have to reset this object everytime we run this function because this.CheckLinesForKnownVariables() will populuate this object with the most up to date expressions that don't actually equal each other
     this.CheckLinesForKnownVariables();
@@ -541,6 +541,42 @@ function EditorLogger(){
         this.undefinedVars.defined[key].value = undefined;
         this.undefinedVars.defined[key].components = undefined;
       }
+    }
+
+  }
+
+  this.TryToCheckAndSetVectorsAndVectorMagnitudes = function(){
+    
+    // this function goes through every variable and tries to see if it can check or set the corresponding vector magnitude and we do this
+    // right after we have set all known unknowns to unknown and before "CheckLinesForKnownVariables" so that we can have some unknowns
+    // possibly known already by first trying to calculate a vectors magnitude and setting the vector magnitude equal to this value if
+    //the variable exists
+
+    for(const [key, value] of Object.entries(DefinedVariables)){
+      // we will try to set and compare vector magnitudes and vectors
+      CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+        variables: DefinedVariables,
+        vectorLs: value.type == "vector" ? key : `\\vec{${key}}`,
+        vectorMagnitudeLs: value.type == "vector" ? RemoveVectorLatexString(key) : key,
+      });
+    }
+
+    for(const [key, value] of Object.entries(this.undefinedVars.undefined)){
+      // we will try to set and compare vector magnitudes and vectors
+      CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+        variables: this.undefinedVars.undefined,
+        vectorLs: value.type == "vector" ? key : `\\vec{${key}}`,
+        vectorMagnitudeLs: value.type == "vector" ? RemoveVectorLatexString(key) : key,
+      });
+    }
+
+    for(const [key, value] of Object.entries(this.undefinedVars.defined)){
+      // we will try to set and compare vector magnitudes and vectors
+      CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+        variables: this.undefinedVars.defined,
+        vectorLs: value.type == "vector" ? key : `\\vec{${key}}`,
+        vectorMagnitudeLs: value.type == "vector" ? RemoveVectorLatexString(key) : key,
+      });
     }
 
   }

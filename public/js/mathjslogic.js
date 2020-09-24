@@ -3144,7 +3144,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
                 DefinedVariables[k].components = variableVectorData.components;
                 // after we set component and value data for this vector we need to check that the vector's magnitude variable (if there is one) actually equals the magnitude of the vector with its new data and if it doesn't have a value we will see if we can set one 
                 CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-                  location: "DefinedVariables",
+                  variables: DefinedVariables,
                   vectorLs: k,
                   vectorMagnitudeLs: RemoveVectorLatexString(k),
                 });
@@ -3153,7 +3153,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
                 DefinedVariables[k].value = (actualValue) ? ConvertStringToScientificNotation(actualValue) : undefined;
                 // after we set component and value data for this vector we need to check that the vector's magnitude variable (if there is one) actually equals the magnitude of the vector with its new data and if it doesn't have a value we will see if we can set one 
                 CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-                  location: "DefinedVariables",
+                  variables: DefinedVariables,
                   vectorLs: `\\vec{${k}}`,
                   vectorMagnitudeLs: k,
                 });
@@ -3182,7 +3182,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
                 EL.undefinedVars.undefined[k].components = variableVectorData.components;
                 // after we set component and value data for this vector we need to check that the vector's magnitude variable (if there is one) actually equals the magnitude of the vector with its new data and if it doesn't have a value we will see if we can set one 
                 CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-                  location: "EL.undefinedVars.undefined",
+                  variables: EL.undefinedVars.undefined,
                   vectorLs: k,
                   vectorMagnitudeLs: RemoveVectorLatexString(k),
                 });
@@ -3191,7 +3191,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
                 EL.undefinedVars.undefined[k].value = (actualValue) ? ConvertStringToScientificNotation(actualValue) : undefined;
                 // after we set component and value data for this vector we need to check that the vector's magnitude variable (if there is one) actually equals the magnitude of the vector with its new data and if it doesn't have a value we will see if we can set one 
                 CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-                  location: "EL.undefinedVars.undefined",
+                  variables: EL.undefinedVars.undefined,
                   vectorLs: `\\vec{${k}}`,
                   vectorMagnitudeLs: k,
                 });
@@ -3219,7 +3219,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
                 EL.undefinedVars.defined[k].value = variableVectorData.value;
                 EL.undefinedVars.defined[k].components = variableVectorData.components;
                 CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-                  location: "EL.undefinedVars.defined",
+                  variables: EL.undefinedVars.defined,
                   vectorLs: k,
                   vectorMagnitudeLs: RemoveVectorLatexString(k),
                 });
@@ -3228,7 +3228,7 @@ function TryToSolveForUnknownVariablesAndCheckIfExpressionsActuallyEqualEachOthe
                 EL.undefinedVars.defined[k].value = (actualValue) ? ConvertStringToScientificNotation(actualValue) : undefined;
                 // after we set component and value data for this vector we need to check that the vector's magnitude variable (if there is one) actually equals the magnitude of the vector with its new data and if it doesn't have a value we will see if we can set one 
                 CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-                  location: "EL.undefinedVars.defined",
+                  variables: EL.undefinedVars.defined,
                   vectorLs: `\\vec{${k}}`,
                   vectorMagnitudeLs: k,
                 });
@@ -3264,9 +3264,9 @@ function CheckThatVectorMagnitudeVariableEqualsVectorMagnitude(opts){
   // when you calculated the magnitude of the vector variable. And if the vector magnitude is not known then we set its value to known and calculate its value
 
   // making sure we have all the data we need to do what we are trying to do in this function
-  if(opts.location == undefined || opts.vectorLs == undefined || opts.vectorMagnitudeLs == undefined){return}
+  if(opts.variables == undefined || opts.vectorLs == undefined || opts.vectorMagnitudeLs == undefined){return}
 
-  let variables = opts.location == "DefinedVariables" ? DefinedVariables : opts.location == "EL.undefinedVars.defined" ? EL.undefinedVars.defined :  EL.undefinedVars.undefined;
+  let variables = opts.variables;
   let vectorLs = opts.vectorLs;
   let vectorMagnitudeLs = opts.vectorMagnitudeLs;
 

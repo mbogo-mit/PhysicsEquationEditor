@@ -1420,20 +1420,11 @@ function FindAndUpdateVariableByRID(opts = {}){
         DefinedVariables[key].value = opts.value;
         DefinedVariables[key].valueFormattingError = opts.valueFormattingError;
         DefinedVariables[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
-        if(opts.type == "vector"){
-          CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-            location: "DefinedVariables",
-            vectorLs: key,
-            vectorMagnitudeLs: RemoveVectorLatexString(key),
-          });
-        }else{
-          CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-            location: "DefinedVariables",
-            vectorLs: `\\vec{${key}}`,
-            vectorMagnitudeLs: key,
-          });
-        }
-        
+        CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+          variables: DefinedVariables,
+          vectorLs: opts.type == "vector" ? key : `\\vec{${key}}`,
+          vectorMagnitudeLs: opts.type == "vector" ? RemoveVectorLatexString(key) : key,
+        });
       }
       break;
     }
@@ -1449,19 +1440,11 @@ function FindAndUpdateVariableByRID(opts = {}){
           EL.undefinedVars.undefined[key].value = opts.value;
           EL.undefinedVars.undefined[key].valueFormattingError = opts.valueFormattingError;
           EL.undefinedVars.undefined[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
-          if(opts.type == "vector"){
-            CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-              location: "EL.undefinedVars.undefined",
-              vectorLs: key,
-              vectorMagnitudeLs: RemoveVectorLatexString(key),
-            });
-          }else{
-            CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-              location: "EL.undefinedVars.undefined",
-              vectorLs: `\\vec{${key}}`,
-              vectorMagnitudeLs: key,
-            });
-          }
+          CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+            variables: EL.undefinedVars.undefined,
+            vectorLs: opts.type == "vector" ? key : `\\vec{${key}}`,
+            vectorMagnitudeLs: opts.type == "vector" ? RemoveVectorLatexString(key) : key,
+          });
         }
         break;  
       }
@@ -1478,26 +1461,16 @@ function FindAndUpdateVariableByRID(opts = {}){
           EL.undefinedVars.defined[key].value = opts.value;
           EL.undefinedVars.defined[key].valueFormattingError = opts.valueFormattingError;
           EL.undefinedVars.defined[key].components = (opts.valueFormattingError == undefined && opts.type == "vector") ? GetComponentsForVectorFromVariableValue(opts.value, key) : undefined;
-          if(opts.type == "vector"){
-            CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-              location: "EL.undefinedVars.defined",
-              vectorLs: key,
-              vectorMagnitudeLs: RemoveVectorLatexString(key),
-            });
-          }else{
-            CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
-              location: "EL.undefinedVars.defined",
-              vectorLs: `\\vec{${key}}`,
-              vectorMagnitudeLs: key,
-            });
-          }
+          CheckThatVectorMagnitudeVariableEqualsVectorMagnitude({
+            variables: EL.undefinedVars.defined,
+            vectorLs: opts.type == "vector" ? key : `\\vec{${key}}`,
+            vectorMagnitudeLs: opts.type == "vector" ? RemoveVectorLatexString(key) : key,
+          });
         }
         break;
       }
     }
   }
-
-  console.log("updatedVariable",updatedVariable);
 
   if(updatedVariable){
     DisplayLoadingBar(true);
