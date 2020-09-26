@@ -652,23 +652,143 @@ function ToggleKeyboard(){
   }
 }
 
-function RenderMessageUI(id){
+function RenderVariableCollectionErrors(){
+  console.log("RenderVariableCollectionErrors");
+  // this function goes through all the objects holding variable data and creates errors and displays them in the ui through tooltips exactly like mathfields
+  // the first thing we need to do is create for loops that go through each object that holds variable data
+  // next we need to find any errors that exist and format them into an object that the ejs template "mathfield-error" can understand to create a tooltip for the error
+  // then we need to figure out which ".variable-collection-error-container" span to attach the tooltip onto
 
-  let elmnt = $(`#${id}`).parents(".editor_line");
-  elmnt.find(".line_label span").removeClass('active');
+  let errorsInVariableCollection = {};
 
-  if(MathFields[id].message.question != null){
-    elmnt.find(".line_label span.line-question").addClass('active');
+  for(const [key, value] of Object.entries(DefinedVariables)){
+    let errors = [];
+    if(value.type == "vector"){
+      if(!value.canBeVector){
+        errors.push({
+          error: {
+            type: "This unit can't be a vector",
+            description: "This vector has units that can only be mesaured using a scalar"
+          },
+          latexExpressions: undefined,
+        });
+      }
+      if(value.magnitudeOfVectorEqualsVectorMagnitude == false){
+        let vectorMagnitudeLs = RemoveVectorLatexString(key);
+        // we have to make sure that the vector magnitude variable doesn't have an empty string, a string filled with spaces, or "undefined" for its value. if it does we just say its equal to 0
+        let vectorMagnitudeValue = (DefinedVariables[vectorMagnitudeLs].value.replace(/\\\s|\s*/g,"") == "" || DefinedVariables[vectorMagnitudeLs].value == undefined) ? "0" : DefinedVariables[vectorMagnitudeLs].value;
+        errors.push({
+          error: {
+            type: "Magnitude of vector and vector magnitude don't equal",
+            description: "Calculating the magnitude of the vector doesn't evaluate to the value of the vector magnitude variable."
+          },
+          latexExpressions: [`\\left(\\left|${key}\\right|=${vectorMagnitudeLs}\\right)\\ \\Rightarrow\\ \\left(${value.vectorMagnitude}\\neq ${vectorMagnitudeValue}\\right)`],
+        });
+      }
+    }
+
+    // now that we have possibly populated errors array with data we need to add the errors to the "errorsInVariableCollection" object using the variables ls as the key
+    if(errors.length > 0){
+      errorsInVariableCollection[key] = {errors: errors, rid: value.rid};
+    }
   }
-  else if(MathFields[id].message.warning != null){
-    elmnt.find(".line_label span.line-warning").addClass('active');
+
+  for(const [key, value] of Object.entries(EL.undefinedVars.undefined)){
+    let errors = [];
+    if(value.type == "vector"){
+      if(!value.canBeVector){
+        errors.push({
+          error: {
+            type: "This unit can't be a vector",
+            description: "This vector has units that can only be a mesaured using a scalar"
+          },
+          latexExpressions: undefined,
+        });
+      }
+      if(value.magnitudeOfVectorEqualsVectorMagnitude == false){
+        let vectorMagnitudeLs = RemoveVectorLatexString(key);
+        // we have to make sure that the vector magnitude variable doesn't have an empty string, a string filled with spaces, or "undefined" for its value. if it does we just say its equal to 0
+        let vectorMagnitudeValue = (EL.undefinedVars.undefined[vectorMagnitudeLs].value.replace(/\\\s|\s*/g,"") == "" || EL.undefinedVars.undefined[vectorMagnitudeLs].value == undefined) ? "0" : EL.undefinedVars.undefined[vectorMagnitudeLs].value;
+        errors.push({
+          error: {
+            type: "Magnitude of vector and vector magnitude don't equal",
+            description: "Calculating the magnitude of the vector doesn't evaluate to the value of the vector magnitude variable."
+          },
+          latexExpressions: [`\\left|${key}\\right|=${vectorMagnitudeLs}\\ \\Rightarrow\\ ${value.vectorMagnitude}\\neq ${vectorMagnitudeValue}`],
+        });
+      }
+    }
+
+    // now that we have possibly populated errors array with data we need to add the errors to the "errorsInVariableCollection" object using the variables ls as the key
+    if(errors.length > 0){
+      errorsInVariableCollection[key] = {errors: errors, rid: value.rid};
+    }
   }
-  else if(MathFields[id].message.error != null){
-    elmnt.find(".line_label span.line-error").addClass('active');
+
+  for(const [key, value] of Object.entries(EL.undefinedVars.defined)){
+    let errors = [];
+    if(value.type == "vector"){
+      if(!value.canBeVector){
+        errors.push({
+          error: {
+            type: "This unit can't be a vector",
+            description: "This vector has units that can only be a mesaured using a scalar"
+          },
+          latexExpressions: undefined,
+        });
+      }
+      if(value.magnitudeOfVectorEqualsVectorMagnitude == false){
+        let vectorMagnitudeLs = RemoveVectorLatexString(key);
+        // we have to make sure that the vector magnitude variable doesn't have an empty string, a string filled with spaces, or "undefined" for its value. if it does we just say its equal to 0
+        let vectorMagnitudeValue = (EL.undefinedVars.defined[vectorMagnitudeLs].value.replace(/\\\s|\s*/g,"") == "" || EL.undefinedVars.defined[vectorMagnitudeLs].value == undefined) ? "0" : EL.undefinedVars.defined[vectorMagnitudeLs].value;
+        errors.push({
+          error: {
+            type: "Magnitude of vector and vector magnitude don't equal",
+            description: "Calculating the magnitude of the vector doesn't evaluate to the value of the vector magnitude variable."
+          },
+          latexExpressions: [`\\left|${key}\\right|=${vectorMagnitudeLs}\\ \\Rightarrow\\ ${value.vectorMagnitude}\\neq ${vectorMagnitudeValue}`],
+        });
+      }
+    }
+
+    // now that we have possibly populated errors array with data we need to add the errors to the "errorsInVariableCollection" object using the variables ls as the key
+    if(errors.length > 0){
+      errorsInVariableCollection[key] = {errors: errors, rid: value.rid};
+    }
   }
-  else{
-    elmnt.find(".line_label span.line-number").addClass('active');
+
+  // before we add any errors we need to clear past errors
+  $("#my_variables-collection-container .variable-row .variable-collection-error-container").each(function(){
+    $(this).removeClass('active');
+    // we will try to destroy any tooltip that this "variable-collection-error-container" may have 
+    try{
+      $(this).tooltip('destroy');
+    }catch(err){}
+  });
+
+
+  console.log("errorsInVariableCollection",errorsInVariableCollection);
+
+  // now that we have collect all possible errors that may exist in the variable collection we need to clear any existing errors that are in the collection and remove class active and destroy any possible tooltips that may exist
+  for(const [key, value] of Object.entries(errorsInVariableCollection)){
+    // we need to find the correct ".variable-row" to attach the error too
+    let variableCollectionErrorContainer = $(`#my_variables-collection-container .variable-row[${IsVariableLatexStringVector(key) ? "vector-rid" : "scalar-rid"}='${value.rid}'] .variable-collection-error-container`);
+    console.log("variableCollectionErrorContainer",variableCollectionErrorContainer);
+    console.log(`#my_variables-collection-container .variable-row[${IsVariableLatexStringVector(key) ? "vector-rid" : "scalar-rid"}='${value.rid}'] .variable-collection-error-container`);
+    variableCollectionErrorContainer.addClass('active');// this makes the error bug visible
+    variableCollectionErrorContainer.tooltip({html: ejs.render(Templates["mathfield-error"], {errors: value.errors})});
+
+    // now we need to put a hover event that opens the tooltip and renders the latex inside the tooltip
+    variableCollectionErrorContainer.hover(function(){
+      $(this).tooltip("open");
+      $(".log-static-latex").each(function(){
+        MQ.StaticMath($(this)[0]).latex($(this).attr("latex"));
+      });
+    });
   }
+
+  //after we create the and attached the tooltips we have to initialize the latex inside them into static math field
+  
 }
 
 function RenderAllMathFieldLogs(){
@@ -1176,7 +1296,7 @@ function OrderCompileAndRenderMyVariablesCollection(){
   }
 
   //we need to remove all tooltips in the collection before we create new ones
-  $('#my_variables-collection-container .tooltipped').each(function(){
+  $('#my_variables-collection-container .tooltipped, #my_variables-collection-container .variable-collection-error-container.active').each(function(){
     try{
       $(this).tooltip("destroy");
     }catch(err){console.log(err);}
@@ -1202,8 +1322,6 @@ function OrderCompileAndRenderMyVariablesCollection(){
       charsThatBreakOutOfSupSub: '+-=<>',
       handlers: {
         edit: function(mathField) {
-          console.log("edit.....................");
-          console.log("mathField.latex()",mathField.latex());
           // it seems like the "edit" event listener  is triggered when the mathField is initialized which happens every time the my
           // variables collection is update. We don't consider this an edit so the below if statements are checking if the "edit" was
           // triggered because of an initialization or because the user actually changed something
@@ -1405,7 +1523,6 @@ function GetComponentsForVectorFromVariableValue(ls, variableLs){
 }
 
 function FindAndUpdateVariableByRID(opts = {}){
-
   let foundVariable = false;
   let updatedVariable = false;
   
@@ -1549,6 +1666,8 @@ function UpdateMyVariablesCollection(opts = {ls: "", rid: "", update: true, add:
 
   //after the variables have been edited we need to rerender the my variables collection
   OrderCompileAndRenderMyVariablesCollection();
+  //after compiling a new variable collection we need to render any errors that may exist with the variable collection variables
+  RenderVariableCollectionErrors();
 
 }
 
@@ -2007,7 +2126,6 @@ function DefineVariableUnits(el, rid, rid2){
     //displaying dropdown search menu
     DisplayUnitDropdownSearchMenu(el, rid, rid2);
   }
-
 }
 
 function ToggleVariableBadgeUnitsSize(el = null, rid = "", rid2 = null,  expand = false){

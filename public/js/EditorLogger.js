@@ -638,6 +638,9 @@ function EditorLogger(){
       //after generating errors and defined undefined and defined undefined variables we need to rerender my variable collection
       OrderCompileAndRenderMyVariablesCollection();
     }
+
+    //regardless if we update the variable collection we need to make sure the errors for the variable collection are up to date
+    RenderVariableCollectionErrors();
     
   }
 
