@@ -968,9 +968,9 @@ input.valid[type=text]:not(.browser-default) {
 }
 
 .variable-collection-error-container {
-  display: none;
+  visibility: hidden;
 }
 
 .variable-collection-error-container.active {
-  display: inline;
+  visibility: visible;
 }
