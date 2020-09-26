@@ -3363,13 +3363,25 @@ function CheckThatVectorMagnitudeVariableEqualsVectorMagnitude(opts){
         variables[vectorMagnitudeLs].value = calculatedVectorMagnitudeValueLs;
       }else{
         // we need to check if the two values equal
-        let vectorMagnitudeValue; 
-
-        let num1 = calculatedVectorMagnitudeValueMathJs.toExponential().split("e");
-        let num2 = math.evaluate(nerdamer.convertFromLaTeX(variables[vectorMagnitudeLs].value).evaluate().toString()).toExponential().split("e");
-        let isEqual = nerdamer(`${Number(num1[0]).toFixed(PrecisionSigFigs)}e${num1[1]}`).eq(`${Number(num2[0]).toFixed(PrecisionSigFigs)}e${num2[1]}`);
-        variables[vectorLs].magnitudeOfVectorEqualsVectorMagnitude = isEqual;
-        variables[vectorMagnitudeLs].magnitudeOfVectorEqualsVectorMagnitude = isEqual;
+        try{
+          // we are going to try to compare the value of the vector magnitude and the magnitude of the vector 
+          let num1 = calculatedVectorMagnitudeValueMathJs.toExponential().split("e");
+          //we need to convert variable value latex to a string that nerdamer and mathjs can read and understand
+          let expressionObj = ExactConversionFromLatexStringToNerdamerReadableString({
+            ls: variables[vectorMagnitudeLs].value,
+            uniqueRIDStringArray: [],
+            lineNumber: 0,
+            mfID: "none",
+            throwError: false,
+            convertVectorsToNerdamerMatrices: false,
+            returnFinalObject: true,//if the expression evaulates to a vector we want to return an array
+          });
+          let num2 = math.evaluate(expressionObj.array[0]).toExponential().split("e");
+          let isEqual = nerdamer(`${Number(num1[0]).toFixed(PrecisionSigFigs)}e${num1[1]}`).eq(`${Number(num2[0]).toFixed(PrecisionSigFigs)}e${num2[1]}`);
+          variables[vectorLs].magnitudeOfVectorEqualsVectorMagnitude = isEqual;
+          variables[vectorMagnitudeLs].magnitudeOfVectorEqualsVectorMagnitude = isEqual;
+        }catch(err){}
+        
       }
     }
   }
