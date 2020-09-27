@@ -867,7 +867,7 @@ function GetUndefinedVariables(ls){
 }
 
 function TryToAssignDefinitionsToUndefinedVariables(undefinedVars){
-  console.log("TryToAssignDefinitionsToUndefinedVariables");
+  //console.log("TryToAssignDefinitionsToUndefinedVariables");
   let keys = Object.keys(SimilarDefinedVariables);
   let newSetOfUndefinedVars = [];
   for(var i = 0; i < undefinedVars.length; i++){
