@@ -31,10 +31,10 @@ declare namespace nerdamer {
 	 * @example
 	 * nerdamer.setFunction('f', ['x', 'y'], 'x^2+y')
 	 * var x = nerdamer('f(4, 7)').toString()
-	 * console.log(x.toString())
+	 * //console.log(x.toString())
 	 * nerdamer.setFunction('g', ['z', 'x', 'y'], '2*x+3*y+4*z')
 	 * x = nerdamer('g(3, 1, 2)')
-	 * console.log(x.toString())
+	 * //console.log(x.toString())
 	 */
 	export function setFunction(function_name: string, param_array: string[], function_body: string): typeof nerdamer
 
@@ -56,9 +56,9 @@ declare namespace nerdamer {
 	 * Clears all stored expressions.
 	 * @example
 	 * var x = nerdamer('x*x')
-	 console.log(nerdamer.expressions())
+	 //console.log(nerdamer.expressions())
 	 nerdamer.flush() //clear all expressions
-	 console.log(nerdamer.expressions())
+	 //console.log(nerdamer.expressions())
 	 */
 	export function flush(): typeof nerdamer
 

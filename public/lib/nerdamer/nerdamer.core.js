@@ -8324,7 +8324,7 @@ var nerdamer = (function (imports) {
         
         function print() {
             arguments2Array(arguments).map(function(x) {
-                console.log(x.toString());
+                //console.log(x.toString());
             });
         }
         

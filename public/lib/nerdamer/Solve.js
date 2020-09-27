@@ -1274,7 +1274,7 @@ if ((typeof module) !== 'undefined') {
                     solutions.sort();
                 }
                 catch(e) {
-                    console.log(e);
+                    //console.log(e);
                 }
             }
 
