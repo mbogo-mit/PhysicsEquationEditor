@@ -40,7 +40,7 @@ $(document).ready(function(){
   $('.tabs').tabs();
   $('.dropdown-trigger').dropdown();
 
-  $("#modal-physics-equation-more-information, #modal-user-guide, #modal-create-custom-unit").modal();
+  $("#modal-physics-equation-more-information, #modal-user-guide, #modal-create-custom-unit, #promo-video-modal").modal();
   $("#modal_import_variable_definition").modal({
     onOpenStart: function(){
       $("#btn-update-imported-variables").addClass("disabled");
