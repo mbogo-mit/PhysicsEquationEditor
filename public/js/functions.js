@@ -670,11 +670,11 @@ function RenderVariableCollectionErrors(){
   for(const [key, value] of Object.entries(DefinedVariables)){
     let errors = [];
     if(value.type == "vector"){
-      if(!value.canBeVector){
+      if(value.canBeVector == false){
         errors.push({
           error: {
             type: "This unit can't be a vector",
-            description: "This vector has units that can only be mesaured using a scalar"
+            description: "This vector has units that can only be measured using a scalar"
           },
           latexExpressions: undefined,
         });
@@ -706,7 +706,7 @@ function RenderVariableCollectionErrors(){
         errors.push({
           error: {
             type: "This unit can't be a vector",
-            description: "This vector has units that can only be a mesaured using a scalar"
+            description: "This vector has units that can only be a measured using a scalar"
           },
           latexExpressions: undefined,
         });
@@ -738,7 +738,7 @@ function RenderVariableCollectionErrors(){
         errors.push({
           error: {
             type: "This unit can't be a vector",
-            description: "This vector has units that can only be a mesaured using a scalar"
+            description: "This vector has units that can only be a measured using a scalar"
           },
           latexExpressions: undefined,
         });
