@@ -670,7 +670,7 @@ function RenderVariableCollectionErrors(){
   for(const [key, value] of Object.entries(DefinedVariables)){
     let errors = [];
     if(value.type == "vector"){
-      if(value.canBeVector == false){
+      if(value.canBeVector == false){//we have to say specifically equal to false because it could also be undefined
         errors.push({
           error: {
             type: "This unit can't be a vector",
@@ -702,7 +702,7 @@ function RenderVariableCollectionErrors(){
   for(const [key, value] of Object.entries(EL.undefinedVars.undefined)){
     let errors = [];
     if(value.type == "vector"){
-      if(!value.canBeVector){
+      if(value.canBeVector == false){//we have to say specifically equal to false because it could also be undefined
         errors.push({
           error: {
             type: "This unit can't be a vector",
@@ -734,7 +734,7 @@ function RenderVariableCollectionErrors(){
   for(const [key, value] of Object.entries(EL.undefinedVars.defined)){
     let errors = [];
     if(value.type == "vector"){
-      if(!value.canBeVector){
+      if(value.canBeVector == false){//we have to say specifically equal to false because it could also be undefined
         errors.push({
           error: {
             type: "This unit can't be a vector",
